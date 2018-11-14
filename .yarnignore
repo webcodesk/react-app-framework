@@ -1,0 +1,10 @@
+.idea
+build
+node_modules
+public
+src
+env.js
+yarn.lock
+webpack.config.js
+*.iml
+*.log
