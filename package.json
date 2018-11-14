@@ -1,0 +1,39 @@
+{
+  "name": "react-app-framework",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/webcodesk/react-app-framework.git",
+  "author": "Alexander Pustovalov <apustovalov@gmail.com>",
+  "license": "MIT",
+  "description": "React App Framework for Webcodesk",
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "prop-types": "^15.6.2",
+    "query-string": "^6.2.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-redux": "^5.1.1",
+    "react-router-dom": "^4.3.1",
+    "redux": "^4.0.1",
+    "redux-devtools-extension": "^2.13.5",
+    "redux-thunk": "^2.3.0",
+    "reselect": "^4.0.0",
+    "styled-components": "^4.1.1",
+    "styled-css-grid": "^1.1.1"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "react-scripts": "^2.1.1"
+  },
+  "scripts": {
+    "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3030 react-scripts start",
+    "build": "cross-env NODE_PATH=./src react-scripts build",
+    "test": "react-scripts test --env=jsdom --modulePaths=src",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": [
+    ">0.25%",
+    "not op_mini all",
+    "ie 11"
+  ]
+}

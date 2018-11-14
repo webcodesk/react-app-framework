@@ -1,2 +1,1 @@
-# react-app-framework
-React Application Framework
+# React Application Framework
