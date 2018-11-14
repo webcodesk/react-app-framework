@@ -2,7 +2,11 @@
   "name": "@webcodesk/react-app-framework",
   "version": "1.0.0-alpha.1",
   "main": "dist/index.js",
-  "repository": "https://github.com/webcodesk/react-app-framework.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webcodesk/react-app-framework.git"
+  },
+  "homepage": "https://github.com/webcodesk/react-app-framework",
   "author": "Alex Pustovalov <apustovalov@gmail.com>",
   "license": "MIT",
   "description": "React App Framework for Webcodesk",

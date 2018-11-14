@@ -1,8 +1,10 @@
+.git
 .idea
 build
 node_modules
 public
 src
+gulpfile.js
 yarn.lock
 *.iml
 *.log
