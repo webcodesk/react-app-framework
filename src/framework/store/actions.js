@@ -52,25 +52,35 @@ const createTasks = (targets) => {
   const tasks = [];
   if (targets && targets.length > 0) {
     targets.forEach(target => {
-      const { type, props, event } = target;
+      const { type, props, events } = target;
       if (type === 'userFunction' && props) {
         const func = getUserFunctionByName(props.functionName);
         console.info('Create tasks (props.functionName): ', props.functionName, func);
         if (func) {
+          // First we need to check if there is the user function sequence
           let innerTasks = [];
-          if (event && event.targets) {
-            console.info('Create tasks (event.targets): ', props.functionName, event.targets);
-            innerTasks = createTasks(event.targets);
+          if (events && events.length > 0) {
+            events.forEach(innerEvent => {
+              if (innerEvent && innerEvent.targets) {
+                // select only user function targets
+                const userFunctionTargets =
+                  innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === 'userFunction');
+                if (userFunctionTargets && userFunctionTargets.length > 0) {
+                  console.info('Create tasks (event.targets): ', props.functionName, userFunctionTargets);
+                  innerTasks = innerTasks.concat(createTasks(userFunctionTargets));
+                }
+              }
+            });
           }
+          // push function reference for user function dispatch
           tasks.push(function () {
             const args = arguments;
             return (dispatch, getState, helpers) => {
               func.apply(null, args)((type, payload) => {
-                console.info('Apply action with dispatch: ', type);
+                const event = events.find(targetEvent => targetEvent.name === type);
+                console.info('Apply action with dispatch: ', type, events, event);
                 if (
-                  type
-                  && event
-                  && event.name === type
+                  event
                   && event.targets
                   && event.targets.length > 0
                 ) {

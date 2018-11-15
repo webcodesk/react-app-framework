@@ -11,21 +11,18 @@ const getEventSequence = (event) => {
     eventSequence.targets = [];
     targets.forEach(target => {
       const { type, props, events } = target;
+      const newTarget = {
+        type,
+        props,
+      };
       if (events && events.length > 0 && type === 'userFunction') {
-        events.forEach(event => {
-          const newTarget = {
-            type,
-            props,
-            event: getEventSequence(event),
-          };
-          eventSequence.targets.push(newTarget);
+        const newTargetEvents = [];
+        events.forEach(targetEvent => {
+          newTargetEvents.push(getEventSequence(targetEvent));
         });
-      } else {
-        eventSequence.targets.push({
-          type,
-          props,
-        });
+        newTarget.events = newTargetEvents;
       }
+      eventSequence.targets.push(newTarget);
     });
   }
   return eventSequence;

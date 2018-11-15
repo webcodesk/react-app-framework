@@ -7,6 +7,7 @@ export const setSecondString = () => (dispatch) => {
 };
 
 export const setDoubleStrings = () => (dispatch) => {
+  console.info('Set Double Strings invoke -------------->');
   dispatch('firstStringD', 'Alex First D');
   dispatch('secondStringD', 'Ira Second D');
 };
