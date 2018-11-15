@@ -65,41 +65,55 @@ export default [
       },
     ]
   },
-  // {
-  //   type: 'component',
-  //   props: {
-  //     pageName: 'home',
-  //     componentName: 'usr.components.ControlPanel',
-  //     componentInstance: 'controlPanel1',
-  //   },
-  //   events: [
-  //     {
-  //       name: 'onSecondClick',
-  //       targets: [
-  //         {
-  //           type: 'userFunction',
-  //           props: {
-  //             functionName: 'usr.api.exposed.setSecondString',
-  //           },
-  //           events: [
-  //             {
-  //               name: 'secondString',
-  //               targets: [
-  //                 {
-  //                   type: 'component',
-  //                   props: {
-  //                     pageName: 'home',
-  //                     componentName: 'usr.components.ViewPanel',
-  //                     componentInstance: 'viewPanel1',
-  //                     propertyName: 'secondDataString',
-  //                   },
-  //                 },
-  //               ],
-  //             },
-  //           ],
-  //         },
-  //       ],
-  //     },
-  //   ]
-  // },
+  {
+    type: 'component',
+    props: {
+      pageName: 'home',
+      componentName: 'usr.components.ControlPanel',
+      componentInstance: 'controlPanel1',
+    },
+    events: [
+      {
+        name: 'onSecondClick',
+        targets: [
+          {
+            type: 'userFunction',
+            props: {
+              functionName: 'usr.api.exposed.setDoubleStrings',
+            },
+            events: [
+              {
+                name: 'firstStringD',
+                targets: [
+                  {
+                    type: 'component',
+                    props: {
+                      pageName: 'home',
+                      componentName: 'usr.components.ViewPanel',
+                      componentInstance: 'viewPanel1',
+                      propertyName: 'firstDataString',
+                    },
+                  },
+                ],
+              },
+              {
+                name: 'secondStringD',
+                targets: [
+                  {
+                    type: 'component',
+                    props: {
+                      pageName: 'home',
+                      componentName: 'usr.components.ViewPanel',
+                      componentInstance: 'viewPanel1',
+                      propertyName: 'secondDataString',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]
+  },
 ];

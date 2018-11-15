@@ -5,3 +5,8 @@ export const setFirstString = () => (dispatch) => {
 export const setSecondString = () => (dispatch) => {
   dispatch('secondString', 'Ira Second');
 };
+
+export const setDoubleStrings = () => (dispatch) => {
+  dispatch('firstStringD', 'Alex First D');
+  dispatch('secondStringD', 'Ira Second D');
+};
