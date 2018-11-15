@@ -1,13 +1,14 @@
 const pageModel = {
-  type: '_div',
+  type: '_PageGrid',
   props: {
-    style: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-    }
+    _rowsCount: 1,
+    _columnsCount: 6,
+    _rowsHeights: Array(1).fill(-1),
+    _columnsWidths: Array(6).fill(-1),
+    rows: `repeat(${1}, auto)`,
+    columns: `repeat(${6}, 1fr)`,
+    minRowHeight: '20px',
+    gap: '8px',
   },
   children: [
     // First row
@@ -19,6 +20,36 @@ const pageModel = {
         left: 1,
         top: 1,
       },
+      children: [
+        {
+          type: 'usr.components.ViewPanel',
+          instance: 'viewPanel1',
+        }
+      ]
+    },
+    {
+      type: '_PageCell',
+      props: {
+        width: 1,
+        height: 1,
+        left: 2,
+        top: 1,
+      },
+    },
+    {
+      type: '_PageCell',
+      props: {
+        width: 1,
+        height: 1,
+        left: 3,
+        top: 1,
+      },
+      children: [
+        {
+          type: 'usr.components.ControlPanel',
+          instance: 'controlPanel1',
+        }
+      ]
     },
   ]
 };
