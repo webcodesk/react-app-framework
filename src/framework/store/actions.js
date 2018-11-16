@@ -10,10 +10,10 @@ const dispatchToComponent = (props, payload, dispatch, helpers) => {
     const {
       pageName, componentName, componentInstance, propertyName, isForward, forwardRule
     } = props;
-    const targetKey = `${pageName}_${componentName}_${componentInstance}`;
+    const targetKey = `${componentName}_${componentInstance}`;
     if (isForward && helpers) {
       const { history } = helpers;
-      if (history) {
+      if (pageName && history) {
         let pathString = `/${pageName}`;
         const {withParams, withQuery} = forwardRule || {};
         if (withParams) {
@@ -30,13 +30,13 @@ const dispatchToComponent = (props, payload, dispatch, helpers) => {
           if (!payload) {
             console.error(`Cannot add parameters to "${pathString}" URL due to undefined payload. Remove forward with parameters setting or pass not null value in the dispatch`)
           } else {
-            if (isNumber(payload) || isString(payload)) {
+            if (isNumber(payload) || isString(payload) && propertyName) {
               pathString = `${pathString}?${propertyName}=${payload}`;
             } else if (isObject(payload) || isArray(payload)) {
               pathString = `${pathString}?${queryString.stringify(payload)}`;
             }
           }
-        } else {
+        } else if (propertyName) {
           dispatch({ type: targetKey, payload: { [propertyName]: payload } });
         }
         console.info('Actions forward to: ', pathString);

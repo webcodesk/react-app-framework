@@ -1,3 +1,5 @@
+import queryString from 'query-string';
+import forOwn from 'lodash/forOwn';
 import uniqueId from 'lodash/uniqueId';
 import get from 'lodash/get';
 import React, { Component } from 'react';
@@ -16,19 +18,19 @@ class PageComposition extends Component {
 
   static propTypes = {
     userComponents: PropTypes.object,
-    pageName: PropTypes.string,
-    pages: PropTypes.object,
+    componentsTree: PropTypes.object,
     actionSequences: PropTypes.object,
     pageParams: PropTypes.object,
+    pageSearch: PropTypes.string,
     populationTargets: PropTypes.array,
   };
 
   static defaultProps = {
     userComponents: {},
-    pageName: '',
-    pages: {},
+    componentsTree: {},
     actionSequences: {},
     pageParams: {},
+    pageSearch: '',
     populationTargets: [],
   };
 
@@ -38,14 +40,41 @@ class PageComposition extends Component {
     this.renderComponent = this.renderComponent.bind(this);
   }
 
-  renderComponent (pageName, userComponents, description, actionSequences, pageParams, populationTargets) {
+  renderComponent (
+    userComponents,
+    description,
+    actionSequences,
+    pageParams,
+    pageQuery,
+    populationTargets
+  ) {
     if (description) {
       const { type, instance, key, props, children } = description;
+      const propsComponents = {};
+      if (props) {
+        forOwn(props, (value, prop) => {
+          if (value && value.type && value.instance) {
+            propsComponents[prop] = this.renderComponent(
+              userComponents,
+              value,
+              actionSequences,
+              pageParams,
+              pageQuery,
+              populationTargets
+            );
+          }
+        });
+      }
       let nestedComponents = [];
       if (children && children.length > 0) {
         nestedComponents = children.map(child => {
           return this.renderComponent(
-            pageName, userComponents, child, actionSequences, pageParams, populationTargets
+            userComponents,
+            child,
+            actionSequences,
+            pageParams,
+            pageQuery,
+            populationTargets
           );
         });
       }
@@ -55,7 +84,7 @@ class PageComposition extends Component {
         const pageComponent = pageComponents[pageComponentType];
         return React.createElement(
           pageComponent || pageComponentType,
-          { key: key || uniqueId(validType), ...props },
+          { key: key || uniqueId(validType), ...props, ...propsComponents },
           nestedComponents
         );
       } else {
@@ -64,16 +93,16 @@ class PageComposition extends Component {
         if (!wrappedComponent) {
           return React.createElement(
             NotFoundComponent,
-            {key: uniqueId('notFound'), componentName: validType}
-            );
+            { key: uniqueId('notFound'), componentName: validType }
+          );
         }
         const { _doNotCreateContainer } = props || {};
-        const containerKey = `${pageName}_${type}_${instance}`;
+        const containerKey = `${type}_${instance}`;
 
         if (_doNotCreateContainer) {
           return React.createElement(
             wrappedComponent,
-            { key: key || uniqueId(validType), ...props },
+            { key: key || uniqueId(validType), ...props, ...propsComponents },
             nestedComponents
           );
         }
@@ -84,24 +113,29 @@ class PageComposition extends Component {
           containerHandlers = actionSequence.events;
         }
         let populatedProps = {};
-        populationTargets.map(populationTarget => {
+        populationTargets.forEach(populationTarget => {
           const {
             componentName: targetComponentName,
             componentInstance: targetInstance,
             propertyName: targetPropertyName,
           } = populationTarget;
           if (targetComponentName === type && targetInstance === instance) {
-            populatedProps[targetPropertyName] = pageParams[targetPropertyName];
+            if (targetPropertyName) {
+              populatedProps[targetPropertyName] =
+                pageParams[targetPropertyName] || pageQuery;
+            } else {
+              // todo: should we allow to pass arbitrary object keys in search query as props into the container?
+              populatedProps = pageQuery;
+            }
           }
         });
         console.info('Create container with page params: ', type, userComponents, populatedProps);
         return createContainer(
           wrappedComponent,
-          pageName,
           type,
           instance,
           containerHandlers,
-          { key: key || containerKey, ...props, ...populatedProps }
+          { key: key || containerKey, ...props, ...populatedProps, ...propsComponents }
         );
       }
     }
@@ -109,18 +143,28 @@ class PageComposition extends Component {
   };
 
   renderPage () {
-    const { userComponents, pages, pageName, actionSequences, pageParams, populationTargets } = this.props;
-    if (pageName && pages) {
-      const componentsTree = pages[pageName];
-      if (componentsTree) {
-        // console.info('Render page with components tree: ', componentsTree);
-        return this.renderComponent(
-          pageName, userComponents, componentsTree, actionSequences, pageParams, populationTargets
-        );
-      }
-      return (<h1>Page {pageName} does not have components.</h1>);
+    const {
+      userComponents,
+      componentsTree,
+      actionSequences,
+      pageParams,
+      pageSearch,
+      populationTargets
+    } = this.props;
+    if (componentsTree) {
+      // console.info('Render page with components tree: ', componentsTree);
+      const pageQuery = queryString.parse(pageSearch);
+      console.info('Page query: ', pageQuery);
+      return this.renderComponent(
+        userComponents,
+        componentsTree,
+        actionSequences,
+        pageParams,
+        pageQuery,
+        populationTargets
+      );
     }
-    return (<h1>Page name is not set.</h1>);
+    return (<h1>Page does not have components.</h1>);
   }
 
   render () {

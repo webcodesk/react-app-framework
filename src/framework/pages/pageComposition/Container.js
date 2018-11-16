@@ -8,13 +8,13 @@ import createContainerActions from '../../store/actions';
 class Container extends React.Component {
 
   componentDidMount() {
-    const { pageName, componentName, componentInstance } = this.props;
-    console.info('MountContainer: ', pageName, componentName, componentInstance);
+    const { componentName, componentInstance } = this.props;
+    console.info('MountContainer: ', componentName, componentInstance);
   }
 
   render () {
-    const { pageName, componentName, componentInstance, wrappedComponent, wrappedProps, stateProps } = this.props;
-    console.info('RenderContainer: ', pageName, componentName, componentInstance);
+    const { componentName, componentInstance, wrappedComponent, wrappedProps, stateProps } = this.props;
+    console.info('RenderContainer: ', componentName, componentInstance);
     const wrappedHandlers = {};
     const { containerEventHandlers, actions } = this.props;
     if (containerEventHandlers && containerEventHandlers.length > 0) {
@@ -33,7 +33,7 @@ class Container extends React.Component {
 }
 
 export default function createContainer(
-  wrappedComponent, pageName, componentName, componentInstance, containerEventHandlers, props = {}
+  wrappedComponent, componentName, componentInstance, containerEventHandlers, props = {}
 ) {
   // console.info('bindActionCreators: ', pageName, componentName, componentInstance, containerEventHandlers);
   const actions = createContainerActions(containerEventHandlers);
@@ -42,11 +42,10 @@ export default function createContainer(
     return { actions: bindActionCreators(actions, dispatch) };
   };
   const mapStateToProps = createStructuredSelector({
-    stateProps: createContainerSelector(pageName, componentName, componentInstance),
+    stateProps: createContainerSelector(componentName, componentInstance),
   });
   const wrapperProps = {
     key: props.key,
-    pageName,
     componentName,
     componentInstance,
     containerEventHandlers,

@@ -22,8 +22,8 @@ const pageModel = {
       },
       children: [
         {
-          type: 'usr.components.ViewPanel',
-          instance: 'viewPanel1',
+          type: 'usr.components.AboutPanel',
+          instance: 'aboutPanel1',
         }
       ]
     },
@@ -46,14 +46,8 @@ const pageModel = {
       },
       children: [
         {
-          type: 'usr.components.ControlPanel',
-          instance: 'controlPanel1',
-          props: {
-            subControlPanel: {
-              type: 'usr.components.SubControlPanel',
-              instance: 'subControlPanel1',
-            }
-          }
+          type: 'usr.components.ViewPanel',
+          instance: 'viewPanel1',
         }
       ]
     },

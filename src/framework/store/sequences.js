@@ -39,7 +39,7 @@ const getActionSequences = (handlers, actionSequences = {}) => {
           let handlerObject;
           if (event && event.name && event.targets && event.targets.length > 0) {
             if (type === 'component') {
-              key = `${props.pageName}_${props.componentName}_${props.componentInstance}`;
+              key = `${props.componentName}_${props.componentInstance}`;
               handlerObject = actionSequences[key] || { ...props, events: [] };
               const eventSequence = getEventSequence(event);
               // find the same event handler name for the container

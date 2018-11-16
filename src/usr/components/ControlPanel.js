@@ -8,6 +8,7 @@ class ControlPanel extends React.Component {
     firstDataString: PropTypes.string,
     secondDataString: PropTypes.string,
     onDirectPassIn: PropTypes.func,
+    subControlPanel: PropTypes.element,
   };
 
   static defaultProps = {
@@ -22,6 +23,7 @@ class ControlPanel extends React.Component {
     onDirectPassIn: () => {
       console.info('ControlPanel.onDirectPassIn is not set');
     },
+    subControlPanel: null,
   };
 
   constructor (props) {
@@ -41,6 +43,10 @@ class ControlPanel extends React.Component {
         <button style={{padding: '1em'}} onClick={this.props.onFirstClick}>First Click</button>
         <button style={{padding: '1em'}} onClick={this.props.onSecondClick}>Second Click</button>
         <button style={{padding: '1em'}} onClick={this.handleDirectPassIn}>Direct pass in</button>
+        <div>
+          <p>Sub Control</p>
+          {this.props.subControlPanel}
+        </div>
       </div>
     );
   }

@@ -33,8 +33,7 @@ const PageRouter = (props) => {
                 ({match, location}) =>
                   <PageComposition
                     userComponents={userComponents}
-                    pageName={route.pageName}
-                    pages={pages}
+                    componentsTree={pages[route.pageName]}
                     actionSequences={actionSequences}
                     pageParams={match.params}
                     pageSearch={location.search}
