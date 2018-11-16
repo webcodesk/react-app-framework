@@ -42,7 +42,7 @@ export default function createContainer(
     return { actions: bindActionCreators(actions, dispatch) };
   };
   const mapStateToProps = createStructuredSelector({
-    stateProps: createContainerSelector(pageName, componentName, componentInstance)(),
+    stateProps: createContainerSelector(pageName, componentName, componentInstance),
   });
   const wrapperProps = {
     key: props.key,

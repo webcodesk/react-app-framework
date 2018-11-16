@@ -1,18 +1,21 @@
+import { createSelector } from 'reselect';
 /**
  * Direct selector to the main state domain
  */
-// eslint-disable-next-line
-const select = () => state => state;
+const select = (pageName, componentName, componentInstance) => (state) => {
+  // console.info('Invoke global selector for: ', pageName, componentName, componentInstance);
+  return state[`${pageName}_${componentName}_${componentInstance}`];
+};
 
 /**
  * Other specific selectors
  */
-export const createContainerSelector = (pageName, componentName, componentInstance) => () => {
-  return state => {
-    console.info('Invoke selector: ', pageName, componentName, componentInstance);
-    console.info('Invoke selector state: ', state);
-    return state[`${pageName}_${componentName}_${componentInstance}`] || {};
-  };
+export const createContainerSelector = (pageName, componentName, componentInstance) => {
+  // console.info('Container selector is created: ', pageName, componentName, componentInstance);
+  return createSelector(
+    select(pageName, componentName, componentInstance),
+    a => a
+  );
 };
 
 
