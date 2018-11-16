@@ -77,26 +77,30 @@ const createTasks = (targets) => {
             const args = arguments;
             return (dispatch, getState, helpers) => {
               func.apply(null, args)((type, payload) => {
-                const event = events.find(targetEvent => targetEvent.name === type);
-                console.info('Apply action with dispatch: ', type, events, event);
-                if (
-                  event
-                  && event.targets
-                  && event.targets.length > 0
-                ) {
-                  //
-                  console.info('Apply action with event: ', event);
-                  event.targets.forEach(eventTarget => {
-                    const { type: eventTargetType, props: eventTargetProps } = eventTarget;
-                    if (eventTargetType === 'component') {
-                      dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
-                    }
-                  });
-                  console.info('Inner tasks: ', innerTasks);
-                  if (innerTasks.length > 0) {
-                    innerTasks.forEach(task => {
-                      task.apply(null, [payload])(dispatch);
+                // user function is invoked now
+                // check if the user function dispatches any event
+                if (events && events.length > 0) {
+                  const event = events.find(targetEvent => targetEvent.name === type);
+                  console.info('Apply action with dispatch: ', type, events, event);
+                  if (
+                    event
+                    && event.targets
+                    && event.targets.length > 0
+                  ) {
+                    //
+                    console.info('Apply action with event: ', event);
+                    event.targets.forEach(eventTarget => {
+                      const { type: eventTargetType, props: eventTargetProps } = eventTarget;
+                      if (eventTargetType === 'component') {
+                        dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
+                      }
                     });
+                    console.info('Inner tasks: ', innerTasks);
+                    if (innerTasks.length > 0) {
+                      innerTasks.forEach(task => {
+                        task.apply(null, [payload])(dispatch);
+                      });
+                    }
                   }
                 }
               });
