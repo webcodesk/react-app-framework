@@ -10,8 +10,11 @@ const dispatchToComponent = (props, payload, dispatch, helpers) => {
     const {
       pageName, componentName, componentInstance, propertyName, isForward, forwardRule
     } = props;
+    // console.info('Dispatch/Forward to component: ', pageName, componentName, componentInstance, isForward, helpers);
+    // todo: componentName and componentInstance attributes may not be present, hide target key initialization
     const targetKey = `${componentName}_${componentInstance}`;
     if (isForward && helpers) {
+      // console.info('Forwarding routine start with helpers: ', helpers);
       const { history } = helpers;
       if (pageName && history) {
         let pathString = `/${pageName}`;
@@ -90,6 +93,7 @@ const createTasks = (targets) => {
                     //
                     console.info('Apply action with event: ', event);
                     event.targets.forEach(eventTarget => {
+                      console.info('Apply action to target: ', eventTarget);
                       const { type: eventTargetType, props: eventTargetProps } = eventTarget;
                       if (eventTargetType === 'component') {
                         dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
@@ -98,7 +102,7 @@ const createTasks = (targets) => {
                     console.info('Inner tasks: ', innerTasks);
                     if (innerTasks.length > 0) {
                       innerTasks.forEach(task => {
-                        task.apply(null, [payload])(dispatch);
+                        task.apply(null, [payload])(dispatch, getState, helpers);
                       });
                     }
                   }

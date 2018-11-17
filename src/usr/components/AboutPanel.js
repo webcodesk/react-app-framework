@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 class AboutPanel extends React.Component {
   static propTypes = {
     authorData: PropTypes.object,
+    onRunMethodsChain: PropTypes.func,
   };
 
   static defaultProps = {
@@ -12,6 +13,9 @@ class AboutPanel extends React.Component {
       day: 'DD',
       month: 'MM',
       year: 'YYYY'
+    },
+    onRunMethodsChain: () => {
+      console.info('AboutPanel.onRunMethodsChain is not set');
     },
   };
 
@@ -26,6 +30,9 @@ class AboutPanel extends React.Component {
         <h1>About Panel</h1>
         <p>Author: {author}</p>
         <p>Date: {day}/{month}/{year}</p>
+        <div>
+          <button onClick={this.props.onRunMethodsChain}>Run methods chain</button>
+        </div>
       </div>
     );
   }
