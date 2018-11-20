@@ -1,5 +1,15 @@
-import exposed from './exposed';
+import {
+  setDoubleStrings,
+  setFirstString,
+  setSecondString
+} from "usr/api/controlPanelActions";
+
+import exposed from "./exposed";
 
 export default {
-  exposed,
+  setDoubleStrings,
+  setFirstString,
+  setSecondString,
+
+  exposed
 };

@@ -1,5 +1,5 @@
-import usr from './usr';
+import usr from "./usr";
 
 export default {
-  usr,
+  usr
 };

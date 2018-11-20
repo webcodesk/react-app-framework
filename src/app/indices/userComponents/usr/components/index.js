@@ -1,11 +1,5 @@
-import AboutPanel from 'usr/components/AboutPanel';
-import ControlPanel from 'usr/components/ControlPanel';
-import SubControlPanel from 'usr/components/SubControlPanel';
-import ViewPanel from 'usr/components/ViewPanel';
+import ControlPanel from "usr/components/ControlPanel";
 
 export default {
-  AboutPanel,
-  ControlPanel,
-  SubControlPanel,
-  ViewPanel,
-}
+  ControlPanel
+};

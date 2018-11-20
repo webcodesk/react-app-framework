@@ -12,6 +12,5 @@ export const setDoubleStrings = () => (dispatch) => {
   setTimeout(() => {
     dispatch('secondStringD', 'Ira Second D');
   }, 2000);
-};
 
-export const testNewMethod = () => (dispatch) => {};
+};

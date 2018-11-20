@@ -61,7 +61,7 @@ const createTasks = (targets) => {
         console.info('Create tasks (props.functionName): ', props.functionName, func);
         if (func) {
           // First we need to check if there is the user function sequence
-          let innerTasks = [];
+          let innerTasks = {};
           if (events && events.length > 0) {
             events.forEach(innerEvent => {
               if (innerEvent && innerEvent.targets) {
@@ -70,7 +70,8 @@ const createTasks = (targets) => {
                   innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === 'userFunction');
                 if (userFunctionTargets && userFunctionTargets.length > 0) {
                   console.info('Create tasks (event.targets): ', props.functionName, userFunctionTargets);
-                  innerTasks = innerTasks.concat(createTasks(userFunctionTargets));
+                  innerTasks[innerEvent.name] = innerTasks[innerEvent.name] || [];
+                  innerTasks[innerEvent.name] = innerTasks[innerEvent.name].concat(createTasks(userFunctionTargets));
                 }
               }
             });
@@ -78,7 +79,9 @@ const createTasks = (targets) => {
           // push function reference for user function dispatch
           tasks.push(function () {
             const args = arguments;
+            // console.info('Invoked by redux: ', func);
             return (dispatch, getState, helpers) => {
+              // console.info('Apply user function: ', func);
               func.apply(null, args)((type, payload) => {
                 // user function is invoked now
                 // check if the user function dispatches any event
@@ -99,9 +102,9 @@ const createTasks = (targets) => {
                         dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
                       }
                     });
-                    console.info('Inner tasks: ', innerTasks);
-                    if (innerTasks.length > 0) {
-                      innerTasks.forEach(task => {
+                    console.info('Inner tasks: ', innerTasks[type]);
+                    if (innerTasks[type] && innerTasks[type].length > 0) {
+                      innerTasks[type].forEach(task => {
                         task.apply(null, [payload])(dispatch, getState, helpers);
                       });
                     }
