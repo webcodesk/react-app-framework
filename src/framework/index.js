@@ -2,8 +2,10 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import createBrowserHistory from 'history/createBrowserHistory';
 import { configureStore } from './store/store';
+import { createActionSequences } from './store/sequences';
 
-import PageRouter from './pages';
+import PageRouter from './pages/pageRouter/PageRouter';
+import StartWrapper from './pages/startWrapper/StartWrapper';
 
 let store;
 let history;
@@ -21,16 +23,21 @@ const Application = (props) => {
   }
   const {routes, pages, flows, userComponents, userFunctions} = props;
   console.info('Application: ', userComponents);
+  const actionSequences = createActionSequences(flows, userFunctions);
   return (
     <Provider store={store}>
-      <PageRouter
-        history={history}
-        routes={routes}
-        pages={pages}
-        flows={flows}
-        userComponents={userComponents}
-        userFunctions={userFunctions}
-      />
+      <StartWrapper
+        actionSequences={actionSequences}
+        store={store}
+      >
+        <PageRouter
+          history={history}
+          routes={routes}
+          pages={pages}
+          userComponents={userComponents}
+          actionSequences={actionSequences}
+        />
+      </StartWrapper>
     </Provider>
   );
 };

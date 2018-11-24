@@ -33,7 +33,12 @@ class Container extends React.Component {
 }
 
 export default function createContainer(
-  wrappedComponent, componentName, componentInstance, containerEventHandlers, props = {}
+  wrappedComponent,
+  componentName,
+  componentInstance,
+  containerEventHandlers,
+  props = {},
+  nestedComponents = null
 ) {
   // console.info('bindActionCreators: ', pageName, componentName, componentInstance, containerEventHandlers);
   const actions = createContainerActions(containerEventHandlers);
@@ -54,6 +59,7 @@ export default function createContainer(
   };
   return React.createElement(
     connect(mapStateToProps, mapDispatchToProps)(Container),
-    wrapperProps
+    wrapperProps,
+    nestedComponents
   );
 }
