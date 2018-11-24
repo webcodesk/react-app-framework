@@ -13,5 +13,3 @@ export const setDoubleStrings = () => (dispatch) => {
     dispatch('secondStringD', 'Ira Second D');
   }, 2000);
 };
-
-export const testNewMethod = () => (dispatch) => {};

@@ -135,7 +135,8 @@ class PageComposition extends Component {
           type,
           instance,
           containerHandlers,
-          { key: key || containerKey, ...props, ...populatedProps, ...propsComponents }
+          { key: key || containerKey, ...props, ...populatedProps, ...propsComponents },
+          nestedComponents
         );
       }
     }

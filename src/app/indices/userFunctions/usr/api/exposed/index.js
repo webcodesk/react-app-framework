@@ -6,8 +6,7 @@ import {
 import {
   setDoubleStrings,
   setFirstString,
-  setSecondString,
-  testNewMethod
+  setSecondString
 } from "usr/api/exposed/controlPanelActions";
 
 export default {
@@ -16,6 +15,5 @@ export default {
 
   setDoubleStrings,
   setFirstString,
-  setSecondString,
-  testNewMethod
+  setSecondString
 };
