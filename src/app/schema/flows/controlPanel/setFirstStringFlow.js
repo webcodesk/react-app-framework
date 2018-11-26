@@ -2,7 +2,7 @@ export default [
   {
     type: 'component',
     props: {
-      componentName: 'usr.components.ControlPanel',
+      componentName: 'usr.components.ControlPanel.ControlPanel',
       componentInstance: 'controlPanel1',
     },
     events: [
@@ -12,7 +12,7 @@ export default [
           {
             type: 'userFunction',
             props: {
-              functionName: 'usr.api.exposed.setFirstString',
+              functionName: 'usr.api.exposed.controlPanelActions.setFirstString',
             },
             events: [
               {
@@ -21,7 +21,7 @@ export default [
                   {
                     type: 'component',
                     props: {
-                      componentName: 'usr.components.ControlPanel',
+                      componentName: 'usr.components.ControlPanel.ControlPanel',
                       componentInstance: 'controlPanel1',
                       propertyName: 'firstDataString',
                     },
@@ -32,7 +32,7 @@ export default [
                           {
                             type: 'userFunction',
                             props: {
-                              functionName: 'usr.api.exposed.setFirstString',
+                              functionName: 'usr.api.exposed.controlPanelActions.setFirstString',
                             },
                             events: [
                               {
@@ -41,7 +41,7 @@ export default [
                                   {
                                     type: 'component',
                                     props: {
-                                      componentName: 'usr.components.ViewPanel',
+                                      componentName: 'usr.components.ViewPanel.ViewPanel',
                                       componentInstance: 'viewPanel1',
                                       propertyName: 'firstDataString',
                                     }
@@ -65,7 +65,7 @@ export default [
   {
     type: 'component',
     props: {
-      componentName: 'usr.components.ControlPanel',
+      componentName: 'usr.components.ControlPanel.ControlPanel',
       componentInstance: 'controlPanel1',
     },
     events: [
@@ -75,7 +75,7 @@ export default [
           {
             type: 'userFunction',
             props: {
-              functionName: 'usr.api.exposed.setDoubleStrings',
+              functionName: 'usr.api.exposed.controlPanelActions.setDoubleStrings',
             },
             events: [
               {
@@ -84,7 +84,7 @@ export default [
                   {
                     type: 'component',
                     props: {
-                      componentName: 'usr.components.ViewPanel',
+                      componentName: 'usr.components.ViewPanel.ViewPanel',
                       componentInstance: 'viewPanel1',
                       propertyName: 'firstDataString',
                     },
@@ -97,7 +97,7 @@ export default [
                   {
                     type: 'component',
                     props: {
-                      componentName: 'usr.components.ViewPanel',
+                      componentName: 'usr.components.ViewPanel.ViewPanel',
                       componentInstance: 'viewPanel1',
                       propertyName: 'secondDataString',
                     },

@@ -2,7 +2,7 @@ export default [
   {
     type: 'component',
     props: {
-      componentName: 'usr.components.ControlPanel',
+      componentName: 'usr.components.ControlPanel.ControlPanel',
       componentInstance: 'controlPanel1',
     },
     events: [
@@ -12,7 +12,7 @@ export default [
           {
             type: 'component',
             props: {
-              componentName: 'usr.components.ViewPanel',
+              componentName: 'usr.components.ViewPanel.ViewPanel',
               componentInstance: 'viewPanel1',
               propertyName: 'thirdDataString',
             },

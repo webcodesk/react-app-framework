@@ -4,11 +4,15 @@ import PropTypes from 'prop-types';
 class SubControlPanel extends React.Component {
   static propTypes = {
     onGoToAbout: PropTypes.func,
+    onGoToUser: PropTypes.func,
   };
 
   static defaultProps = {
     onGoToAbout: () => {
       console.info('SubControlPanel.onGoToAbout is not set');
+    },
+    onGoToUser: () => {
+      console.info('SubControlPanel.onGoToUser is not set');
     },
   };
 
@@ -25,10 +29,16 @@ class SubControlPanel extends React.Component {
     });
   };
 
+  handleGoToUser = () => {
+    this.props.onGoToUser();
+  };
+
   render () {
     return (
       <div>
         <button onClick={this.handleGoToAbout}>Go to About page</button>
+        &nbsp;
+        <button onClick={this.handleGoToUser}>Go to User page</button>
       </div>
     );
   }

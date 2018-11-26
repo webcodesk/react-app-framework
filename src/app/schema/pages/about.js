@@ -22,7 +22,7 @@ const pageModel = {
       },
       children: [
         {
-          type: 'usr.components.AboutPanel',
+          type: 'usr.components.AboutPanel.AboutPanel',
           instance: 'aboutPanel1',
         }
       ]
@@ -46,7 +46,7 @@ const pageModel = {
       },
       children: [
         {
-          type: 'usr.components.ViewPanel',
+          type: 'usr.components.ViewPanel.ViewPanel',
           instance: 'viewPanel1',
         }
       ]

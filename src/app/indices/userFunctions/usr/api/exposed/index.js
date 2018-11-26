@@ -1,19 +1,13 @@
-import {
-  firstMethodInChain,
-  secondMethodInChain
-} from "usr/api/exposed/aboutPanelActions";
+import aboutPanelActions from "./aboutPanelActions";
 
-import {
-  setDoubleStrings,
-  setFirstString,
-  setSecondString
-} from "usr/api/exposed/controlPanelActions";
+import controlPanelActions from "./controlPanelActions";
+
+import newControlPanelActions from "./newControlPanelActions";
 
 export default {
-  firstMethodInChain,
-  secondMethodInChain,
+  aboutPanelActions,
 
-  setDoubleStrings,
-  setFirstString,
-  setSecondString
+  controlPanelActions,
+
+  newControlPanelActions
 };

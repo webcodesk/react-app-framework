@@ -12,7 +12,7 @@ export default [
           {
             type: 'userFunction',
             props: {
-              functionName: 'usr.api.exposed.setFirstString',
+              functionName: 'usr.api.exposed.controlPanelActions.setFirstString',
             },
             events: [
               {
@@ -21,7 +21,7 @@ export default [
                   {
                     type: 'component',
                     props: {
-                      componentName: 'usr.components.ControlPanel',
+                      componentName: 'usr.components.ControlPanel.ControlPanel',
                       componentInstance: 'controlPanel1',
                       propertyName: 'firstDataString',
                     },

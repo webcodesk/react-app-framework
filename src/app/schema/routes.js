@@ -12,7 +12,7 @@ export default [
     pageName: 'about',
     populationTargets: [
       {
-        componentName: 'usr.components.AboutPanel',
+        componentName: 'usr.components.AboutPanel.AboutPanel',
         componentInstance: 'aboutPanel1',
         propertyName: 'authorData',
       }

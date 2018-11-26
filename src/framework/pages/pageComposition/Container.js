@@ -4,17 +4,47 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import createContainerSelector from '../../store/selectors';
 import createContainerActions from '../../store/actions';
+import NotFoundComponent from './NotFoundComponent';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  componentDidCatch(error, info) {
+    // Display fallback UI
+    this.setState({ hasError: true });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      const { componentName } = this.props;
+      // You can render any custom fallback UI
+      return <NotFoundComponent componentName={componentName} />;
+    }
+    return this.props.children;
+  }
+}
 
 class Container extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.createElement = this.createElement.bind(this);
+  }
 
   componentDidMount() {
     const { componentName, componentInstance } = this.props;
     console.info('MountContainer: ', componentName, componentInstance);
   }
 
+  createElement() {
+
+  }
+
   render () {
-    const { componentName, componentInstance, wrappedComponent, wrappedProps, stateProps } = this.props;
-    console.info('RenderContainer: ', componentName, componentInstance);
+    const { wrappedComponent, wrappedProps, stateProps } = this.props;
     const wrappedHandlers = {};
     const { containerEventHandlers, actions } = this.props;
     if (containerEventHandlers && containerEventHandlers.length > 0) {
@@ -27,6 +57,7 @@ class Container extends React.Component {
         };
       });
     }
+    console.info('Wrapped component: ', wrappedComponent);
     console.info('Wrapped props: ', wrappedProps);
     return React.createElement(wrappedComponent, { ...wrappedProps, ...stateProps, ...wrappedHandlers });
   }
@@ -57,9 +88,13 @@ export default function createContainer(
     wrappedProps: props,
     wrappedComponent,
   };
-  return React.createElement(
-    connect(mapStateToProps, mapDispatchToProps)(Container),
-    wrapperProps,
-    nestedComponents
+  return (
+    <ErrorBoundary key={`errorBoundary_${props.key}`} componentName={componentName}>
+      {React.createElement(
+        connect(mapStateToProps, mapDispatchToProps)(Container),
+        wrapperProps,
+        nestedComponents
+      )}
+    </ErrorBoundary>
   );
 }

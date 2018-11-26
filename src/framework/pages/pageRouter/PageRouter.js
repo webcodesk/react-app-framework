@@ -1,3 +1,4 @@
+import get from 'lodash/get';
 import React from 'react';
 import { Router, Switch, Route, Link } from 'react-router-dom';
 
@@ -31,7 +32,7 @@ const PageRouter = (props) => {
               ({ match, location }) =>
                 <PageComposition
                   userComponents={userComponents}
-                  componentsTree={pages[route.pageName]}
+                  componentsTree={get(pages, route.pageName, {})}
                   actionSequences={actionSequences}
                   pageParams={match.params}
                   pageSearch={location.search}

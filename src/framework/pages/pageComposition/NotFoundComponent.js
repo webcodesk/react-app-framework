@@ -5,7 +5,9 @@ class NotFoundComponent extends React.Component {
   render () {
     const { componentName } = this.props;
     return (
-      <p>Component is not found {componentName}</p>
+      <div style={{color: 'white', backgroundColor: 'red', borderRadius: '4px', padding: '.5em'}}>
+        <code>Component is not found: "{componentName}"</code>
+      </div>
     );
   }
 }

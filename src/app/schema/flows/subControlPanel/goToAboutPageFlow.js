@@ -2,7 +2,7 @@ export default [
   {
     type: 'component',
     props: {
-      componentName: 'usr.components.SubControlPanel',
+      componentName: 'usr.components.SubControlPanel.SubControlPanel',
       componentInstance: 'subControlPanel1',
     },
     events: [
@@ -13,7 +13,7 @@ export default [
             type: 'component',
             props: {
               pageName: 'about',
-              componentName: 'usr.components.AboutPanel',
+              componentName: 'usr.components.AboutPanel.AboutPanel',
               componentInstance: 'aboutPanel1',
               isForward: true,
               forwardRule: {
@@ -27,7 +27,7 @@ export default [
                   {
                     type: 'userFunction',
                     props: {
-                      functionName: 'usr.api.exposed.firstMethodInChain',
+                      functionName: 'usr.api.exposed.aboutPanelActions.firstMethodInChain',
                     },
                     events: [
                       {
@@ -36,7 +36,7 @@ export default [
                           {
                             type: 'userFunction',
                             props: {
-                              functionName: 'usr.api.exposed.secondMethodInChain',
+                              functionName: 'usr.api.exposed.aboutPanelActions.secondMethodInChain',
                             },
                             events: [
                               {
@@ -52,7 +52,7 @@ export default [
                                   {
                                     type: 'component',
                                     props: {
-                                      componentName: 'usr.components.AboutPanel',
+                                      componentName: 'usr.components.AboutPanel.AboutPanel',
                                       componentInstance: 'aboutPanel1',
                                       propertyName: 'authorData'
                                     }
