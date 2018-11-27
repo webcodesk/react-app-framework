@@ -1,5 +1,7 @@
 import forOwn from 'lodash/forOwn';
 import get from 'lodash/get';
+import isArray from 'lodash/isArray';
+import isObject from 'lodash/isObject';
 
 let userFunctions = {};
 
@@ -73,12 +75,22 @@ export function getUserFunctionByName (functionName) {
   return get(userFunctions, functionName);
 }
 
+function createActionSequencesRecursively (handlers, actionSequences = {}) {
+  forOwn(handlers, value => {
+    if (isArray(value)) {
+      // only arrays should be exported as flow sequences otherwise the object is assumed as a nested sequences
+      getActionSequences(value, actionSequences);
+    } else if (isObject(value)) {
+      // if the handlers is objects it means we have a nested handlers description
+      createActionSequencesRecursively(value, actionSequences);
+    }
+  });
+  return actionSequences;
+}
+
 export function createActionSequences (handlers, functions) {
   userFunctions = functions;
-  let actionSequences = {};
-  forOwn(handlers, value => {
-    getActionSequences(value, actionSequences);
-  });
+  const actionSequences = createActionSequencesRecursively(handlers);
   console.info('Action sequences: ', actionSequences);
   return actionSequences;
 }
