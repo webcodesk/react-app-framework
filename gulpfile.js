@@ -11,7 +11,13 @@ gulp.task('clean', function () {
 });
 
 gulp.task('build', gulp.series('clean', function () {
-  return gulp.src('./src/framework/**/*.js')
+  return gulp.src(
+    [
+      './src/framework/**/*.js',
+      '!./src/framework/**/__tests__',
+      '!./src/framework/**/__tests__/**/*',
+    ]
+  )
     .pipe(babel({
       plugins: ['@babel/plugin-proposal-class-properties'],
       presets: ['@babel/env', '@babel/react']
