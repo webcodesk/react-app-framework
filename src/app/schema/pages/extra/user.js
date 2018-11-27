@@ -22,8 +22,8 @@ const pageModel = {
       },
       children: [
         {
-          type: 'usr.components.AboutPanel.AboutPanel',
-          instance: 'aboutPanel1',
+          type: 'usr.components.extra.UserPanel.UserPanel',
+          instance: 'userPanel1',
         }
       ]
     },
@@ -35,21 +35,6 @@ const pageModel = {
         left: 2,
         top: 1,
       },
-    },
-    {
-      type: '_PageCell',
-      props: {
-        width: 1,
-        height: 1,
-        left: 3,
-        top: 1,
-      },
-      children: [
-        {
-          type: 'usr.components.ViewPanel',
-          instance: 'viewPanel1',
-        }
-      ]
     },
   ]
 };

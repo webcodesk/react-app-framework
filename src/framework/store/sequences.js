@@ -43,7 +43,8 @@ const getActionSequences = (handlers, actionSequences = {}) => {
               handlerObject = actionSequences[key] || { ...props, events: [] };
               const eventSequence = getEventSequence(event);
               // find the same event handler name for the container
-              const existingHandlerEventIndex = handlerObject.events.findIndex(evn => evn.name === eventSequence.name);
+              const existingHandlerEventIndex =
+                handlerObject.events.findIndex(evn => evn.name === eventSequence.name);
               if (existingHandlerEventIndex >= 0) {
                 // here we should merge targets of the same container events handler
                 const existingHandlerEventTargets = handlerObject.events[existingHandlerEventIndex];

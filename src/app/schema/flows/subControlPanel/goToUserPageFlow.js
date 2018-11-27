@@ -12,8 +12,7 @@ export default [
           {
             type: 'component',
             props: {
-              path: '/user',
-              isForward: true,
+              forwardPath: '/user',
             },
           }
         ],

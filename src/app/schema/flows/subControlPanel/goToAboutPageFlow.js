@@ -12,10 +12,9 @@ export default [
           {
             type: 'component',
             props: {
-              pageName: 'about',
               componentName: 'usr.components.AboutPanel.AboutPanel',
               componentInstance: 'aboutPanel1',
-              isForward: true,
+              forwardPath: '/about',
               forwardRule: {
                 withQuery: true,
               }
@@ -45,8 +44,7 @@ export default [
                                   {
                                     type: 'component',
                                     props: {
-                                      pageName: 'home',
-                                      isForward: true,
+                                      forwardPath: '/home',
                                     }
                                   },
                                   {

@@ -8,16 +8,16 @@ import { getUserFunctionByName } from './sequences';
 const dispatchToComponent = (props, payload, dispatch, helpers) => {
   if (props) {
     const {
-      pageName, componentName, componentInstance, propertyName, isForward, forwardRule
+      componentName, componentInstance, propertyName, forwardPath, forwardRule
     } = props;
     // console.info('Dispatch/Forward to component: ', pageName, componentName, componentInstance, isForward, helpers);
     // todo: componentName and componentInstance attributes may not be present, hide target key initialization
     const targetKey = `${componentName}_${componentInstance}`;
-    if (isForward && helpers) {
+    if (forwardPath && helpers) {
       // console.info('Forwarding routine start with helpers: ', helpers);
       const { history } = helpers;
-      if (pageName && history) {
-        let pathString = `/${pageName}`;
+      if (forwardPath && history) {
+        let pathString = forwardPath;
         const {withParams, withQuery} = forwardRule || {};
         if (withParams) {
           if (!payload) {

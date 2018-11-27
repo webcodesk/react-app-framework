@@ -48,99 +48,102 @@ class PageComposition extends Component {
     pageQuery,
     populationTargets
   ) {
-    if (description) {
-      const { type, instance, key, props, children } = description;
-      const propsComponents = {};
-      if (props) {
-        forOwn(props, (value, prop) => {
-          if (value && value.type && value.instance) {
-            propsComponents[prop] = this.renderComponent(
-              userComponents,
-              value,
-              actionSequences,
-              pageParams,
-              pageQuery,
-              populationTargets
-            );
-          }
-        });
-      }
-      let nestedComponents = [];
-      if (children && children.length > 0) {
-        nestedComponents = children.map(child => {
-          return this.renderComponent(
+    if (!description) {
+      return null;
+    }
+    const { type, instance, key, props, children } = description;
+    if (!type) {
+      return null;
+    }
+    const propsComponents = {};
+    if (props) {
+      forOwn(props, (value, prop) => {
+        if (value && value.type && value.instance) {
+          propsComponents[prop] = this.renderComponent(
             userComponents,
-            child,
+            value,
             actionSequences,
             pageParams,
             pageQuery,
             populationTargets
           );
-        });
-      }
-      const validType = type || 'div';
-      if (validType.charAt(0) === '_') {
-        const pageComponentType = validType.substr(1);
-        const pageComponent = pageComponents[pageComponentType];
+        }
+      });
+    }
+    let nestedComponents = [];
+    if (children && children.length > 0) {
+      nestedComponents = children.map(child => {
+        return this.renderComponent(
+          userComponents,
+          child,
+          actionSequences,
+          pageParams,
+          pageQuery,
+          populationTargets
+        );
+      });
+    }
+    const validType = type || 'div';
+    if (validType.charAt(0) === '_') {
+      const pageComponentType = validType.substr(1);
+      const pageComponent = pageComponents[pageComponentType];
+      return React.createElement(
+        pageComponent || pageComponentType,
+        { key: key || uniqueId(validType), ...props, ...propsComponents },
+        nestedComponents
+      );
+    } else {
+      // this is a user custom component, create container for it
+      const wrappedComponent = get(userComponents, validType, null);
+      if (!wrappedComponent || typeof wrappedComponent !== 'function') {
         return React.createElement(
-          pageComponent || pageComponentType,
+          NotFoundComponent,
+          { key: uniqueId('notFound'), componentName: validType }
+        );
+      }
+      const { _doNotCreateContainer } = props || {};
+      const containerKey = `${type}_${instance}`;
+
+      if (_doNotCreateContainer) {
+        return React.createElement(
+          wrappedComponent,
           { key: key || uniqueId(validType), ...props, ...propsComponents },
           nestedComponents
         );
-      } else {
-        // this is a user custom component, create container for it
-        const wrappedComponent = get(userComponents, validType, null);
-        if (!wrappedComponent || typeof wrappedComponent !== 'function') {
-          return React.createElement(
-            NotFoundComponent,
-            { key: uniqueId('notFound'), componentName: validType }
-          );
-        }
-        const { _doNotCreateContainer } = props || {};
-        const containerKey = `${type}_${instance}`;
-
-        if (_doNotCreateContainer) {
-          return React.createElement(
-            wrappedComponent,
-            { key: key || uniqueId(validType), ...props, ...propsComponents },
-            nestedComponents
-          );
-        }
-
-        let containerHandlers = [];
-        const actionSequence = actionSequences[containerKey];
-        if (actionSequence) {
-          containerHandlers = actionSequence.events;
-        }
-        let populatedProps = {};
-        populationTargets.forEach(populationTarget => {
-          const {
-            componentName: targetComponentName,
-            componentInstance: targetInstance,
-            propertyName: targetPropertyName,
-          } = populationTarget;
-          if (targetComponentName === type && targetInstance === instance) {
-            if (targetPropertyName) {
-              populatedProps[targetPropertyName] =
-                pageParams[targetPropertyName] || pageQuery;
-            } else {
-              // todo: should we allow to pass arbitrary object keys in search query as props into the container?
-              populatedProps = pageQuery;
-            }
-          }
-        });
-        console.info('Create container with page params: ', type, userComponents, populatedProps);
-        return createContainer(
-          wrappedComponent,
-          type,
-          instance,
-          containerHandlers,
-          { key: key || containerKey, ...props, ...populatedProps, ...propsComponents },
-          nestedComponents
-        );
       }
+
+      let containerHandlers = [];
+      const actionSequence = actionSequences[containerKey];
+      if (actionSequence) {
+        containerHandlers = actionSequence.events;
+      }
+      let populatedProps = {};
+      populationTargets.forEach(populationTarget => {
+        const {
+          componentName: targetComponentName,
+          componentInstance: targetInstance,
+          propertyName: targetPropertyName,
+        } = populationTarget;
+        if (targetComponentName === type && targetInstance === instance) {
+          if (targetPropertyName) {
+            populatedProps[targetPropertyName] =
+              pageParams[targetPropertyName] || pageQuery;
+          } else {
+            // todo: should we allow to pass arbitrary object keys in search query as props into the container?
+            populatedProps = pageQuery;
+          }
+        }
+      });
+      console.info('Create container with page params: ', type, userComponents, populatedProps);
+      return createContainer(
+        wrappedComponent,
+        type,
+        instance,
+        containerHandlers,
+        { key: key || containerKey, ...props, ...populatedProps, ...propsComponents },
+        nestedComponents
+      );
     }
-    return null;
   };
 
   renderPage () {
@@ -153,7 +156,7 @@ class PageComposition extends Component {
       populationTargets
     } = this.props;
     if (componentsTree) {
-      // console.info('Render page with components tree: ', componentsTree);
+      console.info('Render page with components tree: ', componentsTree);
       const pageQuery = queryString.parse(pageSearch);
       console.info('Page query: ', pageQuery);
       return this.renderComponent(
