@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 
 class UserPanel extends React.Component {
   static propTypes = {
+    userName: PropTypes.string,
     onGoHome: PropTypes.func,
   };
 
   static defaultProps = {
+    userName: 'Alex Default',
     onGoHome: () => {
       console.info('UserPanel.onGoHome is not set');
     },
@@ -27,7 +29,7 @@ class UserPanel extends React.Component {
   render () {
     return (
       <div>
-        <h1>User Panel</h1>
+        <h1>User Panel of {this.props.userName}</h1>
         <a href="#" onClick={this.handleGoHome}>Go Home</a>
       </div>
     );

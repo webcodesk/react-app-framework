@@ -22,7 +22,7 @@ const pageModel = {
       },
       children: [
         {
-          type: 'usr.components.extra.UserPanel.UserPanel',
+          type: 'usr.components.extra.UserPanel.stories[0]',
           instance: 'userPanel1',
         }
       ]

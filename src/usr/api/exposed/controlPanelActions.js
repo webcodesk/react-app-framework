@@ -1,5 +1,5 @@
 export const setFirstString = () => (dispatch) => {
-  dispatch('firstString', 'Alex First');
+  dispatch('firstString', 'Alex First Changed');
 };
 
 export const setSecondString = () => (dispatch) => {

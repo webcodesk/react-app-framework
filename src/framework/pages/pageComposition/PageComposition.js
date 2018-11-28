@@ -95,10 +95,17 @@ class PageComposition extends Component {
     } else {
       // this is a user custom component, create container for it
       const wrappedComponent = get(userComponents, validType, null);
-      if (!wrappedComponent || typeof wrappedComponent !== 'function') {
+      if (!wrappedComponent || (typeof wrappedComponent !== 'function' && !wrappedComponent.renderStory)) {
         return React.createElement(
           NotFoundComponent,
           { key: uniqueId('notFound'), componentName: validType }
+        );
+      }
+      if (wrappedComponent.renderStory) {
+        return React.createElement(
+          wrappedComponent.renderStory,
+          { key: key || uniqueId(validType), ...props, ...propsComponents },
+          nestedComponents
         );
       }
       const { _doNotCreateContainer } = props || {};
