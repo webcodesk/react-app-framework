@@ -2,6 +2,7 @@ import forOwn from 'lodash/forOwn';
 import get from 'lodash/get';
 import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
+import unionWith from 'lodash/unionWith';
 
 let userFunctions = {};
 
@@ -30,6 +31,48 @@ const getEventSequence = (event) => {
   return eventSequence;
 };
 
+const eventTargetComparator = (destTarget, sourceTarget) => {
+  const { type: sourceType, props: sourceProps } = sourceTarget;
+  const { type: destType, props: destProps } = destTarget;
+  if (sourceType === destType) {
+    if (sourceProps && destProps) {
+      if (sourceProps.functionName && destProps.functionName) {
+        return sourceProps.functionName === destProps.functionName;
+      } else if (sourceProps.componentName && destProps.componentName) {
+        return sourceProps.componentName === destProps.componentName
+          && sourceProps.componentInstance === destProps.componentInstance
+          && sourceProps.propertyName === destProps.propertyName;
+      }
+    }
+  }
+  return false;
+};
+
+const targetEventComparator = (destEvent, sourceEvent) => {
+  return destEvent.name === sourceEvent.name;
+};
+
+const mergeEventTargets = (destTargets, sourceTargets) => {
+  let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
+  resultTargets.forEach(resultTarget => {
+    const sameSourceTarget = sourceTargets.find(sourceTarget => eventTargetComparator(resultTarget, sourceTarget));
+    if (sameSourceTarget) {
+      const resultTargetEvents = unionWith(resultTarget.events, sameSourceTarget.events, targetEventComparator);
+      if (resultTargetEvents && resultTargetEvents.length > 0) {
+        resultTargetEvents.forEach(resultTargetEvent => {
+          const sameSourceTargetEvent =
+            sameSourceTarget.events.find(sourceTargetEvent => targetEventComparator(resultTargetEvent, sourceTargetEvent));
+          if (sameSourceTargetEvent) {
+            resultTargetEvent.targets = mergeEventTargets(resultTargetEvent.targets, sameSourceTargetEvent.targets);
+          }
+        });
+      }
+      resultTarget.events = resultTargetEvents;
+    }
+  });
+  return resultTargets;
+};
+
 const getActionSequences = (handlers, actionSequences = {}) => {
   if (handlers && handlers.length > 0) {
     handlers.forEach(handler => {
@@ -49,11 +92,11 @@ const getActionSequences = (handlers, actionSequences = {}) => {
                 handlerObject.events.findIndex(evn => evn.name === eventSequence.name);
               if (existingHandlerEventIndex >= 0) {
                 // here we should merge targets of the same container events handler
-                const existingHandlerEventTargets = handlerObject.events[existingHandlerEventIndex];
-                if (existingHandlerEventTargets) {
-                  console.info('existingHandlerEventTargets: ', existingHandlerEventTargets);
+                const existingHandlerEvent = handlerObject.events[existingHandlerEventIndex];
+                if (existingHandlerEvent) {
+                  console.info('existingHandlerEvent: ', key, eventSequence.name, existingHandlerEvent);
                   handlerObject.events[existingHandlerEventIndex].targets =
-                    [...existingHandlerEventTargets.targets, ...eventSequence.targets];
+                    mergeEventTargets(existingHandlerEvent.targets, eventSequence.targets);
                 }
               } else {
                 handlerObject.events.push(eventSequence);

@@ -29,7 +29,41 @@ export default [
                 ]
               }
             ]
-          }
+          },
+          {
+            type: 'userFunction',
+            props: {
+              functionName: 'usr.api.exposed.controlPanelActions.setDoubleStrings',
+            },
+            events: [
+              {
+                name: 'firstStringD',
+                targets: [
+                  {
+                    type: 'component',
+                    props: {
+                      componentName: 'usr.components.ViewPanel.ViewPanel',
+                      componentInstance: 'viewPanel1',
+                      propertyName: 'firstDataString',
+                    },
+                  },
+                ],
+              },
+              {
+                name: 'secondStringD',
+                targets: [
+                  {
+                    type: 'component',
+                    props: {
+                      componentName: 'usr.components.ControlPanel.ControlPanel',
+                      componentInstance: 'controlPanel1',
+                      propertyName: 'firstDataString',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
         ],
       },
     ]

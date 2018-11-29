@@ -6,6 +6,7 @@ class ControlPanel extends React.Component {
     onFirstClick: PropTypes.func,
     onSecondClick: PropTypes.func,
     firstDataString: PropTypes.string,
+    firstDataString1: PropTypes.string,
     secondDataString: PropTypes.string,
     onDirectPassIn: PropTypes.func,
     subControlPanel: PropTypes.element,
@@ -19,6 +20,7 @@ class ControlPanel extends React.Component {
       console.info('ControlPanel.onSecondClick is not set');
     },
     firstDataString: 'not set',
+    firstDataString1: 'not set',
     secondDataString: 'not set',
     onDirectPassIn: () => {
       console.info('ControlPanel.onDirectPassIn is not set');
@@ -39,6 +41,7 @@ class ControlPanel extends React.Component {
       <div>
         <p>Control Panel</p>
         <h3>First string: {this.props.firstDataString}</h3>
+        <h3>First string1: {this.props.firstDataString1}</h3>
         <h3>Second string: {this.props.secondDataString}</h3>
         <button style={{padding: '1em'}} onClick={this.props.onFirstClick}>First Click Changed</button>
         <button style={{padding: '1em'}} onClick={this.props.onSecondClick}>Second Click</button>
