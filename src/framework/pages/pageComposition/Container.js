@@ -36,7 +36,7 @@ class Container extends React.Component {
 
   componentDidMount() {
     const { componentName, componentInstance } = this.props;
-    console.info('MountContainer: ', componentName, componentInstance);
+    // console.info('MountContainer: ', componentName, componentInstance);
   }
 
   createElement() {
@@ -57,8 +57,8 @@ class Container extends React.Component {
         };
       });
     }
-    console.info('Wrapped component: ', wrappedComponent);
-    console.info('Wrapped props: ', wrappedProps);
+    // console.info('Wrapped component: ', wrappedComponent);
+    // console.info('Wrapped props: ', wrappedProps);
     return React.createElement(wrappedComponent, { ...wrappedProps, ...stateProps, ...wrappedHandlers });
   }
 }

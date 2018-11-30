@@ -141,7 +141,7 @@ class PageComposition extends Component {
           }
         }
       });
-      console.info('Create container with page params: ', type, userComponents, populatedProps);
+      console.info('Create container: ', type, populatedProps);
       return createContainer(
         wrappedComponent,
         type,
@@ -164,6 +164,7 @@ class PageComposition extends Component {
     } = this.props;
     if (componentsTree) {
       console.info('Render page with components tree: ', componentsTree);
+      console.info('Render page user components: ', userComponents);
       const pageQuery = queryString.parse(pageSearch);
       console.info('Page query: ', pageQuery);
       return this.renderComponent(

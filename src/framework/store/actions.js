@@ -58,7 +58,7 @@ const createTasks = (targets) => {
       const { type, props, events } = target;
       if (type === 'userFunction' && props) {
         const func = getUserFunctionByName(props.functionName);
-        console.info('Create tasks (props.functionName): ', props.functionName, func);
+        // console.info('Create tasks (props.functionName): ', props.functionName, func);
         if (func) {
           // First we need to check if there is the user function sequence
           let innerTasks = {};
@@ -87,7 +87,7 @@ const createTasks = (targets) => {
                 // check if the user function dispatches any event
                 if (events && events.length > 0) {
                   const event = events.find(targetEvent => targetEvent.name === type);
-                  console.info('Apply action with dispatch: ', type, events, event);
+                  console.info('Apply action with dispatch: ', type);
                   if (
                     event
                     && event.targets
@@ -102,7 +102,7 @@ const createTasks = (targets) => {
                         dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
                       }
                     });
-                    console.info('Inner tasks: ', innerTasks[type]);
+                    // console.info('Inner tasks: ', innerTasks[type]);
                     if (innerTasks[type] && innerTasks[type].length > 0) {
                       innerTasks[type].forEach(task => {
                         task.apply(null, [payload])(dispatch, getState, helpers);
@@ -139,7 +139,7 @@ export default eventHandlers => {
     eventHandlers.forEach(eventHandler => {
       const { name, targets } = eventHandler;
       const tasks = createTasks(targets);
-      console.info('Event handler: ', eventHandler);
+      // console.info('Event handler: ', eventHandler);
       actions[name] = function () {
         const args = arguments;
         return (dispatch, getState, helpers) => {
