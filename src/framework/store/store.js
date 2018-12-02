@@ -29,7 +29,7 @@ export function configureStore(initialState, helpersConfig, {name, version}) {
   if (process.env.NODE_ENV !== 'production' && module.hot) {
     module.hot.accept('./reducer', () =>
       // eslint-disable-next-line global-require
-      store.replaceReducer(require('./reducer').default),
+      store.replaceReducer(require('./reducer')),
     );
   }
 

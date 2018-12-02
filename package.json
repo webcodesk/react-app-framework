@@ -14,6 +14,9 @@
     "lodash": "4.17.11",
     "prop-types": "^15.6.2",
     "query-string": "6.2.0",
+    "react-app-rewire-hot-loader": "1.0.3",
+    "react-app-rewired": "2.0.0",
+    "react-hot-loader": "4.5.1",
     "react-redux": "^5.1.1",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.1",
@@ -40,10 +43,10 @@
     "react-scripts": "2.1.1"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3030 react-scripts start",
-    "build": "cross-env NODE_PATH=./src react-scripts build",
-    "test": "react-scripts test --env=jsdom --modulePaths=src",
-    "eject": "react-scripts eject",
+    "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3030 react-app-rewired start",
+    "build": "cross-env NODE_PATH=./src react-app-rewired build",
+    "test": "react-app-rewired test --env=jsdom --modulePaths=src",
+    "eject": "react-app-rewired eject",
     "dist": "cross-env NODE_ENV=development gulp --gulpfile ./gulpfile.js build"
   },
   "browserslist": [

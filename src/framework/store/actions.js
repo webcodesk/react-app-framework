@@ -133,7 +133,7 @@ const createTasks = (targets) => {
   return tasks;
 };
 
-export default eventHandlers => {
+const createActions = (eventHandlers) => {
   const actions = {};
   if (eventHandlers && eventHandlers.length > 0) {
     eventHandlers.forEach(eventHandler => {
@@ -151,6 +151,21 @@ export default eventHandlers => {
         };
       };
     });
+  }
+  return actions;
+};
+
+const actionsCache = new Map();
+
+export const clearActionsCache = () => {
+  actionsCache.clear();
+};
+
+export default (eventHandlersKey, eventHandlers) => {
+  let actions = actionsCache.get(eventHandlersKey);
+  if (!actions) {
+    actions = createActions(eventHandlers);
+    actionsCache.set(eventHandlersKey, actions);
   }
   return actions;
 };

@@ -53,7 +53,11 @@ class Container extends React.Component {
           const args = arguments;
           // console.info(`Invoke ${eventHandler.name} event: `, args);
           const handlerAction = actions[`${eventHandler.name}`];
-          handlerAction.apply(null, args);
+          if (handlerAction) {
+            handlerAction.apply(null, args);
+          } else {
+            console.error(`Event handler was not found for ${eventHandler.name} event.`);
+          }
         };
       });
     }
@@ -72,7 +76,7 @@ export default function createContainer(
   nestedComponents = null
 ) {
   // console.info('bindActionCreators: ', pageName, componentName, componentInstance, containerEventHandlers);
-  const actions = createContainerActions(containerEventHandlers);
+  const actions = createContainerActions(`${componentName}_${componentInstance}`, containerEventHandlers);
   const mapDispatchToProps = (dispatch) => {
     // console.info('bindActionCreators: ', actions);
     return { actions: bindActionCreators(actions, dispatch) };

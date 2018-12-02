@@ -43,9 +43,9 @@ class ControlPanel extends React.Component {
         <h3>First string: {this.props.firstDataString}</h3>
         <h3>First string1: {this.props.firstDataString1}</h3>
         <h3>Second string: {this.props.secondDataString}</h3>
-        <button style={{padding: '1em'}} onClick={this.props.onFirstClick}>First Click Changed</button>
+        <button style={{padding: '1em'}} onClick={this.props.onFirstClick}>First Click</button>
         <button style={{padding: '1em'}} onClick={this.props.onSecondClick}>Second Click</button>
-        <button style={{padding: '1em'}} onClick={this.handleDirectPassIn}>Direct pass in</button>
+        <button style={{padding: '1em'}} onClick={this.handleDirectPassIn}>Direct pass to View</button>
         <div>
           <p>Sub Control</p>
           {this.props.subControlPanel}

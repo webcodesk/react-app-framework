@@ -5,7 +5,7 @@ export default [
   {
     story: 'another component',
     renderStory: () => {
-      return (<h1>HEY!!!! Hello from the story</h1>)
+      return (<h1>HEY!!!! Hello from the story and this is not component</h1>)
     }
   },
   {

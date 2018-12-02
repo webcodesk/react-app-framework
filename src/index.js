@@ -1,5 +1,12 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App, { initApp } from './app';
 import './index.css';
+import packageJson from '../package.json';
 
-import { render } from './app';
+initApp(packageJson.name, packageJson.version);
 
-render();
+ReactDOM.render(
+  <App />,
+  document.getElementById('root')
+);

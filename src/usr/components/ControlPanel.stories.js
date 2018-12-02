@@ -6,10 +6,21 @@ export default [
     story: 'With custom on onFirstClick',
     renderStory: () => {
       const handleOnClick = () => {
-        alert('OnFirstClick');
+        alert('First click changed');
       };
       return (
-        <ControlPanel onFirstClick={handleOnClick} />
+        <ControlPanel firstDataString="Set by default" onFirstClick={handleOnClick} />
+      )
+    }
+  },
+  {
+    story: 'With custom on onFirstClick 2',
+    renderStory: () => {
+      const handleOnClick = () => {
+        alert('First click changed');
+      };
+      return (
+        <ControlPanel firstDataString="With custom on onFirstClick" onFirstClick={handleOnClick} />
       )
     }
   }
