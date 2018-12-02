@@ -1,25 +1,15 @@
-import React from 'react';
-import { hot } from 'react-hot-loader';
-import Application, { initStore } from '../framework';
-import schema from './schema';
-import userComponents from './indices/userComponents';
-import userFunctions from './indices/userFunctions';
+import { initStore } from '../framework';
 
-let userComponentStories = {};
+let App = null;
+
 if (process.env.NODE_ENV !== 'production') {
-  userComponentStories = require('./indices/userComponentStories').default;
+  App = require('./AppDev').default;
+} else {
+  App = require('./App').default;
 }
 
 export function initApp(name, version) {
   initStore(name, version);
 }
 
-const App = () =>
-  (<Application
-    schema={schema}
-    userComponents={userComponents}
-    userFunctions={userFunctions}
-    userComponentStories={userComponentStories}
-  />);
-
-export default hot(module)(App);
+export default App;
