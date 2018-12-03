@@ -4,6 +4,7 @@ import uniqueId from 'lodash/uniqueId';
 import get from 'lodash/get';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Media from 'react-media';
 import PageCell from './PageCell';
 import PageGrid from './PageGrid';
 import NotFoundComponent from './NotFoundComponent';
@@ -18,7 +19,7 @@ class PageComposition extends Component {
 
   static propTypes = {
     userComponents: PropTypes.object,
-    componentsTree: PropTypes.object,
+    pageModels: PropTypes.array,
     actionSequences: PropTypes.object,
     pageParams: PropTypes.object,
     pageSearch: PropTypes.string,
@@ -27,7 +28,7 @@ class PageComposition extends Component {
 
   static defaultProps = {
     userComponents: {},
-    componentsTree: {},
+    pageModels: [],
     actionSequences: {},
     pageParams: {},
     pageSearch: '',
@@ -156,25 +157,49 @@ class PageComposition extends Component {
   renderPage () {
     const {
       userComponents,
-      componentsTree,
+      pageModels,
       actionSequences,
       pageParams,
       pageSearch,
       populationTargets
     } = this.props;
-    if (componentsTree) {
-      console.info('Render page with components tree: ', componentsTree);
+    console.info('Render page with pageModels: ', pageModels);
+    if (pageModels && pageModels.length > 0) {
       console.info('Render page user components: ', userComponents);
       const pageQuery = queryString.parse(pageSearch);
       console.info('Page query: ', pageQuery);
-      return this.renderComponent(
-        userComponents,
-        componentsTree,
-        actionSequences,
-        pageParams,
-        pageQuery,
-        populationTargets
-      );
+      if (pageModels.length > 1) {
+        return pageModels.map((pageModel, idx) => {
+          const { pageVariantName, componentsTree, mediaQuery } = pageModel;
+          return (
+            <Media
+              key={`${pageVariantName}_${idx}`}
+              query={mediaQuery}
+              render={() => {
+                return this.renderComponent(
+                  userComponents,
+                  componentsTree,
+                  actionSequences,
+                  pageParams,
+                  pageQuery,
+                  populationTargets
+                );
+              }}
+            />
+          );
+        });
+      } else {
+        const pageModel = pageModels[0];
+        const { componentsTree } = pageModel;
+        return this.renderComponent(
+          userComponents,
+          componentsTree,
+          actionSequences,
+          pageParams,
+          pageQuery,
+          populationTargets
+        );
+      }
     }
     return (<h1>Page does not have components.</h1>);
   }

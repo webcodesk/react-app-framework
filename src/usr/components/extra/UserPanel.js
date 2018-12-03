@@ -29,7 +29,7 @@ class UserPanel extends React.Component {
   render () {
     return (
       <div>
-        <h1>User Panel of {this.props.userName}</h1>
+        <h1>User Panel: {this.props.userName}</h1>
         <a href="#" onClick={this.handleGoHome}>Go Home</a>
       </div>
     );

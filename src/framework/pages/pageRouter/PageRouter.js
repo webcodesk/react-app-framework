@@ -31,8 +31,9 @@ const PageRouter = (props) => {
             render={
               ({ match, location }) =>
                 <PageComposition
+                  key={`${route.pageName}_${index}`}
                   userComponents={userComponents}
-                  componentsTree={get(pages, route.pageName, {})}
+                  pageModels={get(pages, route.pageName, {})}
                   actionSequences={actionSequences}
                   pageParams={match.params}
                   pageSearch={location.search}

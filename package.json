@@ -14,9 +14,7 @@
     "lodash": "4.17.11",
     "prop-types": "^15.6.2",
     "query-string": "6.2.0",
-    "react-app-rewire-hot-loader": "1.0.3",
-    "react-app-rewired": "2.0.0",
-    "react-hot-loader": "4.5.1",
+    "react-media": "1.8.0",
     "react-redux": "^5.1.1",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.1",
@@ -39,7 +37,10 @@
     "gulp-babel": "8.0.0",
     "lodash": "4.17.11",
     "react": "^16.6.3",
+    "react-app-rewire-hot-loader": "1.0.3",
+    "react-app-rewired": "2.0.0",
     "react-dom": "^16.6.3",
+    "react-hot-loader": "4.5.1",
     "react-scripts": "2.1.1"
   },
   "scripts": {

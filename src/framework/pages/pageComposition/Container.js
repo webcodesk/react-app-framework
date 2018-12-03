@@ -13,14 +13,12 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, info) {
-    // Display fallback UI
     this.setState({ hasError: true });
   }
 
   render() {
     if (this.state.hasError) {
       const { componentName } = this.props;
-      // You can render any custom fallback UI
       return <NotFoundComponent componentName={componentName} />;
     }
     return this.props.children;
@@ -36,7 +34,7 @@ class Container extends React.Component {
 
   componentDidMount() {
     const { componentName, componentInstance } = this.props;
-    // console.info('MountContainer: ', componentName, componentInstance);
+    console.info('MountContainer: ', componentName, componentInstance);
   }
 
   createElement() {
