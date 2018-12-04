@@ -21,6 +21,7 @@ class PageComposition extends Component {
     userComponents: PropTypes.object,
     pageModels: PropTypes.array,
     actionSequences: PropTypes.object,
+    targetProperties: PropTypes.object,
     pageParams: PropTypes.object,
     pageSearch: PropTypes.string,
     populationTargets: PropTypes.array,
@@ -30,6 +31,7 @@ class PageComposition extends Component {
     userComponents: {},
     pageModels: [],
     actionSequences: {},
+    targetProperties: {},
     pageParams: {},
     pageSearch: '',
     populationTargets: [],
@@ -45,6 +47,7 @@ class PageComposition extends Component {
     userComponents,
     description,
     actionSequences,
+    targetProperties,
     pageParams,
     pageQuery,
     populationTargets
@@ -64,6 +67,7 @@ class PageComposition extends Component {
             userComponents,
             value,
             actionSequences,
+            targetProperties,
             pageParams,
             pageQuery,
             populationTargets
@@ -78,6 +82,7 @@ class PageComposition extends Component {
           userComponents,
           child,
           actionSequences,
+          targetProperties,
           pageParams,
           pageQuery,
           populationTargets
@@ -125,6 +130,11 @@ class PageComposition extends Component {
       if (actionSequence) {
         containerHandlers = actionSequence.events;
       }
+      let containerProperties = [];
+      const propertiesObject = targetProperties[containerKey];
+      if (propertiesObject) {
+        containerProperties = Object.keys(propertiesObject);
+      }
       let populatedProps = {};
       populationTargets.forEach(populationTarget => {
         const {
@@ -148,6 +158,7 @@ class PageComposition extends Component {
         type,
         instance,
         containerHandlers,
+        containerProperties,
         { key: key || containerKey, ...props, ...populatedProps, ...propsComponents },
         nestedComponents
       );
@@ -159,6 +170,7 @@ class PageComposition extends Component {
       userComponents,
       pageModels,
       actionSequences,
+      targetProperties,
       pageParams,
       pageSearch,
       populationTargets
@@ -180,6 +192,7 @@ class PageComposition extends Component {
                   userComponents,
                   componentsTree,
                   actionSequences,
+                  targetProperties,
                   pageParams,
                   pageQuery,
                   populationTargets
@@ -195,6 +208,7 @@ class PageComposition extends Component {
           userComponents,
           componentsTree,
           actionSequences,
+          targetProperties,
           pageParams,
           pageQuery,
           populationTargets

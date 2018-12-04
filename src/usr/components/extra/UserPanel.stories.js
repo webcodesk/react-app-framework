@@ -14,10 +14,4 @@ export default [
       return (<UserPanel userName="Alex Component 1" onGoHome={() => {console.info("I'm in the story");}} />)
     }
   },
-  {
-    story: 'Alex From the Story',
-    renderStory: () => {
-      return (<UserPanel userName="Alex Component 2" onGoHome={() => {console.info("I'm in the story");}} />)
-    }
-  },
 ]

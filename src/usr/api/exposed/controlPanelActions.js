@@ -1,7 +1,12 @@
-export const setFirstString = () => (dispatch) => {
+const viewData = {
+  name: "I'm view data",
+};
+
+export const setFirstString = () => async (dispatch) => {
   console.info('Set first string ------------------>');
   dispatch('firstString', 'Alex First A');
-  dispatch('firstString1', 'Alex First 1');
+  // dispatch('viewData', viewData);
+  dispatch('viewData', viewData);
 };
 
 export const setSecondString = () => (dispatch) => {
@@ -14,7 +19,7 @@ export const setDoubleSecondString = () => (dispatch) => {
 
 export const setDoubleStrings = () => (dispatch) => {
   console.info('Set Double Strings invoke -------------->');
-  dispatch('firstStringD', 'Alex First D');
+  dispatch('firstStringD', new String('Alex First D'));
   setTimeout(() => {
     dispatch('secondStringD', 'Ira Second Delayed');
   }, 2000);

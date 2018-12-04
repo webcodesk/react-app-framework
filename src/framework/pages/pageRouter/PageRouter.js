@@ -15,7 +15,7 @@ const NoRoute = () => {
 };
 
 const PageRouter = (props) => {
-  const { routes, pages, userComponents, history, actionSequences } = props;
+  const { routes, pages, userComponents, history, actionSequences, targetProperties } = props;
   if (!routes || routes.length === 0) {
     return (<NoRoute/>);
   }
@@ -35,6 +35,7 @@ const PageRouter = (props) => {
                   userComponents={userComponents}
                   pageModels={get(pages, route.pageName, {})}
                   actionSequences={actionSequences}
+                  targetProperties={targetProperties}
                   pageParams={match.params}
                   pageSearch={location.search}
                   populationTargets={route.populationTargets}

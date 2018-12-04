@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import constants from '../../commons/constants';
 import createContainerSelector from '../../store/selectors';
 import createContainerActions from '../../store/actions';
 import NotFoundComponent from './NotFoundComponent';
@@ -29,7 +30,6 @@ class Container extends React.Component {
 
   constructor(props) {
     super(props);
-    this.createElement = this.createElement.bind(this);
   }
 
   componentDidMount() {
@@ -37,12 +37,36 @@ class Container extends React.Component {
     console.info('MountContainer: ', componentName, componentInstance);
   }
 
-  createElement() {
-
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    if (process.env.NODE_ENV !== 'production') {
+      if (window.__sendFrameworkMessage && window.__webcodeskIsListeningToFramework) {
+        const { componentName, componentInstance, stateProps, containerProperties } = this.props;
+        setTimeout(() => {
+          if (prevProps.stateProps !== stateProps) {
+            if (containerProperties && containerProperties.length > 0) {
+              containerProperties.forEach(propertyName => {
+                if (stateProps[propertyName] !== prevProps.stateProps[propertyName]) {
+                  window.__sendFrameworkMessage({
+                    type: constants.FRAMEWORK_MESSAGE_CONTAINER_UPDATED_PROPS,
+                    payload: {
+                      componentName,
+                      componentInstance,
+                      propertyName,
+                      stateProps: JSON.stringify(stateProps[propertyName])
+                    },
+                  });
+                }
+              });
+            }
+          }
+        }, 0);
+      }
+    }
   }
 
   render () {
-    const { wrappedComponent, wrappedProps, stateProps } = this.props;
+    const { wrappedComponent, wrappedProps, stateProps, componentName, componentInstance } = this.props;
+    console.info('Render container: ', componentName, componentInstance);
     const wrappedHandlers = {};
     const { containerEventHandlers, actions } = this.props;
     if (containerEventHandlers && containerEventHandlers.length > 0) {
@@ -70,6 +94,7 @@ export default function createContainer(
   componentName,
   componentInstance,
   containerEventHandlers,
+  containerProperties,
   props = {},
   nestedComponents = null
 ) {
@@ -79,17 +104,29 @@ export default function createContainer(
     // console.info('bindActionCreators: ', actions);
     return { actions: bindActionCreators(actions, dispatch) };
   };
+
+  const innerStructuresSelectorObject = {};
+  if (containerProperties && containerProperties.length > 0) {
+    containerProperties.forEach(propertyName => {
+      innerStructuresSelectorObject[propertyName] =
+        createContainerSelector(componentName, componentInstance, propertyName);
+    });
+  }
+
   const mapStateToProps = createStructuredSelector({
-    stateProps: createContainerSelector(componentName, componentInstance),
+    stateProps: createStructuredSelector(innerStructuresSelectorObject),
   });
+
   const wrapperProps = {
     key: props.key,
     componentName,
     componentInstance,
     containerEventHandlers,
+    containerProperties,
     wrappedProps: props,
     wrappedComponent,
   };
+
   return (
     <ErrorBoundary key={`errorBoundary_${props.key}`} componentName={componentName}>
       {React.createElement(

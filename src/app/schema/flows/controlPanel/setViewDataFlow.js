@@ -2,12 +2,12 @@ export default [
   {
     type: 'component',
     props: {
-      componentName: 'applicationStartWrapper',
-      componentInstance: 'wrapperInstance',
+      componentName: 'usr.components.ControlPanel.ControlPanel',
+      componentInstance: 'controlPanel1',
     },
     events: [
       {
-        name: 'onComponentDidMount',
+        name: 'onFirstClick',
         targets: [
           {
             type: 'userFunction',
@@ -15,34 +15,48 @@ export default [
               functionName: 'usr.api.exposed.controlPanelActions.setFirstString',
             },
             events: [
+              // {
+              //   name: 'firstString',
+              //   targets: [
+              //     {
+              //       type: 'component',
+              //       props: {
+              //         componentName: 'usr.components.ViewPanel.ViewPanel',
+              //         componentInstance: 'viewPanel1',
+              //         propertyName: 'firstDataString',
+              //       },
+              //     },
+              //   ],
+              // },
               {
-                name: 'firstString',
+                name: 'viewData',
                 targets: [
                   {
                     type: 'component',
                     props: {
-                      componentName: 'usr.components.ControlPanel.ControlPanel',
-                      componentInstance: 'controlPanel1',
-                      propertyName: 'firstDataString',
+                      componentName: 'usr.components.ViewPanel.ViewPanel',
+                      componentInstance: 'viewPanel1',
+                      propertyName: 'viewData',
                     },
-                  }
-                ]
+                  },
+                ],
               },
-              {
-                name: 'caughtException',
-                targets: [
-                  {
-                    type: 'component',
-                    props: {
-                      componentName: 'usr.components.ControlPanel.ControlPanel',
-                      componentInstance: 'controlPanel1',
-                      propertyName: 'errorObject',
-                    },
-                  }
-                ]
-              }
-            ]
+            ],
           },
+        ],
+      },
+    ]
+  },
+  {
+    type: 'component',
+    props: {
+      componentName: 'usr.components.ControlPanel.ControlPanel',
+      componentInstance: 'controlPanel1',
+    },
+    events: [
+      {
+        name: 'onSecondClick',
+        targets: [
           {
             type: 'userFunction',
             props: {
@@ -68,9 +82,9 @@ export default [
                   {
                     type: 'component',
                     props: {
-                      componentName: 'usr.components.ControlPanel.ControlPanel',
-                      componentInstance: 'controlPanel1',
-                      propertyName: 'firstDataString',
+                      componentName: 'usr.components.ViewPanel.ViewPanel',
+                      componentInstance: 'viewPanel1',
+                      propertyName: 'secondDataString',
                     },
                   },
                 ],

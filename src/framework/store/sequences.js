@@ -6,7 +6,39 @@ import unionWith from 'lodash/unionWith';
 
 let userFunctions = {};
 
-const getEventSequence = (event) => {
+function getTargetPropertiesFromEvents(events, targetProperties) {
+  if (events && events.length > 0) {
+    events.forEach(event => {
+      const { targets } = event;
+      if (targets && targets.length > 0) {
+        let key;
+        let propertiesObject;
+        targets.forEach(target => {
+          const { type, props, events } = target;
+          if (type === 'component' && props) {
+            const { componentName, componentInstance, propertyName } = props;
+            if (propertyName) {
+              key = `${componentName}_${componentInstance}`;
+              propertiesObject = targetProperties[key] || {};
+              propertiesObject[propertyName] = true;
+              targetProperties[key] = propertiesObject;
+            }
+          }
+          getTargetPropertiesFromEvents(events, targetProperties);
+        });
+      }
+    });
+  }
+}
+
+function deriveTargetProperties(actionSequences, targetProperties = {}) {
+  forOwn(actionSequences, (value, prop) => {
+    getTargetPropertiesFromEvents(value.events, targetProperties);
+  });
+  return targetProperties;
+}
+
+function getEventSequence(event) {
   const eventSequence = {};
   const { name, targets } = event;
   if (targets && targets.length > 0) {
@@ -29,9 +61,9 @@ const getEventSequence = (event) => {
     });
   }
   return eventSequence;
-};
+}
 
-const eventTargetComparator = (destTarget, sourceTarget) => {
+function eventTargetComparator(destTarget, sourceTarget) {
   const { type: sourceType, props: sourceProps } = sourceTarget;
   const { type: destType, props: destProps } = destTarget;
   if (sourceType === destType) {
@@ -46,13 +78,13 @@ const eventTargetComparator = (destTarget, sourceTarget) => {
     }
   }
   return false;
-};
+}
 
-const targetEventComparator = (destEvent, sourceEvent) => {
+function targetEventComparator(destEvent, sourceEvent) {
   return destEvent.name === sourceEvent.name;
-};
+}
 
-const mergeEventTargets = (destTargets, sourceTargets) => {
+function mergeEventTargets(destTargets, sourceTargets) {
   let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
   resultTargets.forEach(resultTarget => {
     const sameSourceTarget = sourceTargets.find(sourceTarget => eventTargetComparator(resultTarget, sourceTarget));
@@ -71,9 +103,9 @@ const mergeEventTargets = (destTargets, sourceTargets) => {
     }
   });
   return resultTargets;
-};
+}
 
-const getActionSequences = (handlers, actionSequences = {}) => {
+function getActionSequences(handlers, actionSequences = {}) {
   if (handlers && handlers.length > 0) {
     handlers.forEach(handler => {
       const { type, props, events } = handler;
@@ -112,7 +144,7 @@ const getActionSequences = (handlers, actionSequences = {}) => {
       }
     });
   }
-};
+}
 
 export function getUserFunctionByName (functionName) {
   return get(userFunctions, functionName);
@@ -131,9 +163,10 @@ function createActionSequencesRecursively (handlers, actionSequences = {}) {
   return actionSequences;
 }
 
+
 export function createActionSequences (handlers, functions) {
   userFunctions = functions;
   const actionSequences = createActionSequencesRecursively(handlers);
-  console.info('Action sequences: ', actionSequences);
-  return actionSequences;
+  const targetProperties = deriveTargetProperties(actionSequences);
+  return { actionSequences, targetProperties };
 }

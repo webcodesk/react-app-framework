@@ -44,17 +44,19 @@ class ComponentView extends React.Component {
 
   handleReceiveMessage (event, message) {
     console.info('ComponentView received message: ', event, message);
-    const { type, payload } = message;
-    if (type === 'COMPONENT_RESOURCE_INDEX') {
-      this.setState({
-        resourceType: 'component',
-        resourceIndex: payload,
-      });
-    } else if (type === 'COMPONENT_STORY_RESOURCE_INDEX') {
-      this.setState({
-        resourceType: 'componentStory',
-        resourceIndex: payload,
-      });
+    if (message) {
+      const { type, payload } = message;
+      if (type === 'COMPONENT_RESOURCE_INDEX') {
+        this.setState({
+          resourceType: 'component',
+          resourceIndex: payload,
+        });
+      } else if (type === 'COMPONENT_STORY_RESOURCE_INDEX') {
+        this.setState({
+          resourceType: 'componentStory',
+          resourceIndex: payload,
+        });
+      }
     }
   }
 
