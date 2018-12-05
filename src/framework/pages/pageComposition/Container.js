@@ -8,19 +8,19 @@ import createContainerActions from '../../store/actions';
 import NotFoundComponent from './NotFoundComponent';
 
 class ErrorBoundary extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.state = { hasError: false };
   }
 
-  componentDidCatch(error, info) {
+  componentDidCatch (error, info) {
     this.setState({ hasError: true });
   }
 
-  render() {
+  render () {
     if (this.state.hasError) {
       const { componentName } = this.props;
-      return <NotFoundComponent componentName={componentName} />;
+      return <NotFoundComponent componentName={componentName}/>;
     }
     return this.props.children;
   }
@@ -28,39 +28,39 @@ class ErrorBoundary extends React.Component {
 
 class Container extends React.Component {
 
-  constructor(props) {
+  constructor (props) {
     super(props);
   }
 
-  componentDidMount() {
+  componentDidMount () {
     const { componentName, componentInstance } = this.props;
-    console.info('MountContainer: ', componentName, componentInstance);
   }
 
   componentDidUpdate (prevProps, prevState, snapshot) {
     if (process.env.NODE_ENV !== 'production') {
-      if (window.__sendFrameworkMessage && window.__webcodeskIsListeningToFramework) {
+      // if (window.__sendFrameworkMessage && window.__webcodeskIsListeningToFramework) {
         const { componentName, componentInstance, stateProps, containerProperties } = this.props;
-        setTimeout(() => {
-          if (prevProps.stateProps !== stateProps) {
-            if (containerProperties && containerProperties.length > 0) {
-              containerProperties.forEach(propertyName => {
-                if (stateProps[propertyName] !== prevProps.stateProps[propertyName]) {
-                  window.__sendFrameworkMessage({
-                    type: constants.FRAMEWORK_MESSAGE_CONTAINER_UPDATED_PROPS,
-                    payload: {
-                      componentName,
-                      componentInstance,
-                      propertyName,
-                      stateProps: JSON.stringify(stateProps[propertyName])
-                    },
-                  });
-                }
-              });
-            }
+        if (prevProps.stateProps !== stateProps) {
+          if (containerProperties && containerProperties.length > 0) {
+            containerProperties.forEach(propertyName => {
+              if (stateProps[propertyName] !== prevProps.stateProps[propertyName]) {
+                console.info('Component receive data: ', componentInstance, propertyName, stateProps[propertyName]);
+                // setTimeout(() => {
+                //   window.__sendFrameworkMessage({
+                //     type: constants.FRAMEWORK_MESSAGE_CONTAINER_UPDATED_PROPS,
+                //     payload: {
+                //       componentName,
+                //       componentInstance,
+                //       propertyName,
+                //       stateProps: JSON.stringify(stateProps[propertyName])
+                //     },
+                //   });
+                // }, 0);
+              }
+            });
           }
-        }, 0);
-      }
+        }
+      // }
     }
   }
 
@@ -71,7 +71,7 @@ class Container extends React.Component {
     const { containerEventHandlers, actions } = this.props;
     if (containerEventHandlers && containerEventHandlers.length > 0) {
       containerEventHandlers.forEach(eventHandler => {
-        wrappedHandlers[eventHandler.name] = function() {
+        wrappedHandlers[eventHandler.name] = function () {
           const args = arguments;
           // console.info(`Invoke ${eventHandler.name} event: `, args);
           const handlerAction = actions[`${eventHandler.name}`];
@@ -89,7 +89,7 @@ class Container extends React.Component {
   }
 }
 
-export default function createContainer(
+export default function createContainer (
   wrappedComponent,
   componentName,
   componentInstance,

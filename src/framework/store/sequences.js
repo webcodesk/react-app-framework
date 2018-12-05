@@ -126,7 +126,7 @@ function getActionSequences(handlers, actionSequences = {}) {
                 // here we should merge targets of the same container events handler
                 const existingHandlerEvent = handlerObject.events[existingHandlerEventIndex];
                 if (existingHandlerEvent) {
-                  console.info('existingHandlerEvent: ', key, eventSequence.name, existingHandlerEvent);
+                  // console.info('existingHandlerEvent: ', key, eventSequence.name, existingHandlerEvent);
                   handlerObject.events[existingHandlerEventIndex].targets =
                     mergeEventTargets(existingHandlerEvent.targets, eventSequence.targets);
                 }

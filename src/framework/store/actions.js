@@ -47,12 +47,14 @@ function dispatchToComponent (props, payload, dispatch, helpers) {
             }
           }
         } else if (propertyName) {
+          console.info('Passing data: ', targetKey, propertyName, payload);
           dispatch({ type: targetKey, payload: { [propertyName]: payload } });
         }
-        console.info('Actions forward to: ', pathString);
+        // console.info('Actions forward to: ', pathString);
         history.push(pathString);
       }
     } else {
+      console.info('Passing data: ', targetKey, propertyName, payload);
       dispatch({ type: targetKey, payload: { [propertyName]: payload } });
     }
   }
@@ -87,7 +89,7 @@ function createTasks (targets) {
                 const userFunctionTargets =
                   innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === 'userFunction');
                 if (userFunctionTargets && userFunctionTargets.length > 0) {
-                  console.info('Create tasks (event.targets): ', props.functionName, userFunctionTargets);
+                  // console.info('Create tasks (event.targets): ', props.functionName, userFunctionTargets);
                   innerTasks[innerEvent.name] = innerTasks[innerEvent.name] || [];
                   innerTasks[innerEvent.name] = innerTasks[innerEvent.name].concat(createTasks(userFunctionTargets));
                 }
@@ -101,16 +103,17 @@ function createTasks (targets) {
             return (dispatch, getState, helpers) => {
               // console.info('Apply user function: ', func);
               // pass in the dispatch function instance to the flow function
+              console.info('Function execution: ', props.functionName, args[0]);
               const userFunctionInstance = func.apply(null, args);
               // this function is used to pass the error object caugh by the embedded exception caching
               // the function is called with null error object before each user function invocation
               // this will let user to do not worry about the clearing of the error object
-              const caughtExceptionFunction = function(error) {
+              const caughtExceptionFunction = (error) => {
                 const dispatchErrorType = 'caughtException';
-                const eventTargets = findEventTargets(events, dispatchErrorType);
-                if (eventTargets && eventTargets.length > 0) {
-                  eventTargets.forEach(eventTarget => {
-                    const { type: eventTargetType, props: eventTargetProps } = eventTarget;
+                const exceptionEventTargets = findEventTargets(events, dispatchErrorType);
+                if (exceptionEventTargets && exceptionEventTargets.length > 0) {
+                  exceptionEventTargets.forEach(exceptionEventTarget => {
+                    const { type: eventTargetType, props: eventTargetProps } = exceptionEventTarget;
                     if (eventTargetType === 'component') {
                       dispatchToComponent(eventTargetProps, error, dispatch, helpers);
                     }

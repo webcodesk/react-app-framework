@@ -45,7 +45,9 @@ class Application extends React.Component {
 
   componentDidMount () {
     if (process.env.NODE_ENV !== 'production') {
-      electron.ipcRenderer.on('message', this.handleReceiveMessage);
+      if (electron) {
+        electron.ipcRenderer.on('message', this.handleReceiveMessage);
+      }
     }
   }
 
