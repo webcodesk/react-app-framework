@@ -10,10 +10,12 @@ import StartWrapper from './pages/startWrapper/StartWrapper';
 
 let constants;
 let ComponentView;
+let PageComposer;
 let electron;
 if (process.env.NODE_ENV !== 'production') {
   constants = require('./commons/constants');
   ComponentView = require('./pages/componentView/ComponentView').default;
+  PageComposer = require('./pages/pageComposer/PageComposer').default;
   if (window.require) {
     electron = window.require('electron');
   }
@@ -82,14 +84,19 @@ class Application extends React.Component {
     const { schema, userComponents, userFunctions, userComponentStories } = this.props;
     // console.info('Application: ', userComponents);
     if (process.env.NODE_ENV !== 'production') {
-      console.info('[Framework] Window location URL: ', { href: window.location.href });
-      if (window.location.href.indexOf('/webcodesk__component_view') > 0) {
+      const href = window.location.href;
+      console.info('[Framework] Window location URL: ', { href });
+      if (href.indexOf('/webcodesk__component_view') > 0) {
         return (
           <ComponentView
             userComponents={userComponents}
             userComponentStories={userComponentStories}
           />
         );
+      } else if(href.indexOf('/webcodesk__page_composer') > 0) {
+        return (
+          <PageComposer userComponents={userComponents} />
+        )
       }
     }
     clearActionsCache();

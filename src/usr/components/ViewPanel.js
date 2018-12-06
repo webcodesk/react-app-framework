@@ -33,7 +33,7 @@ class ViewPanel extends React.Component {
     const { stateProbeValue } = this.state;
     return (
       <div>
-        <h1>View Panel</h1>
+        <h2>View Panel</h2>
         <h3>First string: {this.props.firstDataString}</h3>
         <h3>Second string: {this.props.secondDataString}</h3>
         <h3>Third string: {this.props.thirdDataString}</h3>

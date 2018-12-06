@@ -6,12 +6,14 @@ class PageGrid extends React.Component {
   static propTypes = {
     fluid: PropTypes.bool,
     elementKey: PropTypes.string,
-    sendMessageCallback: PropTypes.func,
+    rows: PropTypes.string,
+    columns: PropTypes.string,
+    minRowHeight: PropTypes.string,
+    gap: PropTypes.string,
   };
 
   static defaultProps = {
     elementKey: null,
-    sendMessageCallback: null,
     fluid: true,
   };
 
@@ -20,10 +22,9 @@ class PageGrid extends React.Component {
   }
 
   render () {
+    const {elementKey, fluid, rows, columns, minRowHeight, gap} = this.props;
     return (
-      <Grid
-        {...this.props}
-      >
+      <Grid key={elementKey} fluid={fluid} {...{rows, columns, minRowHeight, gap}} >
         {this.props.children}
       </Grid>
     );

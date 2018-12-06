@@ -300,6 +300,7 @@ class PageCell extends React.Component {
     } else {
       style = shadowStyle;
     }
+    console.info('DropZone is rendering');
     return (
       <div
         key={`Cell_${elementKey}`}
@@ -320,7 +321,7 @@ class PageCell extends React.Component {
     return (
       <Cell
         key={elementKey}
-        {...this.props}
+        {...{top, left}}
         style={{...{position: 'relative'}, ...style}}
       >
         {children.length > 0

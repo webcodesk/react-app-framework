@@ -1,7 +1,7 @@
 import get from 'lodash/get';
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import constants from '../../commons/constants';
 import pageComponents from './pageComponentIndex';
 import ComponentWrapper from "./ComponentWrapper/ComponentWrapper";
 import SelectionHandler from './PageCell/SelectionHandler';
@@ -16,19 +16,25 @@ if (window.require) {
 // https://github.com/gaearon/react-hot-loader/issues/934
 let storeComponentsTree;
 
-const renderComponent = (components, description, serviceComponentOptions) => {
+const renderComponent = (userComponents, description, serviceComponentOptions) => {
   if (description) {
     const {type, key, props, children} = description;
+    if (!type) {
+      return null;
+    }
     let nestedComponents = [];
     if (children && children.length > 0) {
       nestedComponents = children.map(child => {
-        return renderComponent(components, child, serviceComponentOptions);
+        return renderComponent(userComponents, child, serviceComponentOptions);
       });
     }
-    if (type && type.charAt(0) === '_') {
+    console.info('PageComposer try to render: ', type);
+    if (type.charAt(0) === '_') {
       const pageComponentType = type.substr(1);
+      console.info('PageComposer this is a service component: ', pageComponentType);
       const pageComponent = pageComponents[pageComponentType];
       if (pageComponent) {
+        console.info('PageComposer found the service component: ', pageComponent);
         const pageSectionProps = {
           ...props,
           key,
@@ -38,10 +44,8 @@ const renderComponent = (components, description, serviceComponentOptions) => {
         return React.createElement(pageComponent, pageSectionProps, nestedComponents);
       }
     } else {
-      let component = 'div';
-      if (type) {
-        component = get(components, type, 'div');
-      }
+      const component = get(userComponents, type, 'div');
+      console.info('PageComposer found a user component: ', component);
       const wrapperProps = {
         key,
         elementKey: key,
@@ -122,12 +126,12 @@ class PageComposer extends React.Component {
   }
 
   handleReceiveMessage(event, message) {
-    console.info('PageTemplate received message: ', event, message);
+    console.info('[Framework] PageComposer received message: ', event, message);
     if (message) {
       const {type, payload} = message;
-      if (type === 'UPDATE_COMPONENTS_TREE') {
+      if (type === constants.WEBCODESK_MESSAGE_UPDATE_PAGE_COMPONENTS_TREE) {
         this.setState({
-          componentsTree: payload.componentsTree,
+          componentsTree: payload,
         });
       } else if(type === 'ITEM_DRAG_START') {
         this.setState({
@@ -143,7 +147,7 @@ class PageComposer extends React.Component {
 
   sendMessage(message) {
     if (message) {
-      console.info('PageTemplate sending message: ', message);
+      console.info('[Framework] PageComposer sending message: ', message);
       electron.ipcRenderer.sendToHost('message', message);
     }
   }
@@ -162,7 +166,7 @@ class PageComposer extends React.Component {
 
   handleSelectCell(cellKey) {
     this.sendMessage({
-      type: 'CELL_WAS_SELECTED',
+      type: constants.FRAMEWORK_MESSAGE_PAGE_CELL_WAS_SELECTED,
       payload: {
         targetKey: cellKey,
       }
@@ -171,7 +175,7 @@ class PageComposer extends React.Component {
 
   handleMultipleSelectionStop() {
     this.sendMessage({
-      type: 'MULTIPLE_CELLS_WERE_SELECTED',
+      type: constants.FRAMEWORK_MESSAGE_PAGE_MULTIPLE_CELLS_WERE_SELECTED,
       payload: {
         cells: this.state.multipleSelectedCells,
       },
@@ -212,7 +216,7 @@ class PageComposer extends React.Component {
   handleCellResize(cellKey, newDimensions) {
     console.info('Resizing new dimensions: ', JSON.stringify(newDimensions, null, 2));
     this.sendMessage({
-      type: 'CELL_WAS_RESIZED',
+      type: constants.FRAMEWORK_MESSAGE_PAGE_CELL_WAS_RESIZED,
       payload: {
         targetKey: cellKey,
         dimensions: newDimensions,
