@@ -73,19 +73,18 @@ class Container extends React.Component {
       containerEventHandlers.forEach(eventHandler => {
         wrappedHandlers[eventHandler.name] = function () {
           const args = arguments;
-          // console.info(`Invoke ${eventHandler.name} event: `, args);
           const handlerAction = actions[`${eventHandler.name}`];
           if (handlerAction) {
             handlerAction.apply(null, args);
           } else {
-            console.error(`Event handler was not found for ${eventHandler.name} event.`);
+            console.error(
+              `Event handler was not found for ${eventHandler.name} event in ${componentName} instance ${componentInstance}`
+            );
           }
         };
       });
     }
-    // console.info('Wrapped component: ', wrappedComponent);
-    // console.info('Wrapped props: ', wrappedProps);
-    return React.createElement(wrappedComponent, { ...wrappedProps, ...stateProps, ...wrappedHandlers });
+    return React.createElement(wrappedComponent, { ...stateProps, ...wrappedProps, ...wrappedHandlers });
   }
 }
 
@@ -98,7 +97,6 @@ export default function createContainer (
   props = {},
   nestedComponents = null
 ) {
-  // console.info('bindActionCreators: ', pageName, componentName, componentInstance, containerEventHandlers);
   const actions = createContainerActions(`${componentName}_${componentInstance}`, containerEventHandlers);
   const mapDispatchToProps = (dispatch) => {
     // console.info('bindActionCreators: ', actions);

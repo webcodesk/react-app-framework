@@ -71,6 +71,27 @@ function findEventTargets (events, type) {
   return result;
 }
 
+function executeUserFunctionDispatch(events, innerTasks, dispatchType, payload, dispatch, getState, helpers) {
+  let targetsCount = 0;
+  // check if the user function dispatches any event
+  const eventTargets = findEventTargets(events, dispatchType);
+  if (eventTargets && eventTargets.length > 0) {
+    targetsCount = eventTargets.length;
+    eventTargets.forEach(eventTarget => {
+      const { type: eventTargetType, props: eventTargetProps } = eventTarget;
+      if (eventTargetType === 'component') {
+        dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
+      }
+    });
+    if (innerTasks[dispatchType] && innerTasks[dispatchType].length > 0) {
+      innerTasks[dispatchType].forEach(task => {
+        task.apply(null, [payload])(dispatch, getState, helpers);
+      });
+    }
+  }
+  return targetsCount;
+}
+
 function createTasks (targets) {
   const tasks = [];
   if (targets && targets.length > 0) {
@@ -78,7 +99,6 @@ function createTasks (targets) {
       const { type, props, events } = target;
       if (type === 'userFunction' && props) {
         const func = getUserFunctionByName(props.functionName);
-        // console.info('Create tasks (props.functionName): ', props.functionName, func);
         if (func) {
           // First we need to check if there is the user function sequence
           let innerTasks = {};
@@ -89,73 +109,50 @@ function createTasks (targets) {
                 const userFunctionTargets =
                   innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === 'userFunction');
                 if (userFunctionTargets && userFunctionTargets.length > 0) {
-                  // console.info('Create tasks (event.targets): ', props.functionName, userFunctionTargets);
                   innerTasks[innerEvent.name] = innerTasks[innerEvent.name] || [];
-                  innerTasks[innerEvent.name] = innerTasks[innerEvent.name].concat(createTasks(userFunctionTargets));
+                  innerTasks[innerEvent.name] = [
+                    ...innerTasks[innerEvent.name],
+                    ...createTasks(userFunctionTargets)
+                  ];
                 }
               }
             });
           }
+          // create dispatchFunction in order to reuse its instance in the action function body
+          const dispatchFunction = (dispatchType, payload, dispatch, getState, helpers) => {
+            console.info('Function execution: ', props.functionName, dispatchType, payload);
+            executeUserFunctionDispatch(events, innerTasks, dispatchType, payload, dispatch, getState, helpers);
+          };
+          // this function is used to pass the error object caught by the embedded exception caching
+          // the function is called with null error object before each user function invocation
+          // this will let user to do not worry about the clearing of the error object
+          const caughtExceptionFunction = (error, dispatch, getState, helpers) => {
+            const dispatchErrorType = 'caughtException';
+            const eventTargetsCount =
+              executeUserFunctionDispatch(events, innerTasks, dispatchErrorType, error, dispatch, getState, helpers);
+            if (eventTargetsCount === 0 && error) {
+              console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${dispatchErrorType}" dispatch event of this function.`);
+            }
+          };
           // push function reference for user function dispatch
           tasks.push(function () {
             const args = arguments;
             // console.info('Invoked by redux: ', func);
             return (dispatch, getState, helpers) => {
-              // console.info('Apply user function: ', func);
-              // pass in the dispatch function instance to the flow function
-              console.info('Function execution: ', props.functionName, args[0]);
               const userFunctionInstance = func.apply(null, args);
-              // this function is used to pass the error object caugh by the embedded exception caching
-              // the function is called with null error object before each user function invocation
-              // this will let user to do not worry about the clearing of the error object
-              const caughtExceptionFunction = (error) => {
-                const dispatchErrorType = 'caughtException';
-                const exceptionEventTargets = findEventTargets(events, dispatchErrorType);
-                if (exceptionEventTargets && exceptionEventTargets.length > 0) {
-                  exceptionEventTargets.forEach(exceptionEventTarget => {
-                    const { type: eventTargetType, props: eventTargetProps } = exceptionEventTarget;
-                    if (eventTargetType === 'component') {
-                      dispatchToComponent(eventTargetProps, error, dispatch, helpers);
-                    }
-                  });
-                  if (innerTasks[dispatchErrorType] && innerTasks[dispatchErrorType].length > 0) {
-                    innerTasks[dispatchErrorType].forEach(task => {
-                      task.apply(null, [error])(dispatch, getState, helpers);
-                    });
-                  }
-                } else {
-                  if (error) {
-                    console.error(`In "${props.functionName}" function ${error}. Probably ${dispatchErrorType} dispatch event is not assigned to any target.`);
-                  }
-                }
-              };
               try {
-                caughtExceptionFunction(null);
+                caughtExceptionFunction(null, dispatch, getState, helpers);
                 const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
                   // user function is invoked now
-                  // check if the user function dispatches any event
-                  const eventTargets = findEventTargets(events, dispatchType);
-                  if (eventTargets && eventTargets.length > 0) {
-                    eventTargets.forEach(eventTarget => {
-                      const { type: eventTargetType, props: eventTargetProps } = eventTarget;
-                      if (eventTargetType === 'component') {
-                        dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
-                      }
-                    });
-                    if (innerTasks[dispatchType] && innerTasks[dispatchType].length > 0) {
-                      innerTasks[dispatchType].forEach(task => {
-                        task.apply(null, [payload])(dispatch, getState, helpers);
-                      });
-                    }
-                  }
+                  dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
                 });
                 if (userFunctionResult && userFunctionResult.then) {
                   userFunctionResult.catch(error => {
-                    caughtExceptionFunction(error);
+                    caughtExceptionFunction(error, dispatch, getState, helpers);
                   });
                 }
               } catch (error) {
-                caughtExceptionFunction(error);
+                caughtExceptionFunction(error, dispatch, getState, helpers);
               }
             };
           });
@@ -185,7 +182,6 @@ function createActions (eventHandlers) {
     eventHandlers.forEach(eventHandler => {
       const { name, targets } = eventHandler;
       const tasks = createTasks(targets);
-      // console.info('Event handler: ', eventHandler);
       actions[name] = function () {
         const args = arguments;
         return (dispatch, getState, helpers) => {

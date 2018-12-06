@@ -1,7 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import createBrowserHistory from 'history/createBrowserHistory';
-import constants from './commons/constants';
 import { configureStore } from './store/store';
 import { clearActionsCache } from './store/actions';
 import { createActionSequences } from './store/sequences';
@@ -9,9 +8,11 @@ import { createActionSequences } from './store/sequences';
 import PageRouter from './pages/pageRouter/PageRouter';
 import StartWrapper from './pages/startWrapper/StartWrapper';
 
+let constants;
 let ComponentView;
 let electron;
 if (process.env.NODE_ENV !== 'production') {
+  constants = require('./commons/constants');
   ComponentView = require('./pages/componentView/ComponentView').default;
   if (window.require) {
     electron = window.require('electron');
@@ -60,12 +61,14 @@ class Application extends React.Component {
   }
 
   handleReceiveMessage = (event, message) => {
-    if (message) {
-      const {type, payload} = message;
-      if (type === constants.WEBCODESK_MESSAGE_START_LISTENING_TO_FRAMEWORK) {
-        window.__webcodeskIsListeningToFramework = true;
-      } else if(type === constants.WEBCODESK_MESSAGE_STOP_LISTENING_TO_FRAMEWORK) {
-        window.__webcodeskIsListeningToFramework = false;
+    if (process.env.NODE_ENV !== 'production') {
+      if (message) {
+        const { type, payload } = message;
+        if (type === constants.WEBCODESK_MESSAGE_START_LISTENING_TO_FRAMEWORK) {
+          window.__webcodeskIsListeningToFramework = true;
+        } else if (type === constants.WEBCODESK_MESSAGE_STOP_LISTENING_TO_FRAMEWORK) {
+          window.__webcodeskIsListeningToFramework = false;
+        }
       }
     }
   };
@@ -78,8 +81,8 @@ class Application extends React.Component {
     }
     const { schema, userComponents, userFunctions, userComponentStories } = this.props;
     // console.info('Application: ', userComponents);
-    console.info('Window location URL: ', window.location.href);
     if (process.env.NODE_ENV !== 'production') {
+      console.info('Window location URL: ', window.location.href);
       if (window.location.href.indexOf('/webcodesk__component_view') > 0) {
         return (
           <ComponentView

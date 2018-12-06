@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import uniqueId from 'lodash/uniqueId';
 import get from 'lodash/get';
+import constants from '../../commons/constants';
 import NotFoundComponent from './NotFoundComponent';
 
 let electron;
@@ -46,12 +47,12 @@ class ComponentView extends React.Component {
     console.info('ComponentView received message: ', event, message);
     if (message) {
       const { type, payload } = message;
-      if (type === 'COMPONENT_RESOURCE_INDEX') {
+      if (type === constants.WEBCODESK_MESSAGE_COMPONENT_RESOURCE_INDEX) {
         this.setState({
           resourceType: 'component',
           resourceIndex: payload,
         });
-      } else if (type === 'COMPONENT_STORY_RESOURCE_INDEX') {
+      } else if (type === constants.WEBCODESK_MESSAGE_COMPONENT_STORY_RESOURCE_INDEX) {
         this.setState({
           resourceType: 'componentStory',
           resourceIndex: payload,

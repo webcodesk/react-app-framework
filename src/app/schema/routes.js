@@ -14,7 +14,7 @@ export default [
       {
         componentName: 'usr.components.AboutPanel.AboutPanel',
         componentInstance: 'aboutPanel1',
-        propertyName: 'authorData',
+        propertyName: 'authorDataPopulated',
       }
     ],
   },

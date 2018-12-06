@@ -2,7 +2,7 @@
   "pageName": "page",
   "model": [
     {
-      "variantName": "Default",
+      "variantName": "auto",
       "mediaQuery": {
         "minWidth": 992
       },
