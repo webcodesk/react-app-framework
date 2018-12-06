@@ -6,7 +6,6 @@
     "type": "git",
     "url": "https://github.com/webcodesk/react-app-framework.git"
   },
-  "homepage": "https://github.com/webcodesk/react-app-framework",
   "author": "Alex Pustovalov <apustovalov@gmail.com>",
   "license": "MIT",
   "description": "React App Framework for Webcodesk",
@@ -33,6 +32,7 @@
     "@babel/plugin-proposal-class-properties": "^7.1.0",
     "cross-env": "5.2.0",
     "del": "^3.0.0",
+    "express": "^4.16.4",
     "gulp": "4.0.0",
     "gulp-babel": "8.0.0",
     "lodash": "4.17.11",
@@ -45,10 +45,11 @@
   },
   "scripts": {
     "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3030 react-app-rewired start",
-    "build": "cross-env NODE_PATH=./src react-app-rewired build",
-    "test": "react-app-rewired test --env=jsdom --modulePaths=src",
-    "eject": "react-app-rewired eject",
-    "dist": "cross-env NODE_ENV=development gulp --gulpfile ./gulpfile.js build"
+    "build": "cross-env NODE_PATH=./src react-scripts build",
+    "test": "react-scripts test --env=jsdom --modulePaths=src",
+    "eject": "react-scripts eject",
+    "dist": "cross-env NODE_ENV=development gulp --gulpfile ./gulpfile.js build",
+    "server": "node ./server.js"
   },
   "browserslist": [
     ">0.25%",
