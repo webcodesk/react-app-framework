@@ -47,14 +47,15 @@ function dispatchToComponent (props, payload, dispatch, helpers) {
             }
           }
         } else if (propertyName) {
-          console.info('Passing data: ', targetKey, propertyName, payload);
           dispatch({ type: targetKey, payload: { [propertyName]: payload } });
         }
-        // console.info('Actions forward to: ', pathString);
+        console.info('[Framework] Forward to: ', {
+          pathString
+        });
         history.push(pathString);
       }
     } else {
-      console.info('Passing data: ', targetKey, propertyName, payload);
+      // console.info('Passing data: ', targetKey, propertyName, payload);
       dispatch({ type: targetKey, payload: { [propertyName]: payload } });
     }
   }
@@ -92,7 +93,7 @@ function executeUserFunctionDispatch(events, innerTasks, dispatchType, payload, 
   return targetsCount;
 }
 
-function createTasks (targets) {
+function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
   const tasks = [];
   if (targets && targets.length > 0) {
     targets.forEach(target => {
@@ -100,6 +101,9 @@ function createTasks (targets) {
       if (type === 'userFunction' && props) {
         const func = getUserFunctionByName(props.functionName);
         if (func) {
+          // actions sequences key should be the starter target name
+          // here is the function name
+          actionsSequenceKey = actionsSequenceKey || props.functionName;
           // First we need to check if there is the user function sequence
           let innerTasks = {};
           if (events && events.length > 0) {
@@ -112,7 +116,7 @@ function createTasks (targets) {
                   innerTasks[innerEvent.name] = innerTasks[innerEvent.name] || [];
                   innerTasks[innerEvent.name] = [
                     ...innerTasks[innerEvent.name],
-                    ...createTasks(userFunctionTargets)
+                    ...createTasks(userFunctionTargets, eventHandlerKey, actionsSequenceKey)
                   ];
                 }
               }
@@ -120,7 +124,14 @@ function createTasks (targets) {
           }
           // create dispatchFunction in order to reuse its instance in the action function body
           const dispatchFunction = (dispatchType, payload, dispatch, getState, helpers) => {
-            console.info('Function execution: ', props.functionName, dispatchType, payload);
+            console.info('[Framework] Function execution: ', {
+              eventHandlerKey,
+              actionsSequenceKey,
+              functionName: props.functionName,
+              eventName: dispatchType,
+              payload,
+              timestamp: Date.now()
+            });
             executeUserFunctionDispatch(events, innerTasks, dispatchType, payload, dispatch, getState, helpers);
           };
           // this function is used to pass the error object caught by the embedded exception caching
@@ -139,13 +150,17 @@ function createTasks (targets) {
             const args = arguments;
             // console.info('Invoked by redux: ', func);
             return (dispatch, getState, helpers) => {
+              // execute user function with passed in args
               const userFunctionInstance = func.apply(null, args);
               try {
+                // dispatch caughtException as null to the assigned targets
                 caughtExceptionFunction(null, dispatch, getState, helpers);
+                // now execute dispatching of the events objects to the targets
                 const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
                   // user function is invoked now
                   dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
                 });
+                // here user returns a Promise and there may be the error
                 if (userFunctionResult && userFunctionResult.then) {
                   userFunctionResult.catch(error => {
                     caughtExceptionFunction(error, dispatch, getState, helpers);
@@ -176,12 +191,14 @@ function createTasks (targets) {
   return tasks;
 }
 
-function createActions (eventHandlers) {
+
+
+function createActions (eventHandlersKey, eventHandlers) {
   const actions = {};
   if (eventHandlers && eventHandlers.length > 0) {
     eventHandlers.forEach(eventHandler => {
       const { name, targets } = eventHandler;
-      const tasks = createTasks(targets);
+      const tasks = createTasks(targets, `${eventHandlersKey}_${name}`);
       actions[name] = function () {
         const args = arguments;
         return (dispatch, getState, helpers) => {
@@ -206,7 +223,7 @@ export function clearActionsCache () {
 export default function (eventHandlersKey, eventHandlers) {
   let actions = actionsCache.get(eventHandlersKey);
   if (!actions) {
-    actions = createActions(eventHandlers);
+    actions = createActions(eventHandlersKey, eventHandlers);
     actionsCache.set(eventHandlersKey, actions);
   }
   return actions;

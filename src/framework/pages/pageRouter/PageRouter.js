@@ -19,7 +19,6 @@ const PageRouter = (props) => {
   if (!routes || routes.length === 0) {
     return (<NoRoute/>);
   }
-  console.info('PageRouter history location: ', history.location);
   return (
     <Router history={history}>
       <Switch>

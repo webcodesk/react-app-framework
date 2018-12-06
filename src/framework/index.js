@@ -23,7 +23,7 @@ let store;
 let history;
 
 export const initStore = (name, version) => {
-  console.info('Init Store');
+  console.info('[Framework] Init Store');
   history = createBrowserHistory();
   store = configureStore({}, { history }, { name, version });
 
@@ -82,7 +82,7 @@ class Application extends React.Component {
     const { schema, userComponents, userFunctions, userComponentStories } = this.props;
     // console.info('Application: ', userComponents);
     if (process.env.NODE_ENV !== 'production') {
-      console.info('Window location URL: ', window.location.href);
+      console.info('[Framework] Window location URL: ', { href: window.location.href });
       if (window.location.href.indexOf('/webcodesk__component_view') > 0) {
         return (
           <ComponentView
@@ -95,7 +95,7 @@ class Application extends React.Component {
     clearActionsCache();
     const { routes, pages, flows } = schema;
     const { actionSequences, targetProperties } = createActionSequences(flows, userFunctions);
-    console.info('Render Application');
+    console.info('[Framework] Render Application');
     // console.info('Action sequences: ', actionSequences);
     // console.info('Target properties: ', targetProperties);
     return (

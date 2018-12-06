@@ -32,10 +32,6 @@ class Container extends React.Component {
     super(props);
   }
 
-  componentDidMount () {
-    const { componentName, componentInstance } = this.props;
-  }
-
   componentDidUpdate (prevProps, prevState, snapshot) {
     if (process.env.NODE_ENV !== 'production') {
       // if (window.__sendFrameworkMessage && window.__webcodeskIsListeningToFramework) {
@@ -44,7 +40,13 @@ class Container extends React.Component {
           if (containerProperties && containerProperties.length > 0) {
             containerProperties.forEach(propertyName => {
               if (stateProps[propertyName] !== prevProps.stateProps[propertyName]) {
-                console.info('Component receive data: ', componentInstance, propertyName, stateProps[propertyName]);
+                console.info('[Framework] Did update component: ', {
+                  componentName,
+                  componentInstance,
+                  propertyName,
+                  value: stateProps[propertyName],
+                  timestamp: Date.now()
+                });
                 // setTimeout(() => {
                 //   window.__sendFrameworkMessage({
                 //     type: constants.FRAMEWORK_MESSAGE_CONTAINER_UPDATED_PROPS,
@@ -66,7 +68,7 @@ class Container extends React.Component {
 
   render () {
     const { wrappedComponent, wrappedProps, stateProps, componentName, componentInstance } = this.props;
-    console.info('Render container: ', componentName, componentInstance);
+    console.info('[Framework] Render container: ', {componentName, componentInstance, timestamp: Date.now()});
     const wrappedHandlers = {};
     const { containerEventHandlers, actions } = this.props;
     if (containerEventHandlers && containerEventHandlers.length > 0) {
@@ -75,6 +77,12 @@ class Container extends React.Component {
           const args = arguments;
           const handlerAction = actions[`${eventHandler.name}`];
           if (handlerAction) {
+            console.info('[Framework] Invoke handler: ', {
+              eventHandlerKey: `${componentName}_${componentInstance}_${eventHandler.name}`,
+              eventHandlerName: eventHandler.name,
+              payload: args,
+              timestamp: Date.now()
+            });
             handlerAction.apply(null, args);
           } else {
             console.error(

@@ -152,7 +152,10 @@ class PageComposition extends Component {
           }
         }
       });
-      console.info('Create container: ', type, populatedProps);
+      console.info('[Framework] Create container: ', {
+        componentName: type,
+        componentInstance: instance
+      });
       return createContainer(
         wrappedComponent,
         type,
@@ -175,11 +178,8 @@ class PageComposition extends Component {
       pageSearch,
       populationTargets
     } = this.props;
-    console.info('Render page with pageModels: ', pageModels);
     if (pageModels && pageModels.length > 0) {
-      console.info('Render page user components: ', userComponents);
       const pageQuery = queryString.parse(pageSearch);
-      console.info('Page query: ', pageQuery);
       if (pageModels.length > 1) {
         return pageModels.map((pageModel, idx) => {
           const { pageVariantName, componentsTree, mediaQuery } = pageModel;

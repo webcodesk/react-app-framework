@@ -44,7 +44,6 @@ class ComponentView extends React.Component {
   }
 
   handleReceiveMessage (event, message) {
-    console.info('ComponentView received message: ', event, message);
     if (message) {
       const { type, payload } = message;
       if (type === constants.WEBCODESK_MESSAGE_COMPONENT_RESOURCE_INDEX) {
