@@ -133,11 +133,11 @@ class PageComposer extends React.Component {
         this.setState({
           componentsTree: payload,
         });
-      } else if(type === 'ITEM_DRAG_START') {
+      } else if(type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_START) {
         this.setState({
-          draggedItem: payload.label,
+          draggedItem: payload,
         })
-      } else if(type === 'ITEM_DRAG_END') {
+      } else if(type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_END) {
         this.setState({
           draggedItem: null,
         })
@@ -153,14 +153,9 @@ class PageComposer extends React.Component {
   }
 
   itemWasDropped(testItem) {
-    const {key} = testItem;
-    const {draggedItem} = this.state;
     this.sendMessage({
-      type: 'ITEM_WAS_DROPPED',
-      payload: {
-        targetKey: key,
-        label: draggedItem,
-      }
+      type: constants.FRAMEWORK_MESSAGE_COMPONENT_ITEM_WAS_DROPPED,
+      payload: testItem
     });
   }
 

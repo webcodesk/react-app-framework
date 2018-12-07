@@ -233,11 +233,14 @@ class PageCell extends React.Component {
   }
 
   handleItemDrop (e) {
-    const {elementKey, itemWasDropped} = this.props;
+    const {elementKey, itemWasDropped, draggedItem} = this.props;
     const {isItemAcceptable, isDragOver} = this.state;
     if (isItemAcceptable && isDragOver && itemWasDropped) {
       itemWasDropped({
-        key: elementKey,
+        destination: {
+          key: elementKey,
+        },
+        source: draggedItem,
       });
       this.setState({
         isItemAcceptable: false,

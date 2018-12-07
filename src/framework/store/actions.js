@@ -151,6 +151,13 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
             // console.info('Invoked by redux: ', func);
             return (dispatch, getState, helpers) => {
               // execute user function with passed in args
+              console.info('[Framework] Apply function: ', {
+                eventHandlerKey,
+                actionsSequenceKey,
+                functionName: props.functionName,
+                payload: args[0],
+                timestamp: Date.now()
+              });
               const userFunctionInstance = func.apply(null, args);
               try {
                 // dispatch caughtException as null to the assigned targets

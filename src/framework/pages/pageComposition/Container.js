@@ -80,7 +80,7 @@ class Container extends React.Component {
             console.info('[Framework] Invoke handler: ', {
               eventHandlerKey: `${componentName}_${componentInstance}_${eventHandler.name}`,
               eventHandlerName: eventHandler.name,
-              payload: args,
+              payload: args[0],
               timestamp: Date.now()
             });
             handlerAction.apply(null, args);
