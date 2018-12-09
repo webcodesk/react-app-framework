@@ -46,5 +46,4 @@ class AboutPanel extends React.Component {
   }
 }
 
-
 export default AboutPanel;

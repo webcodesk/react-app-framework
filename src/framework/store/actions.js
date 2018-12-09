@@ -99,11 +99,11 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
     targets.forEach(target => {
       const { type, props, events } = target;
       if (type === 'userFunction' && props) {
+        // actions sequences key should be the starter target name
+        // here is the function name
+        actionsSequenceKey = actionsSequenceKey || props.functionName;
         const func = getUserFunctionByName(props.functionName);
         if (func) {
-          // actions sequences key should be the starter target name
-          // here is the function name
-          actionsSequenceKey = actionsSequenceKey || props.functionName;
           // First we need to check if there is the user function sequence
           let innerTasks = {};
           if (events && events.length > 0) {
@@ -142,6 +142,14 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
             const eventTargetsCount =
               executeUserFunctionDispatch(events, innerTasks, dispatchErrorType, error, dispatch, getState, helpers);
             if (eventTargetsCount === 0 && error) {
+              console.info('[Framework] Caught error: ', {
+                eventHandlerKey,
+                actionsSequenceKey,
+                functionName: props.functionName,
+                eventName: dispatchErrorType,
+                payload: error,
+                timestamp: Date.now()
+              });
               console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${dispatchErrorType}" dispatch event of this function.`);
             }
           };
@@ -177,6 +185,13 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
                 caughtExceptionFunction(error, dispatch, getState, helpers);
               }
             };
+          });
+        } else {
+          console.error('[Framework] Missing function: ', {
+            eventHandlerKey,
+            actionsSequenceKey,
+            functionName: props.functionName,
+            timestamp: Date.now()
           });
         }
       } else if (type === 'component' && props) {

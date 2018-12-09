@@ -67,7 +67,7 @@ class Container extends React.Component {
   }
 
   render () {
-    const { wrappedComponent, wrappedProps, stateProps, componentName, componentInstance } = this.props;
+    const { wrappedComponent, wrappedProps, stateProps, componentName, componentInstance, children } = this.props;
     console.info('[Framework] Render container: ', {componentName, componentInstance, timestamp: Date.now()});
     const wrappedHandlers = {};
     const { containerEventHandlers, actions } = this.props;
@@ -92,7 +92,7 @@ class Container extends React.Component {
         };
       });
     }
-    return React.createElement(wrappedComponent, { ...stateProps, ...wrappedProps, ...wrappedHandlers });
+    return React.createElement(wrappedComponent, { ...stateProps, ...wrappedProps, ...wrappedHandlers }, children);
   }
 }
 
@@ -107,7 +107,6 @@ export default function createContainer (
 ) {
   const actions = createContainerActions(`${componentName}_${componentInstance}`, containerEventHandlers);
   const mapDispatchToProps = (dispatch) => {
-    // console.info('bindActionCreators: ', actions);
     return { actions: bindActionCreators(actions, dispatch) };
   };
 
