@@ -1,5 +1,9 @@
-import components from "./components";
+import Form from "./Form";
+
+import Header from "./Header";
 
 export default {
-  components
+  Form,
+
+  Header
 };

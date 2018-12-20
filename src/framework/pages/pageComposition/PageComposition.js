@@ -22,6 +22,7 @@ class PageComposition extends Component {
     pageModels: PropTypes.array,
     actionSequences: PropTypes.object,
     targetProperties: PropTypes.object,
+    routePath: PropTypes.string,
     pageParams: PropTypes.object,
     pageSearch: PropTypes.string,
     populationTargets: PropTypes.array,
@@ -32,6 +33,7 @@ class PageComposition extends Component {
     pageModels: [],
     actionSequences: {},
     targetProperties: {},
+    routePath: '',
     pageParams: {},
     pageSearch: '',
     populationTargets: [],
@@ -44,14 +46,18 @@ class PageComposition extends Component {
   }
 
   renderComponent (
-    userComponents,
     description,
-    actionSequences,
-    targetProperties,
-    pageParams,
-    pageQuery,
-    populationTargets
   ) {
+    const {
+      userComponents,
+      actionSequences,
+      targetProperties,
+      routePath,
+      pageParams,
+      pageSearch,
+      populationTargets
+    } = this.props;
+    const pageQuery = queryString.parse(pageSearch);
     if (!description) {
       return null;
     }
@@ -63,30 +69,14 @@ class PageComposition extends Component {
     if (props) {
       forOwn(props, (value, prop) => {
         if (value && value.type && value.instance) {
-          propsComponents[prop] = this.renderComponent(
-            userComponents,
-            value,
-            actionSequences,
-            targetProperties,
-            pageParams,
-            pageQuery,
-            populationTargets
-          );
+          propsComponents[prop] = this.renderComponent(value);
         }
       });
     }
     let nestedComponents = [];
     if (children && children.length > 0) {
       nestedComponents = children.map(child => {
-        return this.renderComponent(
-          userComponents,
-          child,
-          actionSequences,
-          targetProperties,
-          pageParams,
-          pageQuery,
-          populationTargets
-        );
+        return this.renderComponent(child);
       });
     }
     const validType = type || 'div';
@@ -130,28 +120,19 @@ class PageComposition extends Component {
       if (actionSequence) {
         containerHandlers = actionSequence.events;
       }
+      let populatedProps = {};
       let containerProperties = [];
       const propertiesObject = targetProperties[containerKey];
+      const parameterValue = pageParams ? pageParams['parameter'] : null;
+      const normalizedRoutePath = routePath.substr(1).replace('/:parameter?', '');
       if (propertiesObject) {
         containerProperties = Object.keys(propertiesObject);
-      }
-      let populatedProps = {};
-      populationTargets.forEach(populationTarget => {
-        const {
-          componentName: targetComponentName,
-          componentInstance: targetInstance,
-          propertyName: targetPropertyName,
-        } = populationTarget;
-        if (targetComponentName === type && targetInstance === instance) {
-          if (targetPropertyName) {
-            populatedProps[targetPropertyName] =
-              pageParams[targetPropertyName] || pageQuery;
-          } else {
-            // todo: should we allow to pass arbitrary object keys in search query as props into the container?
-            populatedProps = pageQuery;
+        forOwn(propertiesObject, (value, key) => {
+          if (value && value.forwardPath === normalizedRoutePath) {
+            populatedProps[key] = parameterValue || pageQuery;
           }
-        }
-      });
+        });
+      }
       console.info('[Framework] Create container: ', {
         componentName: type,
         componentInstance: instance
@@ -169,17 +150,8 @@ class PageComposition extends Component {
   };
 
   renderPage () {
-    const {
-      userComponents,
-      pageModels,
-      actionSequences,
-      targetProperties,
-      pageParams,
-      pageSearch,
-      populationTargets
-    } = this.props;
+    const {pageModels} = this.props;
     if (pageModels && pageModels.length > 0) {
-      const pageQuery = queryString.parse(pageSearch);
       if (pageModels.length > 1) {
         return pageModels.map((pageModel, idx) => {
           const { pageVariantName, componentsTree, mediaQuery } = pageModel;
@@ -188,15 +160,7 @@ class PageComposition extends Component {
               key={`${pageVariantName}_${idx}`}
               query={mediaQuery}
               render={() => {
-                return this.renderComponent(
-                  userComponents,
-                  componentsTree,
-                  actionSequences,
-                  targetProperties,
-                  pageParams,
-                  pageQuery,
-                  populationTargets
-                );
+                return this.renderComponent(componentsTree);
               }}
             />
           );
@@ -204,15 +168,7 @@ class PageComposition extends Component {
       } else {
         const pageModel = pageModels[0];
         const { componentsTree } = pageModel;
-        return this.renderComponent(
-          userComponents,
-          componentsTree,
-          actionSequences,
-          targetProperties,
-          pageParams,
-          pageQuery,
-          populationTargets
-        );
+        return this.renderComponent(componentsTree);
       }
     }
     return (<h1>Page does not have components.</h1>);

@@ -35,6 +35,7 @@ const PageRouter = (props) => {
                   pageModels={get(pages, route.pageName, {})}
                   actionSequences={actionSequences}
                   targetProperties={targetProperties}
+                  routePath={route.path}
                   pageParams={match.params}
                   pageSearch={location.search}
                   populationTargets={route.populationTargets}

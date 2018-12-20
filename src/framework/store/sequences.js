@@ -16,11 +16,15 @@ function getTargetPropertiesFromEvents(events, targetProperties) {
         targets.forEach(target => {
           const { type, props, events } = target;
           if (type === 'component' && props) {
-            const { componentName, componentInstance, propertyName } = props;
+            const { componentName, componentInstance, propertyName, forwardPath } = props;
+            console.info('Get target properties: ', componentInstance, propertyName, forwardPath);
             if (propertyName) {
               key = `${componentName}_${componentInstance}`;
               propertiesObject = targetProperties[key] || {};
-              propertiesObject[propertyName] = true;
+              // tell the that this property should be bind to the http request query
+              propertiesObject[propertyName] = {
+                forwardPath
+              };
               targetProperties[key] = propertiesObject;
             }
           }
@@ -156,7 +160,7 @@ function createActionSequencesRecursively (handlers, actionSequences = {}) {
       // only arrays should be exported as flow sequences otherwise the object is assumed as a nested sequences
       getActionSequences(value, actionSequences);
     } else if (isObject(value)) {
-      // if the handlers is objects it means we have a nested handlers description
+      // if the handlers is object - it means we have a nested handlers description
       createActionSequencesRecursively(value, actionSequences);
     }
   });

@@ -1,5 +1,5 @@
-import api from "./api";
+import myFunctions from "./myFunctions";
 
 export default {
-  api
+  myFunctions
 };

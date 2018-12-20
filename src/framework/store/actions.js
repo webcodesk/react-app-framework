@@ -15,7 +15,7 @@ if (process.env.NODE_ENV !== 'production') {
 function dispatchToComponent (props, payload, dispatch, helpers) {
   if (props) {
     const {
-      componentName, componentInstance, propertyName, forwardPath, forwardRule
+      componentName, componentInstance, propertyName, forwardPath
     } = props;
     // console.info('Dispatch/Forward to component: ', pageName, componentName, componentInstance, isForward, helpers);
     // todo: componentName and componentInstance attributes may not be present, hide target key initialization
@@ -25,34 +25,17 @@ function dispatchToComponent (props, payload, dispatch, helpers) {
       const { history } = helpers;
       if (forwardPath && history) {
         let pathString = forwardPath;
-        const { withParams, withQuery } = forwardRule || {};
-        if (withParams) {
-          if (!payload) {
-            console.error(`Cannot add parameters to "${pathString}" URL due to undefined payload. Remove forward with parameters setting or pass not null value in the dispatch`);
-          } else {
-            if (isNumber(payload) || isString(payload)) {
-              pathString = `${pathString}/${payload}`;
-            } else if (isObject(payload) || isArray(payload)) {
-              console.error(`The mapping to parameters in URL is possible only for primitives.`);
-            }
+        if (payload) {
+          if (isNumber(payload) || isString(payload)) {
+            pathString = `${pathString}/${payload}`;
+          } else if (isObject(payload) || isArray(payload)) {
+            pathString = `${pathString}?${queryString.stringify(payload)}`;
+            console.error(`The mapping to parameters in URL is possible only for primitives.`);
           }
-        } else if (withQuery) {
-          if (!payload) {
-            console.error(`Cannot add parameters to "${pathString}" URL due to undefined payload. Remove forward with parameters setting or pass not null value in the dispatch`);
-          } else {
-            if (isNumber(payload) || isString(payload) && propertyName) {
-              pathString = `${pathString}?${propertyName}=${payload}`;
-            } else if (isObject(payload) || isArray(payload)) {
-              pathString = `${pathString}?${queryString.stringify(payload)}`;
-            }
-          }
-        } else if (propertyName) {
-          dispatch({ type: targetKey, payload: { [propertyName]: payload } });
         }
-        console.info('[Framework] Forward to: ', {
-          pathString
-        });
         history.push(pathString);
+      } else if (propertyName) {
+        dispatch({ type: targetKey, payload: { [propertyName]: payload } });
       }
     } else {
       // console.info('Passing data: ', targetKey, propertyName, payload);
@@ -72,7 +55,7 @@ function findEventTargets (events, type) {
   return result;
 }
 
-function executeUserFunctionDispatch(events, innerTasks, dispatchType, payload, dispatch, getState, helpers) {
+function executeUserFunctionDispatch (events, innerTasks, dispatchType, payload, dispatch, getState, helpers) {
   let targetsCount = 0;
   // check if the user function dispatches any event
   const eventTargets = findEventTargets(events, dispatchType);
@@ -212,8 +195,6 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
   }
   return tasks;
 }
-
-
 
 function createActions (eventHandlersKey, eventHandlers) {
   const actions = {};
