@@ -38,7 +38,6 @@ const PageRouter = (props) => {
                   routePath={route.path}
                   pageParams={match.params}
                   pageSearch={location.search}
-                  populationTargets={route.populationTargets}
                 />
             }
           />

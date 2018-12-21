@@ -1,6 +1,7 @@
 import queryString from 'query-string';
 import forOwn from 'lodash/forOwn';
 import uniqueId from 'lodash/uniqueId';
+import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -25,7 +26,6 @@ class PageComposition extends Component {
     routePath: PropTypes.string,
     pageParams: PropTypes.object,
     pageSearch: PropTypes.string,
-    populationTargets: PropTypes.array,
   };
 
   static defaultProps = {
@@ -36,7 +36,6 @@ class PageComposition extends Component {
     routePath: '',
     pageParams: {},
     pageSearch: '',
-    populationTargets: [],
   };
 
   constructor (props) {
@@ -55,7 +54,6 @@ class PageComposition extends Component {
       routePath,
       pageParams,
       pageSearch,
-      populationTargets
     } = this.props;
     const pageQuery = queryString.parse(pageSearch);
     if (!description) {
@@ -127,11 +125,13 @@ class PageComposition extends Component {
       const normalizedRoutePath = routePath.substr(1).replace('/:parameter?', '');
       if (propertiesObject) {
         containerProperties = Object.keys(propertiesObject);
-        forOwn(propertiesObject, (value, key) => {
-          if (value && value.forwardPath === normalizedRoutePath) {
-            populatedProps[key] = parameterValue || pageQuery;
-          }
-        });
+        if (parameterValue || (pageQuery && !isEmpty(pageQuery))) {
+          forOwn(propertiesObject, (value, key) => {
+            if (value && value.forwardPath === normalizedRoutePath) {
+              populatedProps[key] = parameterValue || pageQuery;
+            }
+          });
+        }
       }
       console.info('[Framework] Create container: ', {
         componentName: type,

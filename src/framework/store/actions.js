@@ -24,7 +24,7 @@ function dispatchToComponent (props, payload, dispatch, helpers) {
       // console.info('Forwarding routine start with helpers: ', helpers);
       const { history } = helpers;
       if (forwardPath && history) {
-        let pathString = forwardPath;
+        let pathString = `/${forwardPath}`;
         if (payload) {
           if (isNumber(payload) || isString(payload)) {
             pathString = `${pathString}/${payload}`;
