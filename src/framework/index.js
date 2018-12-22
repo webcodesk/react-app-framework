@@ -82,10 +82,8 @@ class Application extends React.Component {
       );
     }
     const { schema, userComponents, userFunctions, userComponentStories } = this.props;
-    // console.info('Application: ', userComponents);
     if (process.env.NODE_ENV !== 'production') {
       const href = window.location.href;
-      console.info('[Framework] Window location URL: ', { href });
       if (href.indexOf('/webcodesk__component_view') > 0) {
         return (
           <ComponentView
@@ -102,9 +100,6 @@ class Application extends React.Component {
     clearActionsCache();
     const { routes, pages, flows } = schema;
     const { actionSequences, targetProperties } = createActionSequences(flows, userFunctions);
-    console.info('[Framework] Render Application');
-    // console.info('Action sequences: ', actionSequences);
-    // console.info('Target properties: ', targetProperties);
     return (
       <Provider store={store}>
         <StartWrapper

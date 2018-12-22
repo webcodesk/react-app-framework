@@ -3,6 +3,7 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
+import * as constants from './constants';
 import { getUserFunctionByName } from './sequences';
 
 let electron;
@@ -17,28 +18,27 @@ function dispatchToComponent (props, payload, dispatch, helpers) {
     const {
       componentName, componentInstance, propertyName, forwardPath
     } = props;
-    // console.info('Dispatch/Forward to component: ', pageName, componentName, componentInstance, isForward, helpers);
-    // todo: componentName and componentInstance attributes may not be present, hide target key initialization
-    const targetKey = `${componentName}_${componentInstance}`;
     if (forwardPath && helpers) {
-      // console.info('Forwarding routine start with helpers: ', helpers);
       const { history } = helpers;
       if (forwardPath && history) {
         let pathString = `/${forwardPath}`;
         if (payload) {
           if (isNumber(payload) || isString(payload)) {
+            // if user function dispatches string or number we pass it as the :parameter in the http request
             pathString = `${pathString}/${payload}`;
           } else if (isObject(payload) || isArray(payload)) {
+            // if user function dispatches an object or an array we pass it as the request query
             pathString = `${pathString}?${queryString.stringify(payload)}`;
             console.error(`The mapping to parameters in URL is possible only for primitives.`);
           }
         }
         history.push(pathString);
       } else if (propertyName) {
+        const targetKey = `${componentName}_${componentInstance}`;
         dispatch({ type: targetKey, payload: { [propertyName]: payload } });
       }
     } else {
-      // console.info('Passing data: ', targetKey, propertyName, payload);
+      const targetKey = `${componentName}_${componentInstance}`;
       dispatch({ type: targetKey, payload: { [propertyName]: payload } });
     }
   }
@@ -63,7 +63,7 @@ function executeUserFunctionDispatch (events, innerTasks, dispatchType, payload,
     targetsCount = eventTargets.length;
     eventTargets.forEach(eventTarget => {
       const { type: eventTargetType, props: eventTargetProps } = eventTarget;
-      if (eventTargetType === 'component') {
+      if (eventTargetType === constants.COMPONENT_TYPE) {
         dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
       }
     });
@@ -81,20 +81,20 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
   if (targets && targets.length > 0) {
     targets.forEach(target => {
       const { type, props, events } = target;
-      if (type === 'userFunction' && props) {
+      if (type === constants.USER_FUNCTION_TYPE && props) {
         // actions sequences key should be the starter target name
         // here is the function name
         actionsSequenceKey = actionsSequenceKey || props.functionName;
         const func = getUserFunctionByName(props.functionName);
         if (func) {
-          // First we need to check if there is the user function sequence
+          // First we need to check if there is a user function sequence
           let innerTasks = {};
           if (events && events.length > 0) {
             events.forEach(innerEvent => {
               if (innerEvent && innerEvent.targets) {
                 // select only user function targets
                 const userFunctionTargets =
-                  innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === 'userFunction');
+                  innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === constants.USER_FUNCTION_TYPE);
                 if (userFunctionTargets && userFunctionTargets.length > 0) {
                   innerTasks[innerEvent.name] = innerTasks[innerEvent.name] || [];
                   innerTasks[innerEvent.name] = [
@@ -117,23 +117,24 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
             });
             executeUserFunctionDispatch(events, innerTasks, dispatchType, payload, dispatch, getState, helpers);
           };
-          // this function is used to pass the error object caught by the embedded exception caching
+          // this function is used to pass the error object caught by the exception caching
           // the function is called with null error object before each user function invocation
           // this will let user to do not worry about the clearing of the error object
           const caughtExceptionFunction = (error, dispatch, getState, helpers) => {
-            const dispatchErrorType = 'caughtException';
             const eventTargetsCount =
-              executeUserFunctionDispatch(events, innerTasks, dispatchErrorType, error, dispatch, getState, helpers);
+              executeUserFunctionDispatch(
+                events, innerTasks, constants.DISPATCH_ERROR_TYPE, error, dispatch, getState, helpers
+              );
             if (eventTargetsCount === 0 && error) {
               console.info('[Framework] Caught error: ', {
                 eventHandlerKey,
                 actionsSequenceKey,
                 functionName: props.functionName,
-                eventName: dispatchErrorType,
+                eventName: constants.DISPATCH_ERROR_TYPE,
                 payload: error,
                 timestamp: Date.now()
               });
-              console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${dispatchErrorType}" dispatch event of this function.`);
+              console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${constants.DISPATCH_ERROR_TYPE}" dispatch event of this function.`);
             }
           };
           // push function reference for user function dispatch
@@ -177,7 +178,7 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
             timestamp: Date.now()
           });
         }
-      } else if (type === 'component' && props) {
+      } else if (type === constants.COMPONENT_TYPE && props) {
         tasks.push(function () {
           const args = arguments;
           // arguments here is the passed parameters from the component event handler

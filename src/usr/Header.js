@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 class Header extends React.Component {
   static propTypes = {
     title: PropTypes.string,
+    subtitle: PropTypes.string,
   };
 
   static defaultProps = {

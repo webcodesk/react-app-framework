@@ -2,7 +2,9 @@ import forOwn from 'lodash/forOwn';
 import get from 'lodash/get';
 import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
+import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
+import * as constants from './constants';
 
 let userFunctions = {};
 
@@ -15,9 +17,8 @@ function getTargetPropertiesFromEvents(events, targetProperties) {
         let propertiesObject;
         targets.forEach(target => {
           const { type, props, events } = target;
-          if (type === 'component' && props) {
+          if (type === constants.COMPONENT_TYPE && props) {
             const { componentName, componentInstance, propertyName, forwardPath } = props;
-            console.info('Get target properties: ', componentInstance, propertyName, forwardPath);
             if (propertyName) {
               key = `${componentName}_${componentInstance}`;
               propertiesObject = targetProperties[key] || {};
@@ -50,18 +51,20 @@ function getEventSequence(event) {
     eventSequence.targets = [];
     targets.forEach(target => {
       const { type, props, events } = target;
-      const newTarget = {
-        type,
-        props,
-      };
-      if (events && events.length > 0 && type === 'userFunction') {
-        const newTargetEvents = [];
-        events.forEach(targetEvent => {
-          newTargetEvents.push(getEventSequence(targetEvent));
-        });
-        newTarget.events = newTargetEvents;
+      if (props && !isEmpty(props)) {
+        const newTarget = {
+          type,
+          props,
+        };
+        if (events && events.length > 0 && type === constants.USER_FUNCTION_TYPE) {
+          const newTargetEvents = [];
+          events.forEach(targetEvent => {
+            newTargetEvents.push(getEventSequence(targetEvent));
+          });
+          newTarget.events = newTargetEvents;
+        }
+        eventSequence.targets.push(newTarget);
       }
-      eventSequence.targets.push(newTarget);
     });
   }
   return eventSequence;
@@ -85,28 +88,37 @@ function eventTargetComparator(destTarget, sourceTarget) {
 }
 
 function targetEventComparator(destEvent, sourceEvent) {
-  return destEvent.name === sourceEvent.name;
+  return destEvent === sourceEvent || destEvent.name === sourceEvent.name;
 }
 
 function mergeEventTargets(destTargets, sourceTargets) {
-  let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
-  resultTargets.forEach(resultTarget => {
-    const sameSourceTarget = sourceTargets.find(sourceTarget => eventTargetComparator(resultTarget, sourceTarget));
-    if (sameSourceTarget) {
-      const resultTargetEvents = unionWith(resultTarget.events, sameSourceTarget.events, targetEventComparator);
-      if (resultTargetEvents && resultTargetEvents.length > 0) {
-        resultTargetEvents.forEach(resultTargetEvent => {
-          const sameSourceTargetEvent =
-            sameSourceTarget.events.find(sourceTargetEvent => targetEventComparator(resultTargetEvent, sourceTargetEvent));
-          if (sameSourceTargetEvent) {
-            resultTargetEvent.targets = mergeEventTargets(resultTargetEvent.targets, sameSourceTargetEvent.targets);
-          }
-        });
+  if (destTargets !== sourceTargets) {
+    let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
+    resultTargets.forEach(resultTarget => {
+      const sameSourceTarget = sourceTargets.find(sourceTarget => eventTargetComparator(resultTarget, sourceTarget));
+      if (sameSourceTarget) {
+        const resultTargetEvents = unionWith(resultTarget.events, sameSourceTarget.events, targetEventComparator);
+        if (resultTargetEvents && resultTargetEvents.length > 0) {
+          resultTargetEvents.forEach(resultTargetEvent => {
+            let sameSourceTargetEvent;
+            if (sameSourceTarget.events && sameSourceTarget.events.length > 0) {
+              sameSourceTargetEvent =
+                sameSourceTarget.events.find(sourceTargetEvent => targetEventComparator(resultTargetEvent, sourceTargetEvent));
+            } else if (resultTarget.events && resultTarget.events.length > 0) {
+              sameSourceTargetEvent =
+                resultTarget.events.find(sourceTargetEvent => targetEventComparator(resultTargetEvent, sourceTargetEvent));
+            }
+            if (sameSourceTargetEvent) {
+              resultTargetEvent.targets = mergeEventTargets(resultTargetEvent.targets, sameSourceTargetEvent.targets);
+            }
+          });
+        }
+        resultTarget.events = resultTargetEvents;
       }
-      resultTarget.events = resultTargetEvents;
-    }
-  });
-  return resultTargets;
+    });
+    return resultTargets;
+  }
+  return destTargets;
 }
 
 function getActionSequences(handlers, actionSequences = {}) {
@@ -115,11 +127,10 @@ function getActionSequences(handlers, actionSequences = {}) {
       const { type, props, events } = handler;
       if (events && events.length > 0) {
         events.forEach(event => {
-          // console.info('Check target: ', type, props, event);
           let key;
           let handlerObject;
           if (event && event.name && event.targets && event.targets.length > 0) {
-            if (type === 'component') {
+            if (type === constants.COMPONENT_TYPE) {
               key = `${props.componentName}_${props.componentInstance}`;
               handlerObject = actionSequences[key] || { ...props, events: [] };
               const eventSequence = getEventSequence(event);
@@ -130,28 +141,20 @@ function getActionSequences(handlers, actionSequences = {}) {
                 // here we should merge targets of the same container events handler
                 const existingHandlerEvent = handlerObject.events[existingHandlerEventIndex];
                 if (existingHandlerEvent) {
-                  // console.info('existingHandlerEvent: ', key, eventSequence.name, existingHandlerEvent);
                   handlerObject.events[existingHandlerEventIndex].targets =
                     mergeEventTargets(existingHandlerEvent.targets, eventSequence.targets);
                 }
               } else {
                 handlerObject.events.push(eventSequence);
               }
-              // console.info('Check component: ', key);
-              // console.info('Handler object: ', handlerObject);
               actionSequences[key] = handlerObject;
             }
-            // console.info('Go through the targets in event: ', event.targets);
             getActionSequences(event.targets, actionSequences);
           }
         });
       }
     });
   }
-}
-
-export function getUserFunctionByName (functionName) {
-  return get(userFunctions, functionName);
 }
 
 function createActionSequencesRecursively (handlers, actionSequences = {}) {
@@ -167,10 +170,13 @@ function createActionSequencesRecursively (handlers, actionSequences = {}) {
   return actionSequences;
 }
 
-
 export function createActionSequences (handlers, functions) {
   userFunctions = functions;
   const actionSequences = createActionSequencesRecursively(handlers);
   const targetProperties = deriveTargetProperties(actionSequences);
   return { actionSequences, targetProperties };
+}
+
+export function getUserFunctionByName (functionName) {
+  return get(userFunctions, functionName);
 }
