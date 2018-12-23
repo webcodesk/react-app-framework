@@ -2,7 +2,7 @@ import get from 'lodash/get';
 import React from 'react';
 import { Router, Switch, Route, Link } from 'react-router-dom';
 
-import PageComposition from '../pageComposition/PageComposition';
+import PageComposition from '../PageComposition';
 
 const NoMatch = () => {
   return (
@@ -32,7 +32,7 @@ const PageRouter = (props) => {
                 <PageComposition
                   key={`${route.pageName}_${index}`}
                   userComponents={userComponents}
-                  pageModels={get(pages, route.pageName, {})}
+                  componentsTree={get(pages, route.pageName, {})}
                   actionSequences={actionSequences}
                   targetProperties={targetProperties}
                   routePath={route.path}

@@ -5,7 +5,6 @@ import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Media from 'react-media';
 import PageCell from './PageCell';
 import PageGrid from './PageGrid';
 import NotFoundComponent from './NotFoundComponent';
@@ -20,7 +19,7 @@ class PageComposition extends Component {
 
   static propTypes = {
     userComponents: PropTypes.object,
-    pageModels: PropTypes.array,
+    componentsTree: PropTypes.object,
     actionSequences: PropTypes.object,
     targetProperties: PropTypes.object,
     routePath: PropTypes.string,
@@ -30,7 +29,7 @@ class PageComposition extends Component {
 
   static defaultProps = {
     userComponents: {},
-    pageModels: [],
+    componentsTree: {},
     actionSequences: {},
     targetProperties: {},
     routePath: '',
@@ -150,26 +149,9 @@ class PageComposition extends Component {
   };
 
   renderPage () {
-    const {pageModels} = this.props;
-    if (pageModels && pageModels.length > 0) {
-      if (pageModels.length > 1) {
-        return pageModels.map((pageModel, idx) => {
-          const { pageVariantName, componentsTree, mediaQuery } = pageModel;
-          return (
-            <Media
-              key={`${pageVariantName}_${idx}`}
-              query={mediaQuery}
-              render={() => {
-                return this.renderComponent(componentsTree);
-              }}
-            />
-          );
-        });
-      } else {
-        const pageModel = pageModels[0];
-        const { componentsTree } = pageModel;
-        return this.renderComponent(componentsTree);
-      }
+    const {componentsTree} = this.props;
+    if (componentsTree && !isEmpty(componentsTree)) {
+      return this.renderComponent(componentsTree);
     }
     return (<h1>Page does not have components.</h1>);
   }

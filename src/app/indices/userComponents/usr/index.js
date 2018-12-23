@@ -1,13 +1,5 @@
-import Form from "./Form";
-
-import Header from "./Header";
-
-import Panel from "./Panel";
+import layouts from "./layouts";
 
 export default {
-  Form,
-
-  Header,
-
-  Panel
+  layouts
 };

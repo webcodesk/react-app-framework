@@ -41,7 +41,7 @@
     "styled-components": "4.1.1",
     "styled-css-grid": "1.1.1",
     "weak": "^1.0.1"
-  },,
+  },
   "scripts": {
     "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3030 react-scripts start",
     "build": "cross-env NODE_PATH=./src react-scripts build",
