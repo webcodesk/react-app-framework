@@ -19,9 +19,7 @@
     "redux": "^4.0.1",
     "redux-devtools-extension": "^2.13.5",
     "redux-thunk": "^2.3.0",
-    "reselect": "^4.0.0",
-    "styled-components": "4.1.1",
-    "styled-css-grid": "1.1.1"
+    "reselect": "^4.0.0"
   },
   "peerDependencies": {
     "react": "*",
@@ -37,16 +35,15 @@
     "gulp-babel": "8.0.0",
     "lodash": "4.17.11",
     "react": "^16.6.3",
-    "react-app-rewire-hot-loader": "1.0.3",
-    "react-app-rewired": "2.0.0",
     "react-dom": "^16.6.3",
-    "react-hot-loader": "4.5.1",
     "react-scripts": "2.1.1",
     "redux-mock-store": "^1.5.3",
+    "styled-components": "4.1.1",
+    "styled-css-grid": "1.1.1",
     "weak": "^1.0.1"
-  },
+  },,
   "scripts": {
-    "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3030 react-app-rewired start",
+    "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3030 react-scripts start",
     "build": "cross-env NODE_PATH=./src react-scripts build",
     "test": "react-scripts test --detectLeaks --runInBand --env=jsdom --modulePaths=src",
     "eject": "react-scripts eject",
