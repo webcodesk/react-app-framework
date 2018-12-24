@@ -35,7 +35,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions) =
         ...props,
         key,
         elementKey: key,
-        text: elementProperty,
+        elementProperty,
         ...serviceComponentOptions
       };
       result.value = React.createElement(Placeholder, placeholderProps);
@@ -108,7 +108,6 @@ class PageComposer extends React.Component {
       componentsTree,
       draggedItem,
     } = this.state;
-
     return componentsTree !== nextState.componentsTree
       || draggedItem !== nextState.draggedItem;
   }
@@ -136,6 +135,10 @@ class PageComposer extends React.Component {
         this.setState({
           draggedItem: null,
         })
+      } else if(type === constants.WEBCODESK_MESSAGE_DELETE_PAGE_COMPONENT) {
+        window.dispatchEvent(new CustomEvent('selectComponentWrapper', {detail: {
+            domNode: null
+          }}));
       }
     }
   }

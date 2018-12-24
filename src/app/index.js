@@ -1,5 +1,12 @@
 import { initStore } from '../framework';
-import App from './App';
+
+let App = null;
+
+if (process.env.NODE_ENV !== 'production') {
+  App = require('./AppDev').default;
+} else {
+  App = require('./App').default;
+}
 
 export function initApp(name, version) {
   initStore(name, version);

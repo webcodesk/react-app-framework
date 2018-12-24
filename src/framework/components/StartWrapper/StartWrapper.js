@@ -25,7 +25,7 @@ class StartWrapper extends React.Component {
     }
     if (containerHandlers.length > 0) {
       const actions = createContainerActions(containerKey, containerHandlers);
-      const onDidMountAction = actions['onComponentDidMount'];
+      const onDidMountAction = actions['onApplicationStart'];
       if (onDidMountAction) {
          store.dispatch(onDidMountAction.apply(null, null));
       }

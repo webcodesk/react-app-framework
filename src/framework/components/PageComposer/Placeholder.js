@@ -12,6 +12,17 @@ const style = {
   position: 'relative',
 };
 
+const styleRootPlaceholder = {
+  width: '100%',
+  height: '200px',
+  backgroundColor: '#dddddd',
+  outline: '1px solid #cdcdcd',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+};
+
 const shadowStyle = {
   position: 'absolute',
   top: 0,
@@ -125,13 +136,27 @@ class Placeholder extends React.Component {
   }
 
   render() {
-    const {text, elementKey} = this.props;
+    const {elementProperty, elementKey} = this.props;
+    if (elementProperty) {
     return (
       <div key={elementKey} style={style}>
         <div>
         <pre>
           <code>
-            {text}
+            {elementProperty}
+          </code>
+        </pre>
+        </div>
+        {this.renderDropZone()}
+      </div>
+    );
+    }
+    return (
+      <div key={elementKey} style={styleRootPlaceholder}>
+        <div>
+        <pre>
+          <code>
+            Drag and drop here
           </code>
         </pre>
         </div>

@@ -70,7 +70,7 @@ class ComponentView extends React.Component {
     const wrappedComponent = resourceType === 'component'
       ? get(userComponents, resourceIndex, null)
       : get(userComponentStories, resourceIndex, null);
-    // console.info('ComponentView renderComponent: ')
+    console.info('ComponentView renderComponent: ', userComponentStories, wrappedComponent);
     if (!wrappedComponent || (typeof wrappedComponent !== 'function' && !wrappedComponent.renderStory)) {
       return React.createElement(
         NotFoundComponent,

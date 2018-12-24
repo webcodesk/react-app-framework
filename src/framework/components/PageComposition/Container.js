@@ -27,10 +27,6 @@ class ErrorBoundary extends React.Component {
 
 class Container extends React.Component {
 
-  constructor (props) {
-    super(props);
-  }
-
   componentDidUpdate (prevProps, prevState, snapshot) {
     if (process.env.NODE_ENV !== 'production') {
       // if (window.__sendFrameworkMessage && window.__webcodeskIsListeningToFramework) {
@@ -104,38 +100,50 @@ export default function createContainer (
   props = {},
   nestedComponents = null
 ) {
-  const actions = createContainerActions(`${componentName}_${componentInstance}`, containerEventHandlers);
-  const mapDispatchToProps = (dispatch) => {
-    return { actions: bindActionCreators(actions, dispatch) };
-  };
+  if ((containerProperties && containerProperties.length > 0)
+    || (containerEventHandlers && containerEventHandlers.length > 0)) {
+    const actions = createContainerActions(`${componentName}_${componentInstance}`, containerEventHandlers);
+    const mapDispatchToProps = (dispatch) => {
+      return { actions: bindActionCreators(actions, dispatch) };
+    };
 
-  const innerStructuresSelectorObject = {};
-  if (containerProperties && containerProperties.length > 0) {
-    containerProperties.forEach(propertyName => {
-      innerStructuresSelectorObject[propertyName] =
-        createContainerSelector(componentName, componentInstance, propertyName);
+    const innerStructuresSelectorObject = {};
+    if (containerProperties && containerProperties.length > 0) {
+      containerProperties.forEach(propertyName => {
+        innerStructuresSelectorObject[propertyName] =
+          createContainerSelector(componentName, componentInstance, propertyName);
+      });
+    }
+
+    const mapStateToProps = createStructuredSelector({
+      stateProps: createStructuredSelector(innerStructuresSelectorObject),
     });
+
+    const wrapperProps = {
+      key: props.key,
+      componentName,
+      componentInstance,
+      containerEventHandlers,
+      containerProperties,
+      wrappedProps: props,
+      wrappedComponent,
+    };
+
+    return (
+      <ErrorBoundary key={`errorBoundary_${props.key}`} componentName={componentName}>
+        {React.createElement(
+          connect(mapStateToProps, mapDispatchToProps)(Container),
+          wrapperProps,
+          nestedComponents
+        )}
+      </ErrorBoundary>
+    );
   }
-
-  const mapStateToProps = createStructuredSelector({
-    stateProps: createStructuredSelector(innerStructuresSelectorObject),
-  });
-
-  const wrapperProps = {
-    key: props.key,
-    componentName,
-    componentInstance,
-    containerEventHandlers,
-    containerProperties,
-    wrappedProps: props,
-    wrappedComponent,
-  };
-
   return (
     <ErrorBoundary key={`errorBoundary_${props.key}`} componentName={componentName}>
       {React.createElement(
-        connect(mapStateToProps, mapDispatchToProps)(Container),
-        wrapperProps,
+        wrappedComponent,
+        props,
         nestedComponents
       )}
     </ErrorBoundary>
