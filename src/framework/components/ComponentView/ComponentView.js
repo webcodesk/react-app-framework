@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import uniqueId from 'lodash/uniqueId';
 import get from 'lodash/get';
 import constants from '../../commons/constants';
-import NotFoundComponent from './NotFoundComponent';
+import NotFoundComponent from '../NotFoundComponent';
 
 let electron;
 if (window.require) {

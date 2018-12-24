@@ -5,8 +5,8 @@ import { configureStore } from './store/store';
 import { clearActionsCache } from './store/actions';
 import { createActionSequences } from './store/sequences';
 
-import PageRouter from './pages/PageRouter';
-import StartWrapper from './pages/StartWrapper';
+import PageRouter from './components/PageRouter';
+import StartWrapper from './components/StartWrapper';
 
 let constants;
 let ComponentView;
@@ -14,8 +14,8 @@ let PageComposer;
 let electron;
 if (process.env.NODE_ENV !== 'production') {
   constants = require('./commons/constants');
-  ComponentView = require('./pages/ComponentView/ComponentView').default;
-  PageComposer = require('./pages/PageComposer/PageComposer').default;
+  ComponentView = require('./components/ComponentView/ComponentView').default;
+  PageComposer = require('./components/PageComposer/PageComposer').default;
   if (window.require) {
     electron = window.require('electron');
   }

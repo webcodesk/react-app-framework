@@ -3,6 +3,13 @@ import PropTypes from 'prop-types';
 import { Grid, Cell } from 'styled-css-grid';
 import Placeholder from './Placeholder';
 
+/*
+  ### I can use here the markdown syntax
+  * And everything will be OK
+  *
+ */
+
+// test line comment
 class CSSGrid_HolyGrail extends React.Component {
   render () {
     const {header, menu, content, ads, footer} = this.props;

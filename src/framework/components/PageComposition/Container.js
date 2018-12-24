@@ -2,10 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import constants from '../../commons/constants';
 import createContainerSelector from '../../store/selectors';
 import createContainerActions from '../../store/actions';
-import NotFoundComponent from './NotFoundComponent';
+import NotFoundComponent from '../NotFoundComponent';
 
 class ErrorBoundary extends React.Component {
   constructor (props) {

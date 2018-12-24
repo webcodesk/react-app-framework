@@ -5,15 +5,8 @@ import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PageCell from './PageCell';
-import PageGrid from './PageGrid';
-import NotFoundComponent from './NotFoundComponent';
+import NotFoundComponent from '../NotFoundComponent';
 import createContainer from './Container';
-
-const pageComponents = {
-  PageCell,
-  PageGrid,
-};
 
 class PageComposition extends Component {
 
@@ -79,9 +72,8 @@ class PageComposition extends Component {
     const validType = type || 'div';
     if (validType.charAt(0) === '_') {
       const pageComponentType = validType.substr(1);
-      const pageComponent = pageComponents[pageComponentType];
       return React.createElement(
-        pageComponent || pageComponentType,
+        pageComponentType,
         { key: key || uniqueId(validType), ...props, ...propsComponents },
         nestedComponents
       );

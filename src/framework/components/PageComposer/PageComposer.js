@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import constants from '../../commons/constants';
 import ComponentWrapper from "./ComponentWrapper";
 import Placeholder from './Placeholder';
-import NotFoundComponent from './NotFoundComponent';
+import NotFoundComponent from '../NotFoundComponent';
 
 let electron;
 if (window.require) {
