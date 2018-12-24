@@ -5,6 +5,8 @@ import constants from '../../commons/constants';
 import ComponentWrapper from "./ComponentWrapper";
 import Placeholder from './Placeholder';
 import NotFoundComponent from '../NotFoundComponent';
+import MouseOverOverlay from './MouseOverOverlay';
+import SelectedOverlay from './SelectedOverlay';
 
 let electron;
 if (window.require) {
@@ -23,7 +25,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions) =
     if (!type || !props) {
       return result;
     }
-    const { componentName, elementProperty } = props;
+    const { componentName, elementProperty, isSelected } = props;
 
     result.key = elementProperty;
 
@@ -51,8 +53,11 @@ const renderComponent = (userComponents, description, serviceComponentOptions) =
       console.info('PageComposer found a user component: ', component);
       const wrapperProps = {
         key,
+        elementKey: key,
         wrappedProps: propsComponents,
         wrappedComponent: component,
+        isSelected,
+        ...serviceComponentOptions,
       };
       result.value = React.createElement(ComponentWrapper, wrapperProps);
     }
@@ -168,7 +173,7 @@ class PageComposer extends React.Component {
     const rootComponent = renderComponent(userComponents, componentsTree, {
       itemWasDropped: this.itemWasDropped,
       draggedItem,
-      onSelectCell: this.handleSelectCell,
+      onMouseDown: this.handleSelectCell,
     });
     return rootComponent.value;
   }
@@ -188,6 +193,8 @@ class PageComposer extends React.Component {
     return (
       <div style={{position: 'relative'}}>
         {content}
+        <MouseOverOverlay bSize="1px"  />
+        <SelectedOverlay bSize="2px" />
       </div>
     );
   }

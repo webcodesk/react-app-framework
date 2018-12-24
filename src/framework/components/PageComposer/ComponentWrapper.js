@@ -12,6 +12,7 @@ class ComponentWrapper extends Component {
     this.handleMouseOver = this.handleMouseOver.bind(this);
     this.handleMouseOut = this.handleMouseOut.bind(this);
     this.handleNoop = this.handleNoop.bind(this);
+
   }
 
   initDOMNode () {
@@ -37,6 +38,23 @@ class ComponentWrapper extends Component {
 
   componentDidMount () {
     this.initDOMNode();
+    const { elementKey, isSelected } = this.props;
+    if (isSelected) {
+      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {detail: {
+          elementKey,
+          domNode: this.$DOMNode
+        }}));
+    }
+  }
+
+  componentDidUpdate (prevProps, prevState, snapshot) {
+    const { elementKey, isSelected } = this.props;
+    if (isSelected) {
+      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {detail: {
+          elementKey,
+          domNode: this.$DOMNode
+        }}));
+    }
   }
 
   componentWillUnmount () {
@@ -63,9 +81,9 @@ class ComponentWrapper extends Component {
   handleMouseDown (e) {
     e.stopPropagation();
     e.preventDefault();
-    const {onMouseDown, elementKey} = this.props;
+    const {elementKey, onMouseDown} = this.props;
     if (onMouseDown) {
-      onMouseDown(e, {elementKey});
+      onMouseDown(elementKey);
     }
   }
 
@@ -75,17 +93,20 @@ class ComponentWrapper extends Component {
   }
 
   handleMouseOver (e) {
-    const {onMouseOver, elementKey} = this.props;
-    if (onMouseOver) {
-      onMouseOver(e, {elementKey});
-    }
+    const {elementKey} = this.props;
+    window.dispatchEvent(new CustomEvent('mouseOverComponentWrapper', {detail: {
+      elementKey,
+      domNode: this.$DOMNode
+    }}));
   }
 
   handleMouseOut (e) {
-    const {onMouseOut, elementKey} = this.props;
-    if (onMouseOut) {
-      onMouseOut(e, {elementKey});
-    }
+    const {elementKey} = this.props;
+    window.dispatchEvent(new CustomEvent('mouseOutComponentWrapper', {detail: {
+        elementKey,
+        domNode: this.$DOMNode,
+        remove: true,
+      }}));
   }
 
   handleNoop (e) {
