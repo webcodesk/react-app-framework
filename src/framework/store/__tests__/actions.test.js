@@ -18,11 +18,12 @@ describe('Actions', () => {
 
   beforeAll(() => {
     const { actionSequences } = createActionSequences(schema.flows, userFunctions);
+    console.info('Sequences: ', JSON.stringify(actionSequences, null, 4));
     const containerSequence = actionSequences[containerKey];
     containerEvents = containerSequence.events;
     store = mockStore({});
 
-    console.info = () => {};
+    // console.info = () => {};
 
   });
 

@@ -6,21 +6,21 @@ import isNumber from 'lodash/isNumber';
 import * as constants from './constants';
 import { getUserFunctionByName } from './sequences';
 
-let electron;
-if (process.env.NODE_ENV !== 'production') {
-  if (window.require) {
-    electron = window.require('electron');
-  }
+const env = process.env;
+let sendDebugMessage;
+if (env.NODE_ENV !== 'production') {
+  sendDebugMessage = require('../commons/sendMessage').default;
 }
 
-function dispatchToComponent (props, payload, dispatch, helpers) {
+function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) {
   if (props) {
     const {
-      componentName, componentInstance, propertyName, forwardPath
+      componentName, componentInstance, propertyName, forwardPath, componentKey
     } = props;
     if (forwardPath && helpers) {
       const { history } = helpers;
-      if (forwardPath && history) {
+      if (history) {
+        // hmmm... why there can not be the history helper?
         let pathString = `/${forwardPath}`;
         if (payload) {
           if (isNumber(payload) || isString(payload)) {
@@ -32,13 +32,71 @@ function dispatchToComponent (props, payload, dispatch, helpers) {
             console.error(`The mapping to parameters in URL is possible only for primitives.`);
           }
         }
+        if (env.NODE_ENV !== 'production') {
+          sendDebugMessage({
+            key: componentKey,
+            eventType: 'forwardToPath',
+            pathString,
+            timestamp: Date.now(),
+          });
+          console.info('[DebugMsg]: ', JSON.stringify({
+            key: componentKey,
+            eventType: 'forwardToPath',
+            pathString,
+            timestamp: Date.now(),
+          }));
+          // console.info(`[${componentKey}] Forward to page`, pathString);
+        }
         history.push(pathString);
       } else if (propertyName) {
+        // hmmm... why there can not be the history helper?
         const targetKey = `${componentName}_${componentInstance}`;
+        if (env.NODE_ENV !== 'production') {
+          sendDebugMessage({
+            key: componentKey,
+            eventType: 'reduceData',
+            data: payload,
+            componentName,
+            componentInstance,
+            propertyName,
+            timestamp: Date.now(),
+          });
+          console.info('[DebugMsg]: ', JSON.stringify({
+            key: componentKey,
+            eventType: 'reduceData',
+            data: {},
+            componentName,
+            componentInstance,
+            propertyName,
+            timestamp: Date.now(),
+          }));
+          // console.info(`[${componentKey}] Reduce data to "${componentName}:${componentInstance} -> ${propertyName}"`, payload);
+        }
         dispatch({ type: targetKey, payload: { [propertyName]: payload } });
       }
     } else {
       const targetKey = `${componentName}_${componentInstance}`;
+      if (env.NODE_ENV !== 'production') {
+        sendDebugMessage({
+          key: componentKey,
+          eventType: 'reduceData',
+          data: payload,
+          componentName,
+          componentInstance,
+          propertyName,
+          timestamp: Date.now(),
+        });
+        console.info('[DebugMsg]: ', JSON.stringify({
+          key: componentKey,
+          eventType: 'reduceData',
+          data: {},
+          componentName,
+          componentInstance,
+          propertyName,
+          timestamp: Date.now(),
+        }));
+        // console.info(`[${componentKey}] Reduce data to "${componentName}:${componentInstance} -> ${propertyName}"`, payload);
+      }
       dispatch({ type: targetKey, payload: { [propertyName]: payload } });
     }
   }
@@ -55,7 +113,9 @@ function findEventTargets (events, type) {
   return result;
 }
 
-function executeUserFunctionDispatch (events, innerTasks, dispatchType, payload, dispatch, getState, helpers) {
+function executeUserFunctionDispatch (
+  events, innerTasks, dispatchType, payload, dispatch, getState, helpers
+) {
   let targetsCount = 0;
   // check if the user function dispatches any event
   const eventTargets = findEventTargets(events, dispatchType);
@@ -64,27 +124,25 @@ function executeUserFunctionDispatch (events, innerTasks, dispatchType, payload,
     eventTargets.forEach(eventTarget => {
       const { type: eventTargetType, props: eventTargetProps } = eventTarget;
       if (eventTargetType === constants.COMPONENT_TYPE) {
-        dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
+        dispatchToComponent(dispatchType, eventTargetProps, payload, dispatch, helpers);
       }
     });
     if (innerTasks[dispatchType] && innerTasks[dispatchType].length > 0) {
       innerTasks[dispatchType].forEach(task => {
-        task.apply(null, [payload])(dispatch, getState, helpers);
+        const { func } = task;
+        func.apply(null, [payload])(dispatch, getState, helpers);
       });
     }
   }
   return targetsCount;
 }
 
-function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
+function createTasks (targets, taskEventName) {
   const tasks = [];
   if (targets && targets.length > 0) {
     targets.forEach(target => {
       const { type, props, events } = target;
       if (type === constants.USER_FUNCTION_TYPE && props) {
-        // actions sequences key should be the starter target name
-        // here is the function name
-        actionsSequenceKey = actionsSequenceKey || props.functionName;
         const func = getUserFunctionByName(props.functionName);
         if (func) {
           // First we need to check if there is a user function sequence
@@ -99,7 +157,7 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
                   innerTasks[innerEvent.name] = innerTasks[innerEvent.name] || [];
                   innerTasks[innerEvent.name] = [
                     ...innerTasks[innerEvent.name],
-                    ...createTasks(userFunctionTargets, eventHandlerKey, actionsSequenceKey)
+                    ...createTasks(userFunctionTargets, innerEvent.name)
                   ];
                 }
               }
@@ -107,15 +165,9 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
           }
           // create dispatchFunction in order to reuse its instance in the action function body
           const dispatchFunction = (dispatchType, payload, dispatch, getState, helpers) => {
-            console.info('[Framework] Function execution: ', {
-              eventHandlerKey,
-              actionsSequenceKey,
-              functionName: props.functionName,
-              eventName: dispatchType,
-              payload,
-              timestamp: Date.now()
-            });
-            executeUserFunctionDispatch(events, innerTasks, dispatchType, payload, dispatch, getState, helpers);
+            executeUserFunctionDispatch(
+              events, innerTasks, dispatchType, payload, dispatch, getState, helpers
+            );
           };
           // this function is used to pass the error object caught by the exception caching
           // the function is called with null error object before each user function invocation
@@ -126,70 +178,110 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
                 events, innerTasks, constants.DISPATCH_ERROR_TYPE, error, dispatch, getState, helpers
               );
             if (eventTargetsCount === 0 && error) {
-              console.info('[Framework] Caught error: ', {
-                eventHandlerKey,
-                actionsSequenceKey,
-                functionName: props.functionName,
-                eventName: constants.DISPATCH_ERROR_TYPE,
-                payload: error,
-                timestamp: Date.now()
-              });
+              if (env.NODE_ENV !== 'production') {
+                sendDebugMessage({
+                  key: props.functionKey,
+                  eventType: 'functionDispatch',
+                  eventName: constants.DISPATCH_ERROR_TYPE,
+                  payload: error,
+                  functionName: props.functionName,
+                  timestamp: Date.now(),
+                });
+                console.info('[DebugMsg]: ', JSON.stringify({
+                  key: props.functionKey,
+                  eventType: 'functionDispatch',
+                  eventName: constants.DISPATCH_ERROR_TYPE,
+                  payload: error,
+                  functionName: props.functionName,
+                  timestamp: Date.now(),
+                }));
+                // console.info(`[${props.functionKey}] Dispatch function "${props.functionName} -> ${constants.DISPATCH_ERROR_TYPE}`, error);
+              }
               console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${constants.DISPATCH_ERROR_TYPE}" dispatch event of this function.`);
             }
           };
           // push function reference for user function dispatch
-          tasks.push(function () {
-            const args = arguments;
-            // console.info('Invoked by redux: ', func);
-            return (dispatch, getState, helpers) => {
-              // execute user function with passed in args
-              console.info('[Framework] Apply function: ', {
-                eventHandlerKey,
-                actionsSequenceKey,
-                functionName: props.functionName,
-                payload: args[0],
-                timestamp: Date.now()
-              });
-              const userFunctionInstance = func.apply(null, args);
-              try {
-                // dispatch caughtException as null to the assigned targets
-                caughtExceptionFunction(null, dispatch, getState, helpers);
-                // now execute dispatching of the events objects to the targets
-                const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
-                  // user function is invoked now
-                  dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
-                });
-                // here user returns a Promise and there may be the error
-                if (userFunctionResult && userFunctionResult.then) {
-                  userFunctionResult.catch(error => {
-                    caughtExceptionFunction(error, dispatch, getState, helpers);
+          tasks.push({
+            functionKey: props.functionKey,
+            funcName: props.functionName,
+            func: function () {
+              const args = arguments;
+              return (dispatch, getState, helpers) => {
+                // execute user function with passed in args
+                if (env.NODE_ENV !== 'production') {
+                  sendDebugMessage({
+                    key: props.functionKey,
+                    eventType: 'callFunction',
+                    argument: args ? args[0] : undefined,
+                    functionName: props.functionName,
+                    timestamp: Date.now(),
                   });
+                  console.info('[DebugMsg]: ', JSON.stringify({
+                    key: props.functionKey,
+                    eventType: 'callFunction',
+                    argument: {},
+                    functionName: props.functionName,
+                    timestamp: Date.now(),
+                  }));
+                  // console.info(`[${props.functionKey}] Call function "${props.functionName}"`, args[0]);
                 }
-              } catch (error) {
-                caughtExceptionFunction(error, dispatch, getState, helpers);
-              }
-            };
+                const userFunctionInstance = func.apply(null, args);
+                try {
+                  // dispatch caughtException as null to the assigned targets
+                  caughtExceptionFunction(null, dispatch, getState, helpers);
+                  // now execute dispatching of the events objects to the targets
+                  const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
+                    // user function is invoked now
+                    if (env.NODE_ENV !== 'production') {
+                      sendDebugMessage({
+                        key: props.functionKey,
+                        eventType: 'fireFunctionEvent',
+                        eventName: dispatchType,
+                        payload,
+                        functionName: props.functionName,
+                        timestamp: Date.now(),
+                      });
+                      console.info('[DebugMsg]: ', JSON.stringify({
+                        key: props.functionKey,
+                        eventType: 'fireFunctionEvent',
+                        eventName: dispatchType,
+                        payload: {},
+                        functionName: props.functionName,
+                        timestamp: Date.now(),
+                      }));
+                      // console.info(`[${props.functionKey}] Dispatch function "${props.functionName} -> ${dispatchType}`, payload);
+                    }
+                    dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
+                  });
+                  // here user returns a Promise and there may be the error
+                  if (userFunctionResult && userFunctionResult.then) {
+                    userFunctionResult.catch(error => {
+                      caughtExceptionFunction(error, dispatch, getState, helpers);
+                    });
+                  }
+                } catch (error) {
+                  caughtExceptionFunction(error, dispatch, getState, helpers);
+                }
+              };
+            }
           });
         } else {
-          console.error('[Framework] Missing function: ', {
-            eventHandlerKey,
-            actionsSequenceKey,
-            functionName: props.functionName,
-            timestamp: Date.now()
-          });
+          console.error(`[Framework] Missing function: ${props.functionName}`);
         }
       } else if (type === constants.COMPONENT_TYPE && props) {
-        tasks.push(function () {
-          const args = arguments;
-          // arguments here is the passed parameters from the component event handler
-          // we have to take only the first argument as a payload
-          let payload = null;
-          if (args.length > 0) {
-            payload = args[0];
+        tasks.push({
+          func: function () {
+            const args = arguments;
+            // arguments here is the passed parameters from the component event handler
+            // we have to take only the first argument as a payload
+            let payload = null;
+            if (args.length > 0) {
+              payload = args[0];
+            }
+            return (dispatch, getState, helpers) => {
+              dispatchToComponent(taskEventName, props, payload, dispatch, helpers);
+            };
           }
-          return (dispatch, getState, helpers) => {
-            dispatchToComponent(props, payload, dispatch, helpers);
-          };
         });
       }
     });
@@ -197,18 +289,20 @@ function createTasks (targets, eventHandlerKey, actionsSequenceKey) {
   return tasks;
 }
 
-function createActions (eventHandlersKey, eventHandlers) {
+function createActions (eventHandlers) {
   const actions = {};
   if (eventHandlers && eventHandlers.length > 0) {
     eventHandlers.forEach(eventHandler => {
       const { name, targets } = eventHandler;
-      const tasks = createTasks(targets, `${eventHandlersKey}_${name}`);
+      const tasks = createTasks(targets, name);
       actions[name] = function () {
         const args = arguments;
         return (dispatch, getState, helpers) => {
           if (tasks.length > 0) {
             tasks.forEach(task => {
-              task.apply(null, args)(dispatch, getState, helpers);
+              if (task.func) {
+                task.func.apply(null, args)(dispatch, getState, helpers);
+              }
             });
           }
         };
@@ -227,7 +321,7 @@ export function clearActionsCache () {
 export default function (eventHandlersKey, eventHandlers) {
   let actions = actionsCache.get(eventHandlersKey);
   if (!actions) {
-    actions = createActions(eventHandlersKey, eventHandlers);
+    actions = createActions(eventHandlers);
     actionsCache.set(eventHandlersKey, actions);
   }
   return actions;

@@ -6,6 +6,12 @@ import createContainerSelector from '../../store/selectors';
 import createContainerActions from '../../store/actions';
 import NotFoundComponent from '../NotFoundComponent';
 
+let sendDebugMessage;
+
+if (process.env.NODE_ENV !== 'production') {
+  sendDebugMessage = require('../../commons/sendMessage').default;
+}
+
 class ErrorBoundary extends React.Component {
   constructor (props) {
     super(props);
@@ -27,57 +33,69 @@ class ErrorBoundary extends React.Component {
 
 class Container extends React.Component {
 
-  componentDidUpdate (prevProps, prevState, snapshot) {
+  shouldComponentUpdate (nextProps, nextState, nextContext) {
     if (process.env.NODE_ENV !== 'production') {
-      // if (window.__sendFrameworkMessage && window.__webcodeskIsListeningToFramework) {
-        const { componentName, componentInstance, stateProps, containerProperties } = this.props;
-        if (prevProps.stateProps !== stateProps) {
-          if (containerProperties && containerProperties.length > 0) {
-            containerProperties.forEach(propertyName => {
-              if (stateProps[propertyName] !== prevProps.stateProps[propertyName]) {
-                console.info('[Framework] Did update component: ', {
-                  componentName,
-                  componentInstance,
-                  propertyName,
-                  value: stateProps[propertyName],
-                  timestamp: Date.now()
-                });
-                // setTimeout(() => {
-                //   window.__sendFrameworkMessage({
-                //     type: constants.FRAMEWORK_MESSAGE_CONTAINER_UPDATED_PROPS,
-                //     payload: {
-                //       componentName,
-                //       componentInstance,
-                //       propertyName,
-                //       stateProps: JSON.stringify(stateProps[propertyName])
-                //     },
-                //   });
-                // }, 0);
-              }
-            });
-          }
-        }
-      // }
+      if (nextProps.stateProps !== this.props.stateProps) {
+        const { componentName, componentInstance } = this.props;
+        sendDebugMessage({
+          eventType: 'receiveNewProps',
+          data: nextProps.stateProps,
+          componentName,
+          componentInstance,
+          timestamp: Date.now(),
+        });
+        console.info('[DebugMsg]: ', JSON.stringify({
+          eventType: 'receiveNewProps',
+          data: {},
+          componentName,
+          componentInstance,
+          timestamp: Date.now(),
+        }));
+        // console.info(`[New Props] "${componentName}:${componentInstance}"`, nextProps.stateProps);
+      }
     }
+    return true;
   }
 
   render () {
-    const { wrappedComponent, wrappedProps, stateProps, componentName, componentInstance, children } = this.props;
-    console.info('[Framework] Render container: ', {componentName, componentInstance, timestamp: Date.now()});
+    const {
+      wrappedComponent,
+      wrappedProps,
+      stateProps,
+      componentName,
+      componentInstance,
+      componentKey,
+      children
+    } = this.props;
     const wrappedHandlers = {};
     const { containerEventHandlers, actions } = this.props;
     if (containerEventHandlers && containerEventHandlers.length > 0) {
       containerEventHandlers.forEach(eventHandler => {
         wrappedHandlers[eventHandler.name] = function () {
           const args = arguments;
-          const handlerAction = actions[`${eventHandler.name}`];
+          const handlerAction = actions[eventHandler.name];
           if (handlerAction) {
-            console.info('[Framework] Invoke handler: ', {
-              eventHandlerKey: `${componentName}_${componentInstance}_${eventHandler.name}`,
-              eventHandlerName: eventHandler.name,
-              payload: args[0],
-              timestamp: Date.now()
-            });
+            if (process.env.NODE_ENV !== 'production') {
+              sendDebugMessage({
+                key: componentKey,
+                eventType: 'fireComponentEvent',
+                eventName: eventHandler.name,
+                payload: args,
+                componentName,
+                componentInstance,
+                timestamp: Date.now(),
+              });
+              console.info('[DebugMsg]: ', JSON.stringify({
+                key: componentKey,
+                eventType: 'fireComponentEvent',
+                eventName: eventHandler.name,
+                payload: {},
+                componentName,
+                componentInstance,
+                timestamp: Date.now(),
+              }));
+              // console.info(`[${componentKey}] Component event fired "${componentName}:${componentInstance} -> ${eventHandler.name}"`, args[0]);
+            }
             handlerAction.apply(null, args);
           } else {
             console.error(
@@ -95,6 +113,7 @@ export default function createContainer (
   wrappedComponent,
   componentName,
   componentInstance,
+  componentKey,
   containerEventHandlers,
   containerProperties,
   props = {},
@@ -121,6 +140,7 @@ export default function createContainer (
 
     const wrapperProps = {
       key: props.key,
+      componentKey,
       componentName,
       componentInstance,
       containerEventHandlers,

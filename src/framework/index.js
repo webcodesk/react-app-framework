@@ -65,9 +65,17 @@ class Application extends React.Component {
   handleReceiveMessage = (event, message) => {
     if (process.env.NODE_ENV !== 'production') {
       if (message) {
-        const { type, payload } = message;
+        const { type } = message;
         if (type === constants.WEBCODESK_MESSAGE_START_LISTENING_TO_FRAMEWORK) {
           window.__webcodeskIsListeningToFramework = true;
+          setTimeout(() => {
+            window.__sendFrameworkMessage({
+              type: constants.FRAMEWORK_MESSAGE_INIT_DEBUG,
+              payload: {
+                actionSequences: this.actionSequences,
+              },
+            });
+          }, 0);
         } else if (type === constants.WEBCODESK_MESSAGE_STOP_LISTENING_TO_FRAMEWORK) {
           window.__webcodeskIsListeningToFramework = false;
         }
@@ -100,6 +108,9 @@ class Application extends React.Component {
     clearActionsCache();
     const { routes, pages, flows } = schema;
     const { actionSequences, targetProperties } = createActionSequences(flows, userFunctions);
+    // store action sequences in case we have to send them for debug
+    this.actionSequences = actionSequences;
+    console.info('Action sequences: ', JSON.stringify(actionSequences, null, 4));
     return (
       <Provider store={store}>
         <StartWrapper

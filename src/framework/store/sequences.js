@@ -1,3 +1,4 @@
+import uniqueId from 'lodash/uniqueId';
 import forOwn from 'lodash/forOwn';
 import get from 'lodash/get';
 import isArray from 'lodash/isArray';
@@ -54,8 +55,18 @@ function getEventSequence(event) {
       if (props && !isEmpty(props)) {
         const newTarget = {
           type,
-          props,
         };
+        if (type === constants.USER_FUNCTION_TYPE) {
+          newTarget.props = {
+            ...props,
+            functionKey: uniqueId('function')
+          };
+        } else if (type === constants.COMPONENT_TYPE) {
+          newTarget.props = {
+            ...props,
+            componentKey: uniqueId('component')
+          };
+        }
         if (events && events.length > 0 && type === constants.USER_FUNCTION_TYPE) {
           const newTargetEvents = [];
           events.forEach(targetEvent => {
@@ -132,7 +143,8 @@ function getActionSequences(handlers, actionSequences = {}) {
           if (event && event.name && event.targets && event.targets.length > 0) {
             if (type === constants.COMPONENT_TYPE) {
               key = `${props.componentName}_${props.componentInstance}`;
-              handlerObject = actionSequences[key] || { ...props, events: [] };
+              handlerObject = actionSequences[key]
+                || { ...props, componentKey: uniqueId('component'), events: [] };
               const eventSequence = getEventSequence(event);
               // find the same event handler name for the container
               const existingHandlerEventIndex =

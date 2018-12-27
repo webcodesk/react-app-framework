@@ -22,15 +22,15 @@ const PageRouter = (props) => {
   return (
     <Router history={history}>
       <Switch>
-        {routes.map((route, index) =>
+        {routes.map(route =>
           <Route
-            key={`route_${index}`}
+            key={`route_${route.path}`}
             exact
             path={route.path}
             render={
               ({ match, location }) =>
                 <PageComposition
-                  key={`${route.pageName}_${index}`}
+                  key={`page_${route.pageName}`}
                   userComponents={userComponents}
                   componentsTree={get(pages, route.pageName, {})}
                   actionSequences={actionSequences}

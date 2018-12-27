@@ -8,6 +8,12 @@ import PropTypes from 'prop-types';
 import NotFoundComponent from '../NotFoundComponent';
 import createContainer from './Container';
 
+let sendDebugMessage;
+
+if (process.env.NODE_ENV !== 'production') {
+  sendDebugMessage = require('../../commons/sendMessage').default;
+}
+
 class PageComposition extends Component {
 
   static propTypes = {
@@ -105,9 +111,11 @@ class PageComposition extends Component {
       }
 
       let containerHandlers = [];
+      let componentKey;
       const actionSequence = actionSequences[containerKey];
       if (actionSequence) {
         containerHandlers = actionSequence.events;
+        componentKey = actionSequence.componentKey;
       }
       let populatedProps = {};
       let containerProperties = [];
@@ -124,14 +132,29 @@ class PageComposition extends Component {
           });
         }
       }
-      console.info('[Framework] Create container: ', {
-        componentName: type,
-        componentInstance: instance
-      });
+      if (process.env.NODE_ENV !== 'production') {
+        sendDebugMessage({
+          key: componentKey,
+          eventType: 'createContainer',
+          populatedProps,
+          type,
+          instance,
+          timestamp: Date.now(),
+        });
+        console.info('[DebugMsg]: ', JSON.stringify({
+          key: componentKey,
+          eventType: 'createContainer',
+          populatedProps: {},
+          type,
+          instance,
+          timestamp: Date.now(),
+        }));
+      }
       return createContainer(
         wrappedComponent,
         type,
         instance,
+        componentKey,
         containerHandlers,
         containerProperties,
         { key: key || containerKey, ...props, ...populatedProps, ...propsComponents },

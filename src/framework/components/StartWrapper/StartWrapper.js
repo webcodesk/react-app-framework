@@ -6,6 +6,12 @@ const componentName = 'applicationStartWrapper';
 const componentInstance = 'wrapperInstance';
 const containerKey = `${componentName}_${componentInstance}`;
 
+let sendDebugMessage;
+
+if (process.env.NODE_ENV !== 'production') {
+  sendDebugMessage = require('../../commons/sendMessage').default;
+}
+
 class StartWrapper extends React.Component {
   static propTypes = {
     actionSequences: PropTypes.object.isRequired,
@@ -16,18 +22,37 @@ class StartWrapper extends React.Component {
     super(props);
   }
 
-  componentDidMount() {
+  componentDidMount () {
     const { actionSequences, store } = this.props;
     let containerHandlers = [];
+    let componentKey;
     const actionSequence = actionSequences[containerKey];
     if (actionSequence) {
       containerHandlers = actionSequence.events;
+      componentKey = actionSequence.componentKey;
     }
     if (containerHandlers.length > 0) {
       const actions = createContainerActions(containerKey, containerHandlers);
       const onDidMountAction = actions['onApplicationStart'];
       if (onDidMountAction) {
-         store.dispatch(onDidMountAction.apply(null, null));
+        if (process.env.NODE_ENV !== 'production') {
+          sendDebugMessage({
+            key: componentKey,
+            eventType: 'onApplicationStart',
+            componentName,
+            componentInstance,
+            timestamp: Date.now(),
+          });
+          console.info('[DebugMsg]: ', JSON.stringify({
+            key: componentKey,
+            eventType: 'onApplicationStart',
+            componentName,
+            componentInstance,
+            timestamp: Date.now(),
+          }));
+        }
+        // console.info(`[${componentKey}] Component event fired "${componentName}:${componentInstance} -> onApplicationStart"`);
+        store.dispatch(onDidMountAction.apply(null, null));
       }
     }
   }
@@ -36,6 +61,5 @@ class StartWrapper extends React.Component {
     return this.props.children;
   }
 }
-
 
 export default StartWrapper;
