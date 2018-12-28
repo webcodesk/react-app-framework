@@ -4,31 +4,6 @@ import PropTypes from 'prop-types';
 const style = {
   width: '100%',
   height: '100%',
-
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  position: 'relative',
-  borderRadius: '4px',
-  boxShadow: 'inset 0px 0px 2px 1px #FFE082',
-};
-
-const styleAcceptable = {
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  position: 'relative',
-  borderRadius: '4px',
-  backgroundColor: '#FFF8E1',
-  boxShadow: 'inset 0px 0px 2px 1px #FFE082',
-};
-
-const styleRootPlaceholder = {
-  width: '100%',
-  height: '200px',
-  backgroundColor: '#dddddd',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -41,6 +16,8 @@ const shadowStyle = {
   right: 0,
   bottom: 0,
   left: 0,
+  borderRadius: '4px',
+  border: '1px dashed #dddddd',
   zIndex: 5,
 };
 
@@ -51,10 +28,23 @@ const shadowStyleAccepting = {
   bottom: 0,
   left: 0,
   borderRadius: '4px',
-  // backgroundColor: '#DCEDC8',
-  boxShadow: 'inset 0px 0px 4px 1px #81C784',
+  backgroundColor: '#76FF03',
+  zIndex: 5,
+  opacity: 0.3,
+
+};
+
+const shadowStyleAcceptable = {
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+  borderRadius: '4px',
+  border: '1px dashed #FFC107',
   zIndex: 5,
 };
+
 
 class Placeholder extends React.Component {
   static propTypes = {
@@ -72,7 +62,7 @@ class Placeholder extends React.Component {
     super(props);
     this.state = {
       isDragOver: false,
-      isItemAcceptable: false,
+      isItemAccepting: false,
     };
 
     this.handleItemDragEnter = this.handleItemDragEnter.bind(this);
@@ -83,9 +73,9 @@ class Placeholder extends React.Component {
   }
 
   handleItemDragOver(e) {
-    const {isDragOver, isItemAcceptable} = this.state;
+    const {isDragOver, isItemAccepting} = this.state;
     console.info('Dragged Item over: ');
-    if (isDragOver && isItemAcceptable) {
+    if (isDragOver && isItemAccepting) {
       e.preventDefault();
     }
   }
@@ -95,7 +85,7 @@ class Placeholder extends React.Component {
     console.info('Dragged Item is entered: ', draggedItem);
     if (draggedItem) {
       this.setState({
-        isItemAcceptable: true,
+        isItemAccepting: true,
         isDragOver: true,
       });
     }
@@ -104,7 +94,7 @@ class Placeholder extends React.Component {
   handleItemDragLeave(e) {
     console.info('Dragged Item leave: ');
     this.setState({
-      isItemAcceptable: false,
+      isItemAccepting: false,
       isDragOver: false,
     });
   }
@@ -112,8 +102,8 @@ class Placeholder extends React.Component {
   handleItemDrop(e) {
     console.info('Dragged Item drop: ');
     const {elementKey, itemWasDropped, draggedItem} = this.props;
-    const {isItemAcceptable, isDragOver} = this.state;
-    if (isItemAcceptable && isDragOver && itemWasDropped) {
+    const {isItemAccepting, isDragOver} = this.state;
+    if (isItemAccepting && isDragOver && itemWasDropped) {
       itemWasDropped({
         destination: {
           key: elementKey,
@@ -121,20 +111,20 @@ class Placeholder extends React.Component {
         source: draggedItem,
       });
       this.setState({
-        isItemAcceptable: false,
+        isItemAccepting: false,
         isDragOver: false,
       });
     }
   }
 
   renderDropZone () {
-    const {elementKey} = this.props;
-    const {isItemAcceptable} = this.state;
-    let style;
-    if (isItemAcceptable) {
+    const {elementKey, draggedItem} = this.props;
+    const {isItemAccepting} = this.state;
+    let style = shadowStyle;
+    if (isItemAccepting) {
       style = shadowStyleAccepting;
-    } else {
-      style = shadowStyle;
+    } else if (draggedItem) {
+      style = shadowStyleAcceptable;
     }
     console.info('DropZone is rendering');
     return (
@@ -150,10 +140,10 @@ class Placeholder extends React.Component {
   }
 
   render() {
-    const {elementProperty, elementKey, draggedItem} = this.props;
+    const {elementProperty, elementKey} = this.props;
     if (elementProperty) {
     return (
-      <div key={elementKey} style={draggedItem ? styleAcceptable : style}>
+      <div key={elementKey} style={style}>
         <div>
         <pre>
           <code>
@@ -166,7 +156,7 @@ class Placeholder extends React.Component {
     );
     }
     return (
-      <div key={elementKey} style={styleRootPlaceholder}>
+      <div key={elementKey} style={style}>
         <div>
         <pre>
           <code>
