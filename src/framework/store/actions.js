@@ -36,6 +36,9 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
           sendDebugMessage({
             key: componentKey,
             eventType: 'forwardToPath',
+            forwardPath,
+            data: payload,
+            propertyName,
             pathString,
             timestamp: Date.now(),
           });
