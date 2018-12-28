@@ -5,7 +5,7 @@ const borderRadius = '2px';
 const nullPx = '0px';
 const px = 'px';
 const position = 'absolute';
-const borderStyle = 'solid #35b3ee';
+const borderStyle = 'solid #2979FF';
 const borderSize = '2px';
 
 const style = {
@@ -34,6 +34,11 @@ class MouseOverOverlay extends Component {
     this.$DOMNode = undefined;
     window.removeEventListener('mouseOverComponentWrapper', this.updatePosition);
     window.removeEventListener('mouseOutComponentWrapper', this.updatePosition);
+  }
+
+  shouldComponentUpdate (nextProps, nextState, nextContext) {
+    const { newPos } = this.state;
+    return newPos !== nextState.newPos;
   }
 
   refreshPosition (position) {
@@ -74,11 +79,13 @@ class MouseOverOverlay extends Component {
     } else {
       if (targetDOMNode) {
         const pos = offset(targetDOMNode);
+        const width = pos.right - pos.left;
+        const height = pos.bottom - pos.top;
         const newPos = {
           top: pos.top,
           left: pos.left,
-          width: pos.right - pos.left,
-          height: pos.bottom - pos.top,
+          width: width > 0 ? width : 1,
+          height: height > 0 ? height : 1,
           label: detail.elementKey,
           key: detail.elementKey
         };
@@ -101,7 +108,7 @@ class MouseOverOverlay extends Component {
   render () {
     const {newPos, border} = this.state;
     let content;
-    if (newPos) {
+    if (newPos && (newPos.width > 1 || newPos.height > 1)) {
       const endPoint = {
         top: newPos.top + px,
         left: newPos.left + px,
@@ -165,12 +172,6 @@ class MouseOverOverlay extends Component {
           <div style={leftLine} />
           <div style={bottomLine} />
           <div style={rightLine} />
-          {/*<span*/}
-            {/*className="structor_mouse-overlay-label"*/}
-            {/*style={labelLine}*/}
-          {/*>*/}
-            {/*{newPos.label}*/}
-          {/*</span>*/}
         </div>
       );
     } else {

@@ -5,7 +5,7 @@ const borderRadius = '2px';
 const nullPx = '0px';
 const px = 'px';
 const position = 'absolute';
-const borderStyle = 'solid #35b3ee';
+const borderStyle = 'solid #2962FF';
 const borderSize = '2px';
 
 class SelectedOverlay extends Component {
@@ -34,15 +34,22 @@ class SelectedOverlay extends Component {
     window.removeEventListener('selectComponentWrapper', this.updatePosition);
   }
 
+  shouldComponentUpdate (nextProps, nextState, nextContext) {
+    const { newPos } = this.state;
+    return newPos !== nextState.newPos;
+  }
+
   refreshPosition (restartTimer = true) {
     const $DOMNode = this.$DOMNode;
     if ($DOMNode) {
       const pos = offset($DOMNode);
+      const width = pos.right - pos.left;
+      const height = pos.bottom - pos.top;
       const newPos = {
         top: pos.top,
         left: pos.left,
-        width: pos.right - pos.left,
-        height: pos.bottom - pos.top,
+        width: width > 0 ? width : 1,
+        height: height > 0 ? height : 1,
       };
       const { newPos: oldPos } = this.state;
       if ((!oldPos && newPos) ||
@@ -88,8 +95,7 @@ class SelectedOverlay extends Component {
   render () {
     const { newPos, border } = this.state;
     let content;
-    console.info('Render with new position: ', newPos);
-    if (newPos) {
+    if (newPos && (newPos.height > 1 || newPos.width > 1)) {
       const endPoint = {
         top: newPos.top + px,
         left: newPos.left + px,
