@@ -4,19 +4,31 @@ import PropTypes from 'prop-types';
 const style = {
   width: '100%',
   height: '100%',
-  backgroundColor: '#dddddd',
-  outline: '1px solid #cdcdcd',
+
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   position: 'relative',
+  borderRadius: '4px',
+  boxShadow: 'inset 0px 0px 2px 1px #FFE082',
+};
+
+const styleAcceptable = {
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+  borderRadius: '4px',
+  backgroundColor: '#FFF8E1',
+  boxShadow: 'inset 0px 0px 2px 1px #FFE082',
 };
 
 const styleRootPlaceholder = {
   width: '100%',
   height: '200px',
   backgroundColor: '#dddddd',
-  outline: '1px solid #cdcdcd',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -32,13 +44,15 @@ const shadowStyle = {
   zIndex: 5,
 };
 
-const shadowStyleAcceptable = {
+const shadowStyleAccepting = {
   position: 'absolute',
   top: 0,
   right: 0,
   bottom: 0,
   left: 0,
-  boxShadow: 'inset 0 0 10px green',
+  borderRadius: '4px',
+  // backgroundColor: '#DCEDC8',
+  boxShadow: 'inset 0px 0px 4px 1px #81C784',
   zIndex: 5,
 };
 
@@ -118,7 +132,7 @@ class Placeholder extends React.Component {
     const {isItemAcceptable} = this.state;
     let style;
     if (isItemAcceptable) {
-      style = shadowStyleAcceptable;
+      style = shadowStyleAccepting;
     } else {
       style = shadowStyle;
     }
@@ -136,10 +150,10 @@ class Placeholder extends React.Component {
   }
 
   render() {
-    const {elementProperty, elementKey} = this.props;
+    const {elementProperty, elementKey, draggedItem} = this.props;
     if (elementProperty) {
     return (
-      <div key={elementKey} style={style}>
+      <div key={elementKey} style={draggedItem ? styleAcceptable : style}>
         <div>
         <pre>
           <code>
