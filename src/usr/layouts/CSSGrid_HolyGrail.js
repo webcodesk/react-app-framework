@@ -34,6 +34,7 @@ class CSSGrid_HolyGrail extends React.Component {
 }
 
 CSSGrid_HolyGrail.propTypes = {
+  /* Header is a header */
   header: PropTypes.element,
   menu: PropTypes.element,
   content: PropTypes.element,

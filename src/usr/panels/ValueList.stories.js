@@ -3,7 +3,7 @@ import ValueList from './ValueList';
 
 export default [
   {
-    story: 'With fake list',
+    story: 'With fake list dfkjhdjks lhlue idhfskjfhw;u efy;ehufweubffd ffef sdf  wed   wewekhdljk',
     renderStory: () => {
       const list = [
         {
