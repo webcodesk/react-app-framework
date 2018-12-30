@@ -141,14 +141,6 @@ class PageComposition extends Component {
           instance,
           timestamp: Date.now(),
         });
-        console.info('[DebugMsg]: ', JSON.stringify({
-          key: componentKey,
-          eventType: 'createContainer',
-          populatedProps: {},
-          type,
-          instance,
-          timestamp: Date.now(),
-        }));
       }
       return createContainer(
         wrappedComponent,

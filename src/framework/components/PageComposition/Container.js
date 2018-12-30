@@ -44,13 +44,6 @@ class Container extends React.Component {
           componentInstance,
           timestamp: Date.now(),
         });
-        console.info('[DebugMsg]: ', JSON.stringify({
-          eventType: 'receiveNewProps',
-          data: {},
-          componentName,
-          componentInstance,
-          timestamp: Date.now(),
-        }));
         // console.info(`[New Props] "${componentName}:${componentInstance}"`, nextProps.stateProps);
       }
     }
@@ -80,23 +73,14 @@ class Container extends React.Component {
                 key: componentKey,
                 eventType: 'fireComponentEvent',
                 eventName: eventHandler.name,
-                payload: args,
+                payload: args && args.length > 0 ? args[0] : undefined,
                 componentName,
                 componentInstance,
                 timestamp: Date.now(),
               });
-              console.info('[DebugMsg]: ', JSON.stringify({
-                key: componentKey,
-                eventType: 'fireComponentEvent',
-                eventName: eventHandler.name,
-                payload: {},
-                componentName,
-                componentInstance,
-                timestamp: Date.now(),
-              }));
               // console.info(`[${componentKey}] Component event fired "${componentName}:${componentInstance} -> ${eventHandler.name}"`, args[0]);
             }
-            handlerAction.apply(null, args);
+            handlerAction.apply(null, [args[0]]);
           } else {
             console.error(
               `Event handler was not found for ${eventHandler.name} event in ${componentName} instance ${componentInstance}`

@@ -42,12 +42,6 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
             pathString,
             timestamp: Date.now(),
           });
-          console.info('[DebugMsg]: ', JSON.stringify({
-            key: componentKey,
-            eventType: 'forwardToPath',
-            pathString,
-            timestamp: Date.now(),
-          }));
           // console.info(`[${componentKey}] Forward to page`, pathString);
         }
         history.push(pathString);
@@ -64,15 +58,6 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
             propertyName,
             timestamp: Date.now(),
           });
-          console.info('[DebugMsg]: ', JSON.stringify({
-            key: componentKey,
-            eventType: 'reduceData',
-            data: {},
-            componentName,
-            componentInstance,
-            propertyName,
-            timestamp: Date.now(),
-          }));
           // console.info(`[${componentKey}] Reduce data to "${componentName}:${componentInstance} -> ${propertyName}"`, payload);
         }
         dispatch({ type: targetKey, payload: { [propertyName]: payload } });
@@ -89,15 +74,6 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
           propertyName,
           timestamp: Date.now(),
         });
-        console.info('[DebugMsg]: ', JSON.stringify({
-          key: componentKey,
-          eventType: 'reduceData',
-          data: {},
-          componentName,
-          componentInstance,
-          propertyName,
-          timestamp: Date.now(),
-        }));
         // console.info(`[${componentKey}] Reduce data to "${componentName}:${componentInstance} -> ${propertyName}"`, payload);
       }
       dispatch({ type: targetKey, payload: { [propertyName]: payload } });
@@ -190,14 +166,6 @@ function createTasks (targets, taskEventName) {
                   functionName: props.functionName,
                   timestamp: Date.now(),
                 });
-                console.info('[DebugMsg]: ', JSON.stringify({
-                  key: props.functionKey,
-                  eventType: 'functionDispatch',
-                  eventName: constants.DISPATCH_ERROR_TYPE,
-                  payload: error,
-                  functionName: props.functionName,
-                  timestamp: Date.now(),
-                }));
                 // console.info(`[${props.functionKey}] Dispatch function "${props.functionName} -> ${constants.DISPATCH_ERROR_TYPE}`, error);
               }
               console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${constants.DISPATCH_ERROR_TYPE}" dispatch event of this function.`);
@@ -219,16 +187,9 @@ function createTasks (targets, taskEventName) {
                     functionName: props.functionName,
                     timestamp: Date.now(),
                   });
-                  console.info('[DebugMsg]: ', JSON.stringify({
-                    key: props.functionKey,
-                    eventType: 'callFunction',
-                    argument: {},
-                    functionName: props.functionName,
-                    timestamp: Date.now(),
-                  }));
                   // console.info(`[${props.functionKey}] Call function "${props.functionName}"`, args[0]);
                 }
-                const userFunctionInstance = func.apply(null, args);
+                const userFunctionInstance = func.apply(null, [args[0]]);
                 try {
                   // dispatch caughtException as null to the assigned targets
                   caughtExceptionFunction(null, dispatch, getState, helpers);
@@ -244,14 +205,6 @@ function createTasks (targets, taskEventName) {
                         functionName: props.functionName,
                         timestamp: Date.now(),
                       });
-                      console.info('[DebugMsg]: ', JSON.stringify({
-                        key: props.functionKey,
-                        eventType: 'fireFunctionEvent',
-                        eventName: dispatchType,
-                        payload: {},
-                        functionName: props.functionName,
-                        timestamp: Date.now(),
-                      }));
                       // console.info(`[${props.functionKey}] Dispatch function "${props.functionName} -> ${dispatchType}`, payload);
                     }
                     dispatchFunction(dispatchType, payload, dispatch, getState, helpers);

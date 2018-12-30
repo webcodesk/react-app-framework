@@ -43,13 +43,6 @@ class StartWrapper extends React.Component {
             componentInstance,
             timestamp: Date.now(),
           });
-          console.info('[DebugMsg]: ', JSON.stringify({
-            key: componentKey,
-            eventType: 'onApplicationStart',
-            componentName,
-            componentInstance,
-            timestamp: Date.now(),
-          }));
         }
         // console.info(`[${componentKey}] Component event fired "${componentName}:${componentInstance} -> onApplicationStart"`);
         store.dispatch(onDidMountAction.apply(null, null));
