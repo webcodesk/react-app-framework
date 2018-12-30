@@ -1,9 +1,9 @@
-import Go_To_Probe2 from "./Go_To_Probe2";
+import test1 from "./test1";
 
-import page_probe2 from "./page_probe2";
+import test2 from "./test2";
 
 export default {
-  Go_To_Probe2,
+  test1,
 
-  page_probe2
+  test2
 };

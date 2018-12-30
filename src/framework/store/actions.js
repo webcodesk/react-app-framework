@@ -3,6 +3,7 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
+import isUndefined from 'lodash/isUndefined';
 import * as constants from './constants';
 import { getUserFunctionByName } from './sequences';
 
@@ -22,7 +23,7 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
       if (history) {
         // hmmm... why there can not be the history helper?
         let pathString = `/${forwardPath}`;
-        if (payload) {
+        if (!isUndefined(payload)) {
           if (isNumber(payload) || isString(payload)) {
             // if user function dispatches string or number we pass it as the :parameter in the http request
             pathString = `${pathString}/${payload}`;
