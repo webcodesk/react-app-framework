@@ -6,7 +6,7 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
-import * as constants from './constants';
+import * as constants from '../commons/constants';
 
 let userFunctions = {};
 
@@ -60,12 +60,12 @@ function getEventSequence(event) {
         if (type === constants.USER_FUNCTION_TYPE) {
           newTarget.props = {
             ...props,
-            functionKey: uniqueId('function')
+            functionKey: uniqueId('seqNode')
           };
         } else if (type === constants.COMPONENT_TYPE) {
           newTarget.props = {
             ...props,
-            componentKey: uniqueId('component')
+            componentKey: uniqueId('seqNode')
           };
         }
         if (events && events.length > 0 && type === constants.USER_FUNCTION_TYPE) {
@@ -146,7 +146,7 @@ function getActionSequences(handlers, actionSequences = {}) {
             if (type === constants.COMPONENT_TYPE) {
               key = `${props.componentName}_${props.componentInstance}`;
               handlerObject = actionSequences[key]
-                || { ...props, componentKey: uniqueId('component'), events: [] };
+                || { ...props, componentKey: uniqueId('seqNode'), events: [] };
               const eventSequence = getEventSequence(event);
               // find the same event handler name for the container
               const existingHandlerEventIndex =

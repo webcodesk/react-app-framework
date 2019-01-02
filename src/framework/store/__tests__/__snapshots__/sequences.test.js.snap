@@ -4,7 +4,7 @@ exports[`Sequences create action sequences 1`] = `
 Object {
   "usr.Form.Form_form": Object {
     "componentInstance": "form",
-    "componentKey": "component1",
+    "componentKey": "seqNode1",
     "componentName": "usr.Form.Form",
     "events": Array [
       Object {
@@ -14,7 +14,7 @@ Object {
             "events": Array [],
             "props": Object {
               "componentInstance": "headerTest1",
-              "componentKey": "component2",
+              "componentKey": "seqNode2",
               "componentName": "usr.Header.Header",
               "propertyName": "title",
             },
@@ -28,7 +28,7 @@ Object {
                   Object {
                     "props": Object {
                       "componentInstance": "form",
-                      "componentKey": "component6",
+                      "componentKey": "seqNode6",
                       "componentName": "usr.SubmitForm.SubmitForm",
                       "propertyName": "errors",
                     },
@@ -47,7 +47,7 @@ Object {
                           Object {
                             "props": Object {
                               "componentInstance": "globalSpinner1",
-                              "componentKey": "component8",
+                              "componentKey": "seqNode8",
                               "componentName": "usr.GlobalSpinner.GlobalSpinner",
                             },
                             "type": "component",
@@ -60,7 +60,7 @@ Object {
                           Object {
                             "props": Object {
                               "componentInstance": "localSpinner1",
-                              "componentKey": "component9",
+                              "componentKey": "seqNode9",
                               "componentName": "usr.LocalSpinner.LocalSpinner",
                             },
                             "type": "component",
@@ -73,7 +73,7 @@ Object {
                           Object {
                             "props": Object {
                               "componentInstance": "paneInfo",
-                              "componentKey": "component10",
+                              "componentKey": "seqNode10",
                               "componentName": "usr.PaneInfo.PaneInfo",
                               "propertyName": "data",
                             },
@@ -83,7 +83,7 @@ Object {
                       },
                     ],
                     "props": Object {
-                      "functionKey": "function7",
+                      "functionKey": "seqNode7",
                       "functionName": "usr.api.myFunctions.getDataByForm",
                     },
                     "type": "userFunction",
@@ -92,7 +92,7 @@ Object {
               },
             ],
             "props": Object {
-              "functionKey": "function5",
+              "functionKey": "seqNode5",
               "functionName": "usr.api.myFunctions.checkFormValidity",
             },
             "type": "userFunction",
@@ -105,7 +105,7 @@ Object {
           Object {
             "props": Object {
               "componentInstance": "headerTest1",
-              "componentKey": "component4",
+              "componentKey": "seqNode4",
               "componentName": "usr.Header.Header",
               "propertyName": "title",
             },
@@ -119,7 +119,7 @@ Object {
           Object {
             "props": Object {
               "componentInstance": "landingPane",
-              "componentKey": "component13",
+              "componentKey": "seqNode13",
               "componentName": "usr.Landing.Landing",
               "forwardPath": "landingPage",
               "propertyName": "formHistory",
@@ -130,7 +130,7 @@ Object {
             "events": Array [],
             "props": Object {
               "componentInstance": "landingPane2",
-              "componentKey": "component14",
+              "componentKey": "seqNode14",
               "componentName": "usr.Landing.Landing",
               "propertyName": "formHistory",
             },
@@ -142,7 +142,7 @@ Object {
   },
   "usr.SubmitForm.SubmitForm_form": Object {
     "componentInstance": "form",
-    "componentKey": "component11",
+    "componentKey": "seqNode11",
     "componentName": "usr.SubmitForm.SubmitForm",
     "events": Array [
       Object {
@@ -151,7 +151,7 @@ Object {
           Object {
             "props": Object {
               "componentInstance": "headerTest",
-              "componentKey": "component12",
+              "componentKey": "seqNode12",
               "componentName": "usr.Header.Header",
               "propertyName": "errorText",
             },
@@ -204,7 +204,7 @@ exports[`Sequences merge sequences 1`] = `
 Object {
   "usr.Form.Form_form": Object {
     "componentInstance": "form",
-    "componentKey": "component16",
+    "componentKey": "seqNode16",
     "componentName": "usr.Form.Form",
     "events": Array [
       Object {
@@ -224,7 +224,7 @@ Object {
                             "events": Array [],
                             "props": Object {
                               "componentInstance": "pane",
-                              "componentKey": "component19",
+                              "componentKey": "seqNode19",
                               "componentName": "usr.Pane.Pane",
                               "propertyName": "data",
                             },
@@ -234,7 +234,7 @@ Object {
                             "events": Array [],
                             "props": Object {
                               "componentInstance": "form",
-                              "componentKey": "component27",
+                              "componentKey": "seqNode27",
                               "componentName": "usr.Form.Form",
                               "propertyName": "formData",
                             },
@@ -244,7 +244,7 @@ Object {
                             "events": Array [],
                             "props": Object {
                               "componentInstance": "pane",
-                              "componentKey": "component30",
+                              "componentKey": "seqNode30",
                               "componentName": "usr.Pane.Pane",
                               "propertyName": "data3",
                             },
@@ -253,7 +253,7 @@ Object {
                           Object {
                             "events": Array [],
                             "props": Object {
-                              "functionKey": "function40",
+                              "functionKey": "seqNode40",
                               "functionName": "usr.api.myFunctions.showTransformedData",
                             },
                             "type": "userFunction",
@@ -262,7 +262,7 @@ Object {
                       },
                     ],
                     "props": Object {
-                      "functionKey": "function18",
+                      "functionKey": "seqNode18",
                       "functionName": "usr.api.myFunctions.transformData",
                     },
                     "type": "userFunction",
@@ -276,7 +276,7 @@ Object {
                     "events": Array [],
                     "props": Object {
                       "componentInstance": "pane",
-                      "componentKey": "component20",
+                      "componentKey": "seqNode20",
                       "componentName": "usr.Pane.Pane",
                       "propertyName": "data",
                     },
@@ -285,7 +285,7 @@ Object {
                   Object {
                     "props": Object {
                       "componentInstance": "pane",
-                      "componentKey": "component21",
+                      "componentKey": "seqNode21",
                       "componentName": "usr.Pane.Pane",
                       "propertyName": "data4",
                     },
@@ -295,7 +295,7 @@ Object {
                     "events": Array [],
                     "props": Object {
                       "componentInstance": "pane",
-                      "componentKey": "component36",
+                      "componentKey": "seqNode36",
                       "componentName": "usr.Pane.Pane",
                       "propertyName": "data2",
                     },
@@ -309,7 +309,7 @@ Object {
                   Object {
                     "props": Object {
                       "componentInstance": "errorPane",
-                      "componentKey": "component37",
+                      "componentKey": "seqNode37",
                       "componentName": "usr.ErrorPane.ErrorPane",
                       "propertyName": "error",
                     },
@@ -318,7 +318,7 @@ Object {
                   Object {
                     "props": Object {
                       "componentInstance": "pane",
-                      "componentKey": "component38",
+                      "componentKey": "seqNode38",
                       "componentName": "usr.Pane.Pane",
                       "propertyName": "data2",
                     },
@@ -328,7 +328,7 @@ Object {
               },
             ],
             "props": Object {
-              "functionKey": "function17",
+              "functionKey": "seqNode17",
               "functionName": "usr.api.myFunctions.function1",
             },
             "type": "userFunction",
@@ -339,7 +339,7 @@ Object {
   },
   "usr.Pane.Pane_pane": Object {
     "componentInstance": "pane",
-    "componentKey": "component22",
+    "componentKey": "seqNode22",
     "componentName": "usr.Pane.Pane",
     "events": Array [
       Object {
@@ -353,7 +353,7 @@ Object {
                   Object {
                     "props": Object {
                       "componentInstance": "form",
-                      "componentKey": "component24",
+                      "componentKey": "seqNode24",
                       "componentName": "usr.Form.Form",
                       "propertyName": "formData",
                     },
@@ -363,7 +363,7 @@ Object {
               },
             ],
             "props": Object {
-              "functionKey": "function23",
+              "functionKey": "seqNode23",
               "functionName": "usr.api.myFunctions.transformData",
             },
             "type": "userFunction",

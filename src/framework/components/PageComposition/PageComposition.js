@@ -7,6 +7,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import NotFoundComponent from '../NotFoundComponent';
 import createContainer from './Container';
+import * as constants from '../../commons/constants';
 
 let sendDebugMessage;
 
@@ -120,11 +121,8 @@ class PageComposition extends Component {
       let populatedProps = {};
       let containerProperties = [];
       const propertiesObject = targetProperties[containerKey];
-      console.info('Create container, propertiesObject: ', propertiesObject);
       const parameterValue = pageParams ? pageParams['parameter'] : null;
-      console.info('Create container, parameterValue: ', parameterValue);
       const normalizedRoutePath = routePath.substr(1).replace('/:parameter?', '');
-      console.info('Create container, normalizedRoutePath: ', normalizedRoutePath);
       if (propertiesObject) {
         containerProperties = Object.keys(propertiesObject);
         if (parameterValue || (pageQuery && !isEmpty(pageQuery))) {
@@ -136,14 +134,16 @@ class PageComposition extends Component {
         }
       }
       if (process.env.NODE_ENV !== 'production') {
-        sendDebugMessage({
-          key: componentKey,
-          eventType: 'createContainer',
-          populatedProps,
-          type,
-          instance,
-          timestamp: Date.now(),
-        });
+        if (!isEmpty(populatedProps)) {
+          sendDebugMessage({
+            key: componentKey,
+            eventType: constants.DEBUG_MSG_CREATE_CONTAINER_EVENT,
+            inputData: populatedProps,
+            componentName: type,
+            componentInstance: instance,
+            timestamp: Date.now(),
+          });
+        }
       }
       return createContainer(
         wrappedComponent,

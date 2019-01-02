@@ -4,7 +4,7 @@ import isObject from 'lodash/isObject';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 import isUndefined from 'lodash/isUndefined';
-import * as constants from './constants';
+import * as constants from '../commons/constants';
 import { getUserFunctionByName } from './sequences';
 
 const env = process.env;
@@ -36,9 +36,9 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
         if (env.NODE_ENV !== 'production') {
           sendDebugMessage({
             key: componentKey,
-            eventType: 'forwardToPath',
+            eventType: constants.DEBUG_MSG_FORWARD_EVENT,
             forwardPath,
-            data: payload,
+            outputData: payload,
             propertyName,
             pathString,
             timestamp: Date.now(),
@@ -52,8 +52,8 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
         if (env.NODE_ENV !== 'production') {
           sendDebugMessage({
             key: componentKey,
-            eventType: 'reduceData',
-            data: payload,
+            eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
+            outputData: payload,
             componentName,
             componentInstance,
             propertyName,
@@ -68,8 +68,8 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
       if (env.NODE_ENV !== 'production') {
         sendDebugMessage({
           key: componentKey,
-          eventType: 'reduceData',
-          data: payload,
+          eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
+          outputData: payload,
           componentName,
           componentInstance,
           propertyName,
@@ -161,9 +161,9 @@ function createTasks (targets, taskEventName) {
               if (env.NODE_ENV !== 'production') {
                 sendDebugMessage({
                   key: props.functionKey,
-                  eventType: 'functionDispatch',
+                  eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
                   eventName: constants.DISPATCH_ERROR_TYPE,
-                  payload: error,
+                  outputData: error && error.message,
                   functionName: props.functionName,
                   timestamp: Date.now(),
                 });
@@ -183,8 +183,8 @@ function createTasks (targets, taskEventName) {
                 if (env.NODE_ENV !== 'production') {
                   sendDebugMessage({
                     key: props.functionKey,
-                    eventType: 'callFunction',
-                    argument: args ? args[0] : undefined,
+                    eventType: constants.DEBUG_MSG_FUNCTION_CALL_EVENT,
+                    inputData: args ? args[0] : undefined,
                     functionName: props.functionName,
                     timestamp: Date.now(),
                   });
@@ -200,9 +200,9 @@ function createTasks (targets, taskEventName) {
                     if (env.NODE_ENV !== 'production') {
                       sendDebugMessage({
                         key: props.functionKey,
-                        eventType: 'fireFunctionEvent',
+                        eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
                         eventName: dispatchType,
-                        payload,
+                        outputData: payload,
                         functionName: props.functionName,
                         timestamp: Date.now(),
                       });

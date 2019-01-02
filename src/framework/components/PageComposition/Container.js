@@ -5,6 +5,7 @@ import { createStructuredSelector } from 'reselect';
 import createContainerSelector from '../../store/selectors';
 import createContainerActions from '../../store/actions';
 import NotFoundComponent from '../NotFoundComponent';
+import * as constants from '../../commons/constants';
 
 let sendDebugMessage;
 
@@ -39,8 +40,8 @@ class Container extends React.Component {
         const { componentName, componentInstance, componentKey } = this.props;
         sendDebugMessage({
           key: componentKey,
-          eventType: 'receiveNewProps',
-          data: nextProps.stateProps,
+          eventType: constants.DEBUG_MSG_NEW_PROPS_EVENT,
+          inputData: nextProps.stateProps,
           componentName,
           componentInstance,
           timestamp: Date.now(),
@@ -72,9 +73,9 @@ class Container extends React.Component {
             if (process.env.NODE_ENV !== 'production') {
               sendDebugMessage({
                 key: componentKey,
-                eventType: 'fireComponentEvent',
+                eventType: constants.DEBUG_MSG_COMPONENT_FIRE_EVENT,
                 eventName: eventHandler.name,
-                payload: args && args.length > 0 ? args[0] : undefined,
+                outputData: args && args.length > 0 ? args[0] : undefined,
                 componentName,
                 componentInstance,
                 timestamp: Date.now(),

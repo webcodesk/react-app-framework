@@ -16,4 +16,5 @@ export const parallelFunction1 = (inputString) => (dispatch) => {
 
 export const parallelFunction2 = (inputString) => (dispatch) => {
   dispatch('parallel', inputString + ' [function2]');
+  throw Error('Dough... Error is here...');
 };
