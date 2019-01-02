@@ -1,0 +1,406 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sequences create action sequences 1`] = `
+Object {
+  "usr.Form.Form_form": Object {
+    "componentInstance": "form",
+    "componentKey": "component1",
+    "componentName": "usr.Form.Form",
+    "events": Array [
+      Object {
+        "name": "onSubmit",
+        "targets": Array [
+          Object {
+            "events": Array [],
+            "props": Object {
+              "componentInstance": "headerTest1",
+              "componentKey": "component2",
+              "componentName": "usr.Header.Header",
+              "propertyName": "title",
+            },
+            "type": "component",
+          },
+          Object {
+            "events": Array [
+              Object {
+                "name": "errors",
+                "targets": Array [
+                  Object {
+                    "props": Object {
+                      "componentInstance": "form",
+                      "componentKey": "component6",
+                      "componentName": "usr.SubmitForm.SubmitForm",
+                      "propertyName": "errors",
+                    },
+                    "type": "component",
+                  },
+                ],
+              },
+              Object {
+                "name": "success",
+                "targets": Array [
+                  Object {
+                    "events": Array [
+                      Object {
+                        "name": "loading",
+                        "targets": Array [
+                          Object {
+                            "props": Object {
+                              "componentInstance": "globalSpinner1",
+                              "componentKey": "component8",
+                              "componentName": "usr.GlobalSpinner.GlobalSpinner",
+                            },
+                            "type": "component",
+                          },
+                        ],
+                      },
+                      Object {
+                        "name": "loading",
+                        "targets": Array [
+                          Object {
+                            "props": Object {
+                              "componentInstance": "localSpinner1",
+                              "componentKey": "component9",
+                              "componentName": "usr.LocalSpinner.LocalSpinner",
+                            },
+                            "type": "component",
+                          },
+                        ],
+                      },
+                      Object {
+                        "name": "resultData",
+                        "targets": Array [
+                          Object {
+                            "props": Object {
+                              "componentInstance": "paneInfo",
+                              "componentKey": "component10",
+                              "componentName": "usr.PaneInfo.PaneInfo",
+                              "propertyName": "data",
+                            },
+                            "type": "component",
+                          },
+                        ],
+                      },
+                    ],
+                    "props": Object {
+                      "functionKey": "function7",
+                      "functionName": "usr.api.myFunctions.getDataByForm",
+                    },
+                    "type": "userFunction",
+                  },
+                ],
+              },
+            ],
+            "props": Object {
+              "functionKey": "function5",
+              "functionName": "usr.api.myFunctions.checkFormValidity",
+            },
+            "type": "userFunction",
+          },
+        ],
+      },
+      Object {
+        "name": "onCancel",
+        "targets": Array [
+          Object {
+            "props": Object {
+              "componentInstance": "headerTest1",
+              "componentKey": "component4",
+              "componentName": "usr.Header.Header",
+              "propertyName": "title",
+            },
+            "type": "component",
+          },
+        ],
+      },
+      Object {
+        "name": "onGoBack",
+        "targets": Array [
+          Object {
+            "props": Object {
+              "componentInstance": "landingPane",
+              "componentKey": "component13",
+              "componentName": "usr.Landing.Landing",
+              "forwardPath": "landingPage",
+              "propertyName": "formHistory",
+            },
+            "type": "component",
+          },
+          Object {
+            "events": Array [],
+            "props": Object {
+              "componentInstance": "landingPane2",
+              "componentKey": "component14",
+              "componentName": "usr.Landing.Landing",
+              "propertyName": "formHistory",
+            },
+            "type": "component",
+          },
+        ],
+      },
+    ],
+  },
+  "usr.SubmitForm.SubmitForm_form": Object {
+    "componentInstance": "form",
+    "componentKey": "component11",
+    "componentName": "usr.SubmitForm.SubmitForm",
+    "events": Array [
+      Object {
+        "name": "onCancel",
+        "targets": Array [
+          Object {
+            "props": Object {
+              "componentInstance": "headerTest",
+              "componentKey": "component12",
+              "componentName": "usr.Header.Header",
+              "propertyName": "errorText",
+            },
+            "type": "component",
+          },
+        ],
+      },
+    ],
+    "propertyName": "errors",
+  },
+}
+`;
+
+exports[`Sequences create action sequences 2`] = `
+Object {
+  "usr.Header.Header_headerTest": Object {
+    "errorText": Object {
+      "forwardPath": undefined,
+    },
+  },
+  "usr.Header.Header_headerTest1": Object {
+    "title": Object {
+      "forwardPath": undefined,
+    },
+  },
+  "usr.Landing.Landing_landingPane": Object {
+    "formHistory": Object {
+      "forwardPath": "landingPage",
+    },
+  },
+  "usr.Landing.Landing_landingPane2": Object {
+    "formHistory": Object {
+      "forwardPath": undefined,
+    },
+  },
+  "usr.PaneInfo.PaneInfo_paneInfo": Object {
+    "data": Object {
+      "forwardPath": undefined,
+    },
+  },
+  "usr.SubmitForm.SubmitForm_form": Object {
+    "errors": Object {
+      "forwardPath": undefined,
+    },
+  },
+}
+`;
+
+exports[`Sequences merge sequences 1`] = `
+Object {
+  "usr.Form.Form_form": Object {
+    "componentInstance": "form",
+    "componentKey": "component16",
+    "componentName": "usr.Form.Form",
+    "events": Array [
+      Object {
+        "name": "onSubmit",
+        "targets": Array [
+          Object {
+            "events": Array [
+              Object {
+                "name": "resultData",
+                "targets": Array [
+                  Object {
+                    "events": Array [
+                      Object {
+                        "name": "transformedData",
+                        "targets": Array [
+                          Object {
+                            "events": Array [],
+                            "props": Object {
+                              "componentInstance": "pane",
+                              "componentKey": "component19",
+                              "componentName": "usr.Pane.Pane",
+                              "propertyName": "data",
+                            },
+                            "type": "component",
+                          },
+                          Object {
+                            "events": Array [],
+                            "props": Object {
+                              "componentInstance": "form",
+                              "componentKey": "component27",
+                              "componentName": "usr.Form.Form",
+                              "propertyName": "formData",
+                            },
+                            "type": "component",
+                          },
+                          Object {
+                            "events": Array [],
+                            "props": Object {
+                              "componentInstance": "pane",
+                              "componentKey": "component30",
+                              "componentName": "usr.Pane.Pane",
+                              "propertyName": "data3",
+                            },
+                            "type": "component",
+                          },
+                          Object {
+                            "events": Array [],
+                            "props": Object {
+                              "functionKey": "function40",
+                              "functionName": "usr.api.myFunctions.showTransformedData",
+                            },
+                            "type": "userFunction",
+                          },
+                        ],
+                      },
+                    ],
+                    "props": Object {
+                      "functionKey": "function18",
+                      "functionName": "usr.api.myFunctions.transformData",
+                    },
+                    "type": "userFunction",
+                  },
+                ],
+              },
+              Object {
+                "name": "success",
+                "targets": Array [
+                  Object {
+                    "events": Array [],
+                    "props": Object {
+                      "componentInstance": "pane",
+                      "componentKey": "component20",
+                      "componentName": "usr.Pane.Pane",
+                      "propertyName": "data",
+                    },
+                    "type": "component",
+                  },
+                  Object {
+                    "props": Object {
+                      "componentInstance": "pane",
+                      "componentKey": "component21",
+                      "componentName": "usr.Pane.Pane",
+                      "propertyName": "data4",
+                    },
+                    "type": "component",
+                  },
+                  Object {
+                    "events": Array [],
+                    "props": Object {
+                      "componentInstance": "pane",
+                      "componentKey": "component36",
+                      "componentName": "usr.Pane.Pane",
+                      "propertyName": "data2",
+                    },
+                    "type": "component",
+                  },
+                ],
+              },
+              Object {
+                "name": "error",
+                "targets": Array [
+                  Object {
+                    "props": Object {
+                      "componentInstance": "errorPane",
+                      "componentKey": "component37",
+                      "componentName": "usr.ErrorPane.ErrorPane",
+                      "propertyName": "error",
+                    },
+                    "type": "component",
+                  },
+                  Object {
+                    "props": Object {
+                      "componentInstance": "pane",
+                      "componentKey": "component38",
+                      "componentName": "usr.Pane.Pane",
+                      "propertyName": "data2",
+                    },
+                    "type": "component",
+                  },
+                ],
+              },
+            ],
+            "props": Object {
+              "functionKey": "function17",
+              "functionName": "usr.api.myFunctions.function1",
+            },
+            "type": "userFunction",
+          },
+        ],
+      },
+    ],
+  },
+  "usr.Pane.Pane_pane": Object {
+    "componentInstance": "pane",
+    "componentKey": "component22",
+    "componentName": "usr.Pane.Pane",
+    "events": Array [
+      Object {
+        "name": "onClick",
+        "targets": Array [
+          Object {
+            "events": Array [
+              Object {
+                "name": "transformedData",
+                "targets": Array [
+                  Object {
+                    "props": Object {
+                      "componentInstance": "form",
+                      "componentKey": "component24",
+                      "componentName": "usr.Form.Form",
+                      "propertyName": "formData",
+                    },
+                    "type": "component",
+                  },
+                ],
+              },
+            ],
+            "props": Object {
+              "functionKey": "function23",
+              "functionName": "usr.api.myFunctions.transformData",
+            },
+            "type": "userFunction",
+          },
+        ],
+      },
+    ],
+    "propertyName": "data",
+  },
+}
+`;
+
+exports[`Sequences merge sequences 2`] = `
+Object {
+  "usr.ErrorPane.ErrorPane_errorPane": Object {
+    "error": Object {
+      "forwardPath": undefined,
+    },
+  },
+  "usr.Form.Form_form": Object {
+    "formData": Object {
+      "forwardPath": undefined,
+    },
+  },
+  "usr.Pane.Pane_pane": Object {
+    "data": Object {
+      "forwardPath": undefined,
+    },
+    "data2": Object {
+      "forwardPath": undefined,
+    },
+    "data3": Object {
+      "forwardPath": undefined,
+    },
+    "data4": Object {
+      "forwardPath": undefined,
+    },
+  },
+}
+`;

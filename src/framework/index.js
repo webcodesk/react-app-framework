@@ -111,6 +111,7 @@ class Application extends React.Component {
     // store action sequences in case we have to send them for debug
     this.actionSequences = actionSequences;
     // console.info('Action sequences: ', JSON.stringify(actionSequences, null, 4));
+    console.info('Action targetProperties: ', targetProperties);
     return (
       <Provider store={store}>
         <StartWrapper

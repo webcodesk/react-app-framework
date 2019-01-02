@@ -1,6 +1,7 @@
 import uniqueId from 'lodash/uniqueId';
 import forOwn from 'lodash/forOwn';
 import get from 'lodash/get';
+import merge from 'lodash/merge';
 import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
@@ -24,9 +25,9 @@ function getTargetPropertiesFromEvents(events, targetProperties) {
               key = `${componentName}_${componentInstance}`;
               propertiesObject = targetProperties[key] || {};
               // tell the that this property should be bind to the http request query
-              propertiesObject[propertyName] = {
+              propertiesObject[propertyName] = merge({}, propertiesObject[propertyName], {
                 forwardPath
-              };
+              });
               targetProperties[key] = propertiesObject;
             }
           }
@@ -91,7 +92,8 @@ function eventTargetComparator(destTarget, sourceTarget) {
       } else if (sourceProps.componentName && destProps.componentName) {
         return sourceProps.componentName === destProps.componentName
           && sourceProps.componentInstance === destProps.componentInstance
-          && sourceProps.propertyName === destProps.propertyName;
+          && sourceProps.propertyName === destProps.propertyName
+          && sourceProps.forwardPath === destProps.forwardPath;
       }
     }
   }

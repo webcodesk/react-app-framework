@@ -1,9 +1,9 @@
+import tert from "./tert";
+
 import test1 from "./test1";
 
-import test2 from "./test2";
-
 export default {
-  test1,
+  tert,
 
-  test2
+  test1
 };

@@ -7,7 +7,7 @@ export const addNewListItem = (value) => (dispatch) => {
 
 export const initialFunction = () => (dispatch) => {
   dispatch('success', 0);
-  dispatch('data', 'Initial Data');
+  // dispatch('data', 'Initial Data');
 };
 
 export const parallelFunction1 = (inputString) => (dispatch) => {

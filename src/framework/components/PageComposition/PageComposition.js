@@ -120,8 +120,11 @@ class PageComposition extends Component {
       let populatedProps = {};
       let containerProperties = [];
       const propertiesObject = targetProperties[containerKey];
+      console.info('Create container, propertiesObject: ', propertiesObject);
       const parameterValue = pageParams ? pageParams['parameter'] : null;
+      console.info('Create container, parameterValue: ', parameterValue);
       const normalizedRoutePath = routePath.substr(1).replace('/:parameter?', '');
+      console.info('Create container, normalizedRoutePath: ', normalizedRoutePath);
       if (propertiesObject) {
         containerProperties = Object.keys(propertiesObject);
         if (parameterValue || (pageQuery && !isEmpty(pageQuery))) {

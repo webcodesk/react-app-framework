@@ -36,15 +36,16 @@ class Container extends React.Component {
   shouldComponentUpdate (nextProps, nextState, nextContext) {
     if (process.env.NODE_ENV !== 'production') {
       if (nextProps.stateProps !== this.props.stateProps) {
-        const { componentName, componentInstance } = this.props;
+        const { componentName, componentInstance, componentKey } = this.props;
         sendDebugMessage({
+          key: componentKey,
           eventType: 'receiveNewProps',
           data: nextProps.stateProps,
           componentName,
           componentInstance,
           timestamp: Date.now(),
         });
-        // console.info(`[New Props] "${componentName}:${componentInstance}"`, nextProps.stateProps);
+        console.info(`[New Props] "${componentName}:${componentInstance}"`, this.props);
       }
     }
     return true;
