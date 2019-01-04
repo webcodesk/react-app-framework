@@ -92,7 +92,7 @@ class Placeholder extends React.Component {
   }
 
   handleItemDragLeave(e) {
-    console.info('Dragged Item leave: ');
+    // console.info('Dragged Item leave: ');
     this.setState({
       isItemAccepting: false,
       isDragOver: false,
@@ -100,7 +100,7 @@ class Placeholder extends React.Component {
   }
 
   handleItemDrop(e) {
-    console.info('Dragged Item drop: ');
+    // console.info('Dragged Item drop: ');
     const {elementKey, itemWasDropped, draggedItem} = this.props;
     const {isItemAccepting, isDragOver} = this.state;
     if (isItemAccepting && isDragOver && itemWasDropped) {
@@ -126,7 +126,7 @@ class Placeholder extends React.Component {
     } else if (draggedItem) {
       style = shadowStyleAcceptable;
     }
-    console.info('DropZone is rendering');
+    // console.info('DropZone is rendering');
     return (
       <div
         key={`DropZone${elementKey}`}

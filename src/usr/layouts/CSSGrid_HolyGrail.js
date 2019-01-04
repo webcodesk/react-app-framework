@@ -21,6 +21,7 @@ class CSSGrid_HolyGrail extends React.Component {
           {header}
         </Cell>
 
+
         <Cell>{menu}</Cell>
         <Cell>{content}</Cell>
         <Cell>{ads}</Cell>
@@ -40,6 +41,7 @@ CSSGrid_HolyGrail.propTypes = {
   content: PropTypes.element,
   ads: PropTypes.element,
   footer: PropTypes.element,
+  invisiblePlace1: PropTypes.element,
 };
 
 CSSGrid_HolyGrail.defaultProps = {
@@ -48,6 +50,7 @@ CSSGrid_HolyGrail.defaultProps = {
   content: <Placeholder text="content" />,
   ads: <Placeholder text="ads" />,
   footer: <Placeholder text="footer " />,
+  invisiblePlace1: null,
 };
 
 export default CSSGrid_HolyGrail;

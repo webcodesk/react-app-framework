@@ -46,7 +46,7 @@ class Container extends React.Component {
           componentInstance,
           timestamp: Date.now(),
         });
-        console.info(`[New Props] "${componentName}:${componentInstance}"`, this.props);
+        // console.info(`[New Props] "${componentName}:${componentInstance}"`, this.props);
       }
     }
     return true;
