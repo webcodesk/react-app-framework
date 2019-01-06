@@ -1,7 +1,6 @@
 import get from 'lodash/get';
 import React from 'react';
 import PropTypes from 'prop-types';
-import constants from '../../commons/constants';
 import ComponentWrapper from "./ComponentWrapper";
 import Placeholder from './Placeholder';
 import NotFoundComponent from '../NotFoundComponent';
@@ -11,6 +10,11 @@ import SelectedOverlay from './SelectedOverlay';
 let electron;
 if (window.require) {
   electron = window.require('electron');
+}
+
+let constants;
+if (process.env.NODE_ENV !== 'production') {
+  constants = require('../../commons/constants');
 }
 
 // ToDo: remove once the WebpackDevServer fixes HMR - it should preserve React components state (now it does not)
@@ -49,17 +53,20 @@ const renderComponent = (userComponents, description, serviceComponentOptions) =
           }
         });
       }
-      const component = get(userComponents, componentName, NotFoundComponent);
-      // console.info('PageComposer found a user component: ', component);
-      const wrapperProps = {
-        key,
-        elementKey: key,
-        wrappedProps: propsComponents,
-        wrappedComponent: component,
-        isSelected,
-        ...serviceComponentOptions,
-      };
-      result.value = React.createElement(ComponentWrapper, wrapperProps);
+      const component = get(userComponents, componentName, null);
+      if (component) {
+        const wrapperProps = {
+          key,
+          elementKey: key,
+          wrappedProps: propsComponents,
+          wrappedComponent: component,
+          isSelected,
+          ...serviceComponentOptions,
+        };
+        result.value = React.createElement(ComponentWrapper, wrapperProps);
+      } else {
+        result.value = React.createElement(NotFoundComponent, {componentName});
+      }
     }
   }
   return result;

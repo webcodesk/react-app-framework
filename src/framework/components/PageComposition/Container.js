@@ -4,15 +4,14 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import createContainerSelector from '../../store/selectors';
 import createContainerActions from '../../store/actions';
-import NotFoundComponent from '../NotFoundComponent';
-import * as constants from '../../commons/constants';
+import { getComponentName } from '../NotFoundComponent/NotFoundComponent';
 
 let sendDebugMessage;
-
+let constants;
 if (process.env.NODE_ENV !== 'production') {
   sendDebugMessage = require('../../commons/sendMessage').default;
+  constants = require('../../commons/constants');
 }
-
 class ErrorBoundary extends React.Component {
   constructor (props) {
     super(props);
@@ -26,7 +25,11 @@ class ErrorBoundary extends React.Component {
   render () {
     if (this.state.hasError) {
       const { componentName } = this.props;
-      return <NotFoundComponent componentName={componentName}/>;
+      return (
+        <div style={{color: 'white', backgroundColor: 'red', borderRadius: '4px', padding: '.5em'}}>
+          <code>Error occurred in "{getComponentName(componentName)}" component</code>
+        </div>
+      );
     }
     return this.props.children;
   }
@@ -80,7 +83,6 @@ class Container extends React.Component {
                 componentInstance,
                 timestamp: Date.now(),
               });
-              // console.info(`[${componentKey}] Component event fired "${componentName}:${componentInstance} -> ${eventHandler.name}"`, args[0]);
             }
             handlerAction.apply(null, [args[0]]);
           } else {

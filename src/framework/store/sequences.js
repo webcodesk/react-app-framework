@@ -6,11 +6,11 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
-import * as constants from '../commons/constants';
+import { COMPONENT_TYPE, USER_FUNCTION_TYPE } from './constants';
 
 let userFunctions = {};
 
-function getTargetPropertiesFromEvents(events, targetProperties) {
+function getTargetPropertiesFromEvents (events, targetProperties) {
   if (events && events.length > 0) {
     events.forEach(event => {
       const { targets } = event;
@@ -19,7 +19,7 @@ function getTargetPropertiesFromEvents(events, targetProperties) {
         let propertiesObject;
         targets.forEach(target => {
           const { type, props, events } = target;
-          if (type === constants.COMPONENT_TYPE && props) {
+          if (type === COMPONENT_TYPE && props) {
             const { componentName, componentInstance, propertyName, forwardPath } = props;
             if (propertyName) {
               key = `${componentName}_${componentInstance}`;
@@ -38,14 +38,14 @@ function getTargetPropertiesFromEvents(events, targetProperties) {
   }
 }
 
-function deriveTargetProperties(actionSequences, targetProperties = {}) {
+function deriveTargetProperties (actionSequences, targetProperties = {}) {
   forOwn(actionSequences, (value, prop) => {
     getTargetPropertiesFromEvents(value.events, targetProperties);
   });
   return targetProperties;
 }
 
-function getEventSequence(event) {
+function getEventSequence (event) {
   const eventSequence = {};
   const { name, targets } = event;
   if (targets && targets.length > 0) {
@@ -57,18 +57,18 @@ function getEventSequence(event) {
         const newTarget = {
           type,
         };
-        if (type === constants.USER_FUNCTION_TYPE) {
+        if (type === USER_FUNCTION_TYPE) {
           newTarget.props = {
             ...props,
             functionKey: uniqueId('seqNode')
           };
-        } else if (type === constants.COMPONENT_TYPE) {
+        } else if (type === COMPONENT_TYPE) {
           newTarget.props = {
             ...props,
             componentKey: uniqueId('seqNode')
           };
         }
-        if (events && events.length > 0 && type === constants.USER_FUNCTION_TYPE) {
+        if (events && events.length > 0 && type === USER_FUNCTION_TYPE) {
           const newTargetEvents = [];
           events.forEach(targetEvent => {
             newTargetEvents.push(getEventSequence(targetEvent));
@@ -82,7 +82,7 @@ function getEventSequence(event) {
   return eventSequence;
 }
 
-function eventTargetComparator(destTarget, sourceTarget) {
+function eventTargetComparator (destTarget, sourceTarget) {
   const { type: sourceType, props: sourceProps } = sourceTarget;
   const { type: destType, props: destProps } = destTarget;
   if (sourceType === destType) {
@@ -100,11 +100,11 @@ function eventTargetComparator(destTarget, sourceTarget) {
   return false;
 }
 
-function targetEventComparator(destEvent, sourceEvent) {
+function targetEventComparator (destEvent, sourceEvent) {
   return destEvent === sourceEvent || destEvent.name === sourceEvent.name;
 }
 
-function mergeEventTargets(destTargets, sourceTargets) {
+function mergeEventTargets (destTargets, sourceTargets) {
   if (destTargets !== sourceTargets) {
     let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
     resultTargets.forEach(resultTarget => {
@@ -134,7 +134,7 @@ function mergeEventTargets(destTargets, sourceTargets) {
   return destTargets;
 }
 
-function getActionSequences(handlers, actionSequences = {}) {
+function getActionSequences (handlers, actionSequences = {}) {
   if (handlers && handlers.length > 0) {
     handlers.forEach(handler => {
       const { type, props, events } = handler;
@@ -143,7 +143,7 @@ function getActionSequences(handlers, actionSequences = {}) {
           let key;
           let handlerObject;
           if (event && event.name && event.targets && event.targets.length > 0) {
-            if (type === constants.COMPONENT_TYPE) {
+            if (type === COMPONENT_TYPE) {
               key = `${props.componentName}_${props.componentInstance}`;
               handlerObject = actionSequences[key]
                 || { ...props, componentKey: uniqueId('seqNode'), events: [] };

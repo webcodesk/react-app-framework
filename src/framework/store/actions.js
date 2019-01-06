@@ -4,13 +4,14 @@ import isObject from 'lodash/isObject';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 import isUndefined from 'lodash/isUndefined';
-import * as constants from '../commons/constants';
+import { COMPONENT_TYPE, USER_FUNCTION_TYPE, DISPATCH_ERROR_TYPE} from './constants';
 import { getUserFunctionByName } from './sequences';
 
-const env = process.env;
 let sendDebugMessage;
-if (env.NODE_ENV !== 'production') {
+let constants;
+if (process.env.NODE_ENV !== 'production') {
   sendDebugMessage = require('../commons/sendMessage').default;
+  constants = require('../commons/constants');
 }
 
 function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) {
@@ -33,7 +34,7 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
             console.error(`The mapping to parameters in URL is possible only for primitives.`);
           }
         }
-        if (env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'production') {
           sendDebugMessage({
             key: componentKey,
             eventType: constants.DEBUG_MSG_FORWARD_EVENT,
@@ -49,7 +50,7 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
       } else if (propertyName) {
         // hmmm... why there can not be the history helper?
         const targetKey = `${componentName}_${componentInstance}`;
-        if (env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'production') {
           sendDebugMessage({
             key: componentKey,
             eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
@@ -59,13 +60,12 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
             propertyName,
             timestamp: Date.now(),
           });
-          // console.info(`[${componentKey}] Reduce data to "${componentName}:${componentInstance} -> ${propertyName}"`, payload);
         }
         dispatch({ type: targetKey, payload: { [propertyName]: payload } });
       }
     } else {
       const targetKey = `${componentName}_${componentInstance}`;
-      if (env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production') {
         sendDebugMessage({
           key: componentKey,
           eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
@@ -75,7 +75,6 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
           propertyName,
           timestamp: Date.now(),
         });
-        // console.info(`[${componentKey}] Reduce data to "${componentName}:${componentInstance} -> ${propertyName}"`, payload);
       }
       dispatch({ type: targetKey, payload: { [propertyName]: payload } });
     }
@@ -103,7 +102,7 @@ function executeUserFunctionDispatch (
     targetsCount = eventTargets.length;
     eventTargets.forEach(eventTarget => {
       const { type: eventTargetType, props: eventTargetProps } = eventTarget;
-      if (eventTargetType === constants.COMPONENT_TYPE) {
+      if (eventTargetType === COMPONENT_TYPE) {
         dispatchToComponent(dispatchType, eventTargetProps, payload, dispatch, helpers);
       }
     });
@@ -122,7 +121,7 @@ function createTasks (targets, taskEventName) {
   if (targets && targets.length > 0) {
     targets.forEach(target => {
       const { type, props, events } = target;
-      if (type === constants.USER_FUNCTION_TYPE && props) {
+      if (type === USER_FUNCTION_TYPE && props) {
         const func = getUserFunctionByName(props.functionName);
         if (func) {
           // First we need to check if there is a user function sequence
@@ -132,7 +131,7 @@ function createTasks (targets, taskEventName) {
               if (innerEvent && innerEvent.targets) {
                 // select only user function targets
                 const userFunctionTargets =
-                  innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === constants.USER_FUNCTION_TYPE);
+                  innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === USER_FUNCTION_TYPE);
                 if (userFunctionTargets && userFunctionTargets.length > 0) {
                   innerTasks[innerEvent.name] = innerTasks[innerEvent.name] || [];
                   innerTasks[innerEvent.name] = [
@@ -155,21 +154,20 @@ function createTasks (targets, taskEventName) {
           const caughtExceptionFunction = (error, dispatch, getState, helpers) => {
             const eventTargetsCount =
               executeUserFunctionDispatch(
-                events, innerTasks, constants.DISPATCH_ERROR_TYPE, error, dispatch, getState, helpers
+                events, innerTasks, DISPATCH_ERROR_TYPE, error, dispatch, getState, helpers
               );
             if (eventTargetsCount === 0 && error) {
-              if (env.NODE_ENV !== 'production') {
+              if (process.env.NODE_ENV !== 'production') {
                 sendDebugMessage({
                   key: props.functionKey,
                   eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
-                  eventName: constants.DISPATCH_ERROR_TYPE,
+                  eventName: DISPATCH_ERROR_TYPE,
                   outputData: error && error.message,
                   functionName: props.functionName,
                   timestamp: Date.now(),
                 });
-                // console.info(`[${props.functionKey}] Dispatch function "${props.functionName} -> ${constants.DISPATCH_ERROR_TYPE}`, error);
               }
-              console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${constants.DISPATCH_ERROR_TYPE}" dispatch event of this function.`);
+              console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${DISPATCH_ERROR_TYPE}" dispatch event of this function.`);
             }
           };
           // push function reference for user function dispatch
@@ -180,7 +178,7 @@ function createTasks (targets, taskEventName) {
               const args = arguments;
               return (dispatch, getState, helpers) => {
                 // execute user function with passed in args
-                if (env.NODE_ENV !== 'production') {
+                if (process.env.NODE_ENV !== 'production') {
                   sendDebugMessage({
                     key: props.functionKey,
                     eventType: constants.DEBUG_MSG_FUNCTION_CALL_EVENT,
@@ -188,7 +186,6 @@ function createTasks (targets, taskEventName) {
                     functionName: props.functionName,
                     timestamp: Date.now(),
                   });
-                  // console.info(`[${props.functionKey}] Call function "${props.functionName}"`, args[0]);
                 }
                 const userFunctionInstance = func.apply(null, [args[0]]);
                 try {
@@ -197,7 +194,7 @@ function createTasks (targets, taskEventName) {
                   // now execute dispatching of the events objects to the targets
                   const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
                     // user function is invoked now
-                    if (env.NODE_ENV !== 'production') {
+                    if (process.env.NODE_ENV !== 'production') {
                       sendDebugMessage({
                         key: props.functionKey,
                         eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
@@ -206,7 +203,6 @@ function createTasks (targets, taskEventName) {
                         functionName: props.functionName,
                         timestamp: Date.now(),
                       });
-                      // console.info(`[${props.functionKey}] Dispatch function "${props.functionName} -> ${dispatchType}`, payload);
                     }
                     dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
                   });
@@ -225,7 +221,7 @@ function createTasks (targets, taskEventName) {
         } else {
           console.error(`[Framework] Missing function: ${props.functionName}`);
         }
-      } else if (type === constants.COMPONENT_TYPE && props) {
+      } else if (type === COMPONENT_TYPE && props) {
         tasks.push({
           func: function () {
             const args = arguments;

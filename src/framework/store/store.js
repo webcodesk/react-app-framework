@@ -1,7 +1,12 @@
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
-import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import rootReducer from './reducer';
+
+let composeWithDevTools;
+if (process.env.NODE_ENV !== 'production') {
+  const developmentOnly = require('redux-devtools-extension/developmentOnly');
+  composeWithDevTools = developmentOnly.composeWithDevTools;
+}
 
 export function configureStore(initialState, helpersConfig, {name, version}) {
   const middleware = [thunk.withExtraArgument(helpersConfig)];
@@ -23,15 +28,5 @@ export function configureStore(initialState, helpersConfig, {name, version}) {
   }
 
   // https://redux.js.org/docs/api/createStore.html
-  const store = createStore(rootReducer, initialState, enhancer);
-
-  // Hot reload reducers (requires Webpack or Browserify HMR to be enabled)
-  if (process.env.NODE_ENV !== 'production' && module.hot) {
-    module.hot.accept('./reducer', () =>
-      // eslint-disable-next-line global-require
-      store.replaceReducer(require('./reducer')),
-    );
-  }
-
-  return store;
+  return createStore(rootReducer, initialState, enhancer);
 }

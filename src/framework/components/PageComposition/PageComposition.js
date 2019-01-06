@@ -7,12 +7,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import NotFoundComponent from '../NotFoundComponent';
 import createContainer from './Container';
-import * as constants from '../../commons/constants';
 
 let sendDebugMessage;
-
+let constants;
 if (process.env.NODE_ENV !== 'production') {
   sendDebugMessage = require('../../commons/sendMessage').default;
+  constants = require('../../commons/constants');
 }
 
 class PageComposition extends Component {

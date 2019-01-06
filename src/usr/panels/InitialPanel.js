@@ -5,6 +5,7 @@ class InitialPanel extends React.Component {
   static propTypes = {
     onClick: PropTypes.func,
     onForward: PropTypes.func,
+    onAnotherForward: PropTypes.func,
   };
 
   static defaultProps = {
@@ -29,6 +30,7 @@ class InitialPanel extends React.Component {
       <div style={{padding: '1em'}}>
         <button style={{padding: '1em'}} onClick={this.handleClick}>Click</button>
         <button style={{padding: '1em'}} onClick={this.handleForward}>Forward</button>
+        <button style={{padding: '1em'}} onClick={this.props.onAnotherForward}>Another Forward</button>
       </div>
     );
   }

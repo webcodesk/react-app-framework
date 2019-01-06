@@ -42,10 +42,6 @@ export const initStore = (name, version) => {
 
 class Application extends React.Component {
 
-  constructor (props) {
-    super(props);
-  }
-
   componentDidMount () {
     if (process.env.NODE_ENV !== 'production') {
       if (electron) {

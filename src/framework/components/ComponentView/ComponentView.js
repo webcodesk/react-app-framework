@@ -2,12 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import uniqueId from 'lodash/uniqueId';
 import get from 'lodash/get';
-import constants from '../../commons/constants';
 import NotFoundComponent from '../NotFoundComponent';
 
 let electron;
 if (window.require) {
   electron = window.require('electron');
+}
+
+let sendDebugMessage;
+let constants;
+if (process.env.NODE_ENV !== 'production') {
+  sendDebugMessage = require('../../commons/sendMessage').default;
+  constants = require('../../commons/constants');
 }
 
 class ComponentView extends React.Component {
@@ -28,6 +34,7 @@ class ComponentView extends React.Component {
     this.state = {
       resourceType: null,
       resourceIndex: null,
+      properties: [],
     };
   }
 
@@ -46,22 +53,41 @@ class ComponentView extends React.Component {
   handleReceiveMessage (event, message) {
     if (message) {
       const { type, payload } = message;
+      let resourceIndex;
+      let properties;
+      if (payload) {
+        resourceIndex = payload.componentName;
+        properties = payload.properties;
+      }
       if (type === constants.WEBCODESK_MESSAGE_COMPONENT_RESOURCE_INDEX) {
         this.setState({
           resourceType: 'component',
-          resourceIndex: payload,
+          resourceIndex,
+          properties
         });
       } else if (type === constants.WEBCODESK_MESSAGE_COMPONENT_STORY_RESOURCE_INDEX) {
         this.setState({
           resourceType: 'componentStory',
-          resourceIndex: payload,
+          resourceIndex,
+          properties,
         });
       }
     }
   }
 
+  handleComponentEvent = (eventName) => (args) => {
+    console.info('Handle: ', eventName, args);
+    if (process.env.NODE_ENV !== 'production') {
+      sendDebugMessage({
+        eventName,
+        args,
+        timestamp: Date.now(),
+      });
+    }
+  };
+
   renderComponent () {
-    const { resourceType, resourceIndex } = this.state;
+    const { resourceType, resourceIndex, properties } = this.state;
     if (!resourceIndex || !resourceType) {
       return null;
     }
@@ -70,22 +96,27 @@ class ComponentView extends React.Component {
     const wrappedComponent = resourceType === 'component'
       ? get(userComponents, resourceIndex, null)
       : get(userComponentStories, resourceIndex, null);
-    // console.info('ComponentView renderComponent: ', userComponentStories, wrappedComponent);
     if (!wrappedComponent || (typeof wrappedComponent !== 'function' && !wrappedComponent.renderStory)) {
       return React.createElement(
         NotFoundComponent,
         { key: uniqueId('notFound'), componentName: resourceIndex }
       );
     }
+    const eventHandlers = {};
+    if (properties && properties.length > 0) {
+      properties.forEach(property => {
+        eventHandlers[property.name] = this.handleComponentEvent(property.name);
+      });
+    }
     if (wrappedComponent.renderStory) {
       return React.createElement(
         wrappedComponent.renderStory,
-        { key: resourceIndex },
+        { key: resourceIndex, ...eventHandlers },
       );
     }
     return React.createElement(
       wrappedComponent,
-      { key: resourceIndex },
+      { key: resourceIndex, ...eventHandlers },
     );
   }
 
