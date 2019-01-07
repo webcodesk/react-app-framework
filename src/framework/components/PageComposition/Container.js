@@ -15,19 +15,21 @@ if (process.env.NODE_ENV !== 'production') {
 class ErrorBoundary extends React.Component {
   constructor (props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
   componentDidCatch (error, info) {
-    this.setState({ hasError: true });
+    this.setState({ hasError: true, error });
   }
 
   render () {
-    if (this.state.hasError) {
+    const {hasError, error} = this.state;
+    if (hasError) {
       const { componentName } = this.props;
       return (
         <div style={{color: 'white', backgroundColor: 'red', borderRadius: '4px', padding: '.5em'}}>
-          <code>Error occurred in "{getComponentName(componentName)}" component</code>
+          <code>Error occurred in "{getComponentName(componentName)}" component: </code>
+          <code>{error && error.message}</code>
         </div>
       );
     }
@@ -49,7 +51,6 @@ class Container extends React.Component {
           componentInstance,
           timestamp: Date.now(),
         });
-        // console.info(`[New Props] "${componentName}:${componentInstance}"`, this.props);
       }
     }
     return true;

@@ -6,6 +6,7 @@ import Placeholder from './Placeholder';
 import NotFoundComponent from '../NotFoundComponent';
 import MouseOverOverlay from './MouseOverOverlay';
 import SelectedOverlay from './SelectedOverlay';
+import WarningComponent from '../WarningComponent';
 
 let electron;
 if (window.require) {
@@ -190,11 +191,7 @@ class PageComposer extends React.Component {
 
   renderElectronError() {
     return (
-      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '450px'}}>
-        <div>
-          <h3>Works only in Electron</h3>
-        </div>
-      </div>
+      <WarningComponent message="Works only in Electron" />
     );
   }
 

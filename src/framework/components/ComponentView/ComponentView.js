@@ -124,11 +124,7 @@ class ComponentView extends React.Component {
     if (!electron) {
       return (<h3>Works only in electron environment.</h3>);
     }
-    return (
-      <div style={{ padding: '2em' }}>
-        {this.renderComponent()}
-      </div>
-    );
+    return this.renderComponent();
   }
 }
 

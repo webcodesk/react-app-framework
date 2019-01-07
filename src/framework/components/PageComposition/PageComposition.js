@@ -7,6 +7,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import NotFoundComponent from '../NotFoundComponent';
 import createContainer from './Container';
+import WarningComponent from '../WarningComponent';
 
 let sendDebugMessage;
 let constants;
@@ -163,7 +164,7 @@ class PageComposition extends Component {
     if (componentsTree && !isEmpty(componentsTree)) {
       return this.renderComponent(componentsTree);
     }
-    return (<h1>Page does not have components.</h1>);
+    return (<WarningComponent message="Page does not have components" />);
   }
 
   render () {

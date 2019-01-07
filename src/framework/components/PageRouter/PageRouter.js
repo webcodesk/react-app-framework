@@ -1,17 +1,18 @@
 import get from 'lodash/get';
 import React from 'react';
-import { Router, Switch, Route, Link } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 
 import PageComposition from '../PageComposition';
+import WarningComponent from '../WarningComponent';
 
 const NoMatch = () => {
   return (
-    <h1>No Match, <Link to="/">Back to home</Link></h1>
+    <WarningComponent message="Page was not found. Switch to the main page." />
   );
 };
 
 const NoRoute = () => {
-  return (<h1>Routes are missing</h1>);
+  return (<WarningComponent message="There is no routes"/>);
 };
 
 const PageRouter = (props) => {

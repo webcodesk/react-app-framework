@@ -8,12 +8,14 @@ export function getComponentName(canonicalComponentName) {
   return canonicalComponentName;
 }
 
+const style = {color: 'white', backgroundColor: 'red', borderRadius: '4px', padding: '.5em'};
+
 class NotFoundComponent extends React.Component {
 
   render () {
     const { componentName } = this.props;
     return (
-      <div style={{color: 'white', backgroundColor: 'red', borderRadius: '4px', padding: '.5em'}}>
+      <div style={style}>
         <code>Component is not found: "{getComponentName(componentName)}"</code>
       </div>
     );
