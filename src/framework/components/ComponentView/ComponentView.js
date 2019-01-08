@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import uniqueId from 'lodash/uniqueId';
 import get from 'lodash/get';
 import NotFoundComponent from '../NotFoundComponent';
+import WarningComponent from '../WarningComponent';
 
 let electron;
 if (window.require) {
@@ -121,7 +122,7 @@ class ComponentView extends React.Component {
 
   render () {
     if (!electron) {
-      return (<h3>Works only in electron environment.</h3>);
+      return (<WarningComponent message="Works only in electron environment" />);
     }
     return this.renderComponent();
   }
