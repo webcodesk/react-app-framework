@@ -12,7 +12,7 @@ const NoMatch = () => {
 };
 
 const NoRoute = () => {
-  return (<WarningComponent message="There is no routes"/>);
+  return (<WarningComponent message="Application does not have pages."/>);
 };
 
 const PageRouter = (props) => {

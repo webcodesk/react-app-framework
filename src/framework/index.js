@@ -7,6 +7,7 @@ import { createActionSequences } from './store/sequences';
 
 import PageRouter from './components/PageRouter';
 import StartWrapper from './components/StartWrapper';
+import WarningComponent from './components/WarningComponent';
 
 let constants;
 let ComponentView;
@@ -25,7 +26,6 @@ let store;
 let history;
 
 export const initStore = (name, version) => {
-  console.info('[Framework] Init Store');
   history = createBrowserHistory();
   store = configureStore({}, { history }, { name, version });
 
@@ -82,7 +82,7 @@ class Application extends React.Component {
   render () {
     if (!store) {
       return (
-        <h1>Initialize store first</h1>
+        <WarningComponent message="Redux store is not initialized." />
       );
     }
     const { schema, userComponents, userFunctions, userComponentStories } = this.props;
@@ -106,8 +106,6 @@ class Application extends React.Component {
     const { actionSequences, targetProperties } = createActionSequences(flows, userFunctions);
     // store action sequences in case we have to send them for debug
     this.actionSequences = actionSequences;
-    // console.info('Action sequences: ', JSON.stringify(actionSequences, null, 4));
-    console.info('Action targetProperties: ', targetProperties);
     return (
       <Provider store={store}>
         <StartWrapper

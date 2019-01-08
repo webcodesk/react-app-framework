@@ -34,7 +34,6 @@ const renderComponent = (userComponents, description, serviceComponentOptions) =
 
     result.key = elementProperty;
 
-    // console.info('PageComposer try to render: ', type);
     if (type === 'pagePlaceholder') {
       const placeholderProps = {
         ...props,
@@ -128,7 +127,6 @@ class PageComposer extends React.Component {
   }
 
   handleReceiveMessage(event, message) {
-    // console.info('[Framework] PageComposer received message: ', event, message);
     if (message) {
       const {type, payload} = message;
       if (type === constants.WEBCODESK_MESSAGE_UPDATE_PAGE_COMPONENTS_TREE) {
@@ -153,7 +151,6 @@ class PageComposer extends React.Component {
 
   sendMessage(message) {
     if (message) {
-      // console.info('[Framework] PageComposer sending message: ', message);
       electron.ipcRenderer.sendToHost('message', message);
     }
   }
@@ -180,7 +177,6 @@ class PageComposer extends React.Component {
       componentsTree,
       draggedItem,
     } = this.state;
-    // console.info('Render page with components tree: ', componentsTree);
     const rootComponent = renderComponent(userComponents, componentsTree, {
       itemWasDropped: this.itemWasDropped,
       draggedItem,

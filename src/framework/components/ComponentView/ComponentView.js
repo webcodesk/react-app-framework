@@ -76,7 +76,6 @@ class ComponentView extends React.Component {
   }
 
   handleComponentEvent = (eventName) => (args) => {
-    console.info('Handle: ', eventName, args);
     if (process.env.NODE_ENV !== 'production') {
       sendDebugMessage({
         eventName,

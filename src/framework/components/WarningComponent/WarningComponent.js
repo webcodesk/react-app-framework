@@ -18,7 +18,7 @@ class WarningComponent extends React.Component {
     const { message, linkTo, linkLabel } = this.props;
     return (
       <div style={style}>
-        <div>{message}</div>
+        <div><code>{message}</code></div>
         {linkTo && <div>&nbsp;&nbsp;<Link to={linkTo}>{linkLabel}</Link></div>}
       </div>
     );

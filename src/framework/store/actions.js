@@ -44,7 +44,6 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
             pathString,
             timestamp: Date.now(),
           });
-          // console.info(`[${componentKey}] Forward to page`, pathString);
         }
         history.push(pathString);
       } else if (propertyName) {
