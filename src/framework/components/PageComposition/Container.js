@@ -88,7 +88,7 @@ class Container extends React.Component {
             handlerAction.apply(null, [args[0]]);
           } else {
             console.error(
-              `Event handler was not found for ${eventHandler.name} event in ${componentName} instance ${componentInstance}`
+              `[Framework] Event handler was not found for ${eventHandler.name} event in ${componentName} instance ${componentInstance}`
             );
           }
         };
@@ -110,6 +110,7 @@ export default function createContainer (
 ) {
   if ((containerProperties && containerProperties.length > 0)
     || (containerEventHandlers && containerEventHandlers.length > 0)) {
+    // create a connected container only for components that participate in the flow
     const actions = createContainerActions(`${componentName}_${componentInstance}`, containerEventHandlers);
     const mapDispatchToProps = (dispatch) => {
       return { actions: bindActionCreators(actions, dispatch) };

@@ -31,7 +31,11 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
           } else if (isObject(payload) || isArray(payload)) {
             // if user function dispatches an object or an array we pass it as the request query
             pathString = `${pathString}?${queryString.stringify(payload)}`;
-            console.error(`The mapping to parameters in URL is possible only for primitives.`);
+          } else {
+            console.error(
+              '[Framework] The mapping to parameters in URL is possible only for ' +
+              'a string, a number, an object, or an array.'
+            );
           }
         }
         if (process.env.NODE_ENV !== 'production') {
