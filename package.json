@@ -13,7 +13,6 @@
     "lodash": "4.17.11",
     "prop-types": "^15.6.2",
     "query-string": "6.2.0",
-    "react-media": "1.8.0",
     "react-redux": "^5.1.1",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.1",
@@ -41,7 +40,7 @@
     "weak": "^1.0.1"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3030 react-scripts start",
+    "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3040 react-scripts start",
     "build": "cross-env NODE_PATH=./src react-scripts build",
     "test": "react-scripts test --detectLeaks --runInBand --env=jsdom --modulePaths=src",
     "eject": "react-scripts eject",

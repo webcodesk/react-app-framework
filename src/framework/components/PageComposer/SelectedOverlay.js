@@ -76,7 +76,7 @@ class SelectedOverlay extends Component {
     this.refreshTimerId = setTimeout(() => {
       this.refreshPosition();
       this.refreshTimerId = undefined;
-    }, 800);
+    }, 1000);
   }
 
   stopRefreshTimer() {

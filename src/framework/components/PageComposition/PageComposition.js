@@ -44,9 +44,7 @@ class PageComposition extends Component {
     this.renderComponent = this.renderComponent.bind(this);
   }
 
-  renderComponent (
-    description,
-  ) {
+  renderComponent (description) {
     const {
       userComponents,
       actionSequences,
