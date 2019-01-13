@@ -1,6 +1,6 @@
 {
   "name": "@webcodesk/react-app-framework",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
@@ -11,14 +11,14 @@
   "description": "React App Framework for Webcodesk",
   "dependencies": {
     "lodash": "4.17.11",
-    "prop-types": "^15.6.2",
+    "prop-types": "15.6.2",
     "query-string": "6.2.0",
-    "react-redux": "^5.1.1",
-    "react-router-dom": "^4.3.1",
-    "redux": "^4.0.1",
-    "redux-devtools-extension": "^2.13.5",
-    "redux-thunk": "^2.3.0",
-    "reselect": "^4.0.0"
+    "react-redux": "5.1.1",
+    "react-router-dom": "4.3.1",
+    "redux": "4.0.1",
+    "redux-devtools-extension": "2.13.5",
+    "redux-thunk": "2.3.0",
+    "reselect": "4.0.0"
   },
   "peerDependencies": {
     "react": "*",
