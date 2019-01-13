@@ -43,7 +43,7 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
             key: componentKey,
             eventType: constants.DEBUG_MSG_FORWARD_EVENT,
             forwardPath,
-            outputData: payload,
+            inputData: payload,
             propertyName,
             pathString,
             timestamp: Date.now(),
@@ -57,7 +57,7 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
           sendDebugMessage({
             key: componentKey,
             eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
-            outputData: payload,
+            inputData: payload,
             componentName,
             componentInstance,
             propertyName,
@@ -72,7 +72,7 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
         sendDebugMessage({
           key: componentKey,
           eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
-          outputData: payload,
+          inputData: payload,
           componentName,
           componentInstance,
           propertyName,
