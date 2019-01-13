@@ -138,7 +138,7 @@ function getActionSequences (handlers, actionSequences = {}) {
   if (handlers && handlers.length > 0) {
     handlers.forEach(handler => {
       const { type, props, events } = handler;
-      if (events && events.length > 0) {
+      if (props && !props.isDisabled && events && events.length > 0) {
         events.forEach(event => {
           let key;
           let handlerObject;

@@ -1,6 +1,6 @@
 {
   "name": "@webcodesk/react-app-framework",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
