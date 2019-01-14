@@ -6,6 +6,8 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
+import isEqual from 'lodash/isEqual';
+import pick from 'lodash/pick';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE } from './constants';
 
 let userFunctions = {};
@@ -90,10 +92,21 @@ function eventTargetComparator (destTarget, sourceTarget) {
       if (sourceProps.functionName && destProps.functionName) {
         return sourceProps.functionName === destProps.functionName;
       } else if (sourceProps.componentName && destProps.componentName) {
-        return sourceProps.componentName === destProps.componentName
-          && sourceProps.componentInstance === destProps.componentInstance
-          && sourceProps.propertyName === destProps.propertyName
-          && sourceProps.forwardPath === destProps.forwardPath;
+        if (sourceProps.forwardPath && destProps.forwardPath) {
+          // if there is forwarding test all attributes
+          return sourceProps.componentName === destProps.componentName
+            && sourceProps.componentInstance === destProps.componentInstance
+            && sourceProps.propertyName === destProps.propertyName
+            && sourceProps.forwardPath === destProps.forwardPath;
+        } else {
+          // if there is no forwarding test only component attributes
+          return sourceProps.componentName === destProps.componentName
+            && sourceProps.componentInstance === destProps.componentInstance
+            && sourceProps.propertyName === destProps.propertyName;
+        }
+      } else if (sourceProps.forwardPath && destProps.forwardPath) {
+        // it is possible to set only forward path without component property target
+        return sourceProps.forwardPath === destProps.forwardPath;
       }
     }
   }
