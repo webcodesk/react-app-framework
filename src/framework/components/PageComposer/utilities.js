@@ -1,5 +1,5 @@
 export function offset(el) {
-  return getPosition1(el);
+  return getPosition2(el);
 }
 
 function getPosition1(el) {
