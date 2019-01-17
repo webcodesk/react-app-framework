@@ -1,25 +1,16 @@
 import get from 'lodash/get';
 import React from 'react';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Redirect, Router, Switch, Route } from 'react-router-dom';
 
 import PageComposition from '../PageComposition';
 import WarningComponent from '../WarningComponent';
 
-const NoMatch = () => {
-  return (
-    <WarningComponent message="Page was not found. Switch to the main page." />
-  );
-};
-
-const NoRoute = () => {
-  return (<WarningComponent message="Application does not have pages."/>);
-};
-
 const PageRouter = (props) => {
   const { routes, pages, userComponents, history, actionSequences, targetProperties } = props;
   if (!routes || routes.length === 0) {
-    return (<NoRoute/>);
+    return (<WarningComponent message="Application does not have pages."/>);
   }
+  const noMatchRoute = routes.find(r => r.pageName === 'noMatch');
   return (
     <Router history={history}>
       <Switch>
@@ -43,7 +34,26 @@ const PageRouter = (props) => {
             }
           />
         )}
-        <Route component={NoMatch}/>
+        {noMatchRoute
+          && (
+            <Route
+              render={
+                ({ match, location }) =>
+                  <PageComposition
+                    key={`page_${noMatchRoute.pageName}`}
+                    userComponents={userComponents}
+                    componentsTree={get(pages, noMatchRoute.pageName, {})}
+                    actionSequences={actionSequences}
+                    targetProperties={targetProperties}
+                    routePath={noMatchRoute.path}
+                    pageParams={match.params}
+                    pageSearch={location.search}
+                  />
+              }
+            />
+          )
+        }
+        <Redirect to="/" />
       </Switch>
     </Router>
   );
