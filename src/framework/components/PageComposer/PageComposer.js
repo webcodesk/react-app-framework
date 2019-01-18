@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import ComponentWrapper from "./ComponentWrapper";
 import Placeholder from './Placeholder';
 import NotFoundComponent from '../NotFoundComponent';
-import MouseOverOverlay from './MouseOverOverlay';
-import SelectedOverlay from './SelectedOverlay';
 import WarningComponent from '../WarningComponent';
+import * as mouseOverBoundaries from './mouseOverBoundaries';
+import * as selectedBoundaries from './selectedBoundaries';
 
 let electron;
 if (window.require) {
@@ -102,12 +102,16 @@ class PageComposer extends React.Component {
     if (electron) {
       electron.ipcRenderer.on('message', this.handleReceiveMessage);
     }
+    mouseOverBoundaries.initElements();
+    selectedBoundaries.initElements();
   }
 
   componentWillUnmount() {
     if (electron) {
       electron.ipcRenderer.removeListener('message', this.handleReceiveMessage);
     }
+    mouseOverBoundaries.destroyElements();
+    selectedBoundaries.destroyElements();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -193,13 +197,10 @@ class PageComposer extends React.Component {
 
   render () {
     let content = electron ? this.renderPage() : this.renderElectronError();
-    return (
-      <div style={{position: 'relative'}}>
-        {content}
-        <MouseOverOverlay bSize="1px"  />
-        <SelectedOverlay bSize="2px" />
-      </div>
-    );
+    if (content) {
+      return content;
+    }
+    return <span />;
   }
 }
 
