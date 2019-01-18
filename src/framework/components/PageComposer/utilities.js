@@ -11,8 +11,8 @@ function getPosition1(el) {
   while (el) {
     if (el.tagName === 'BODY') {
       // deal with browser quirks with body/window/document and page scroll
-      let xScroll = el.scrollLeft || document.documentElement.scrollLeft;
-      let yScroll = el.scrollTop || document.documentElement.scrollTop;
+      let xScroll = window.pageXOffset || document.documentElement.scrollLeft;
+      let yScroll = window.pageYOffset || document.documentElement.scrollTop;
 
       xPos += (el.offsetLeft - xScroll + el.clientLeft);
       yPos += (el.offsetTop - yScroll + el.clientTop);
@@ -36,8 +36,8 @@ function getPosition2(el) {
   const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   return {
-    top: rect.top + scrollTop,
-    left: rect.left + scrollLeft,
+    top: (rect.top + scrollTop),
+    left: (rect.left + scrollLeft),
     right: rect.right + scrollLeft,
     bottom: rect.bottom + scrollTop
   };
