@@ -6,8 +6,6 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
-import isEqual from 'lodash/isEqual';
-import pick from 'lodash/pick';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE } from './constants';
 
 let userFunctions = {};
@@ -87,64 +85,71 @@ function getEventSequence (event) {
 function eventTargetComparator (destTarget, sourceTarget) {
   const { type: sourceType, props: sourceProps } = sourceTarget;
   const { type: destType, props: destProps } = destTarget;
+  let result = false;
   if (sourceType === destType) {
     if (sourceProps && destProps) {
       if (sourceProps.functionName && destProps.functionName) {
-        return sourceProps.functionName === destProps.functionName;
+        result = sourceProps.functionName === destProps.functionName;
       } else if (sourceProps.componentName && destProps.componentName) {
         if (sourceProps.forwardPath && destProps.forwardPath) {
           // if there is forwarding test all attributes
-          return sourceProps.componentName === destProps.componentName
+          result = sourceProps.componentName === destProps.componentName
             && sourceProps.componentInstance === destProps.componentInstance
             && sourceProps.propertyName === destProps.propertyName
             && sourceProps.forwardPath === destProps.forwardPath;
         } else {
           // if there is no forwarding test only component attributes
-          return sourceProps.componentName === destProps.componentName
+          result = sourceProps.componentName === destProps.componentName
             && sourceProps.componentInstance === destProps.componentInstance
             && sourceProps.propertyName === destProps.propertyName;
         }
       } else if (sourceProps.forwardPath && destProps.forwardPath) {
         // it is possible to set only forward path without component property target
-        return sourceProps.forwardPath === destProps.forwardPath;
+        result = sourceProps.forwardPath === destProps.forwardPath;
       }
     }
   }
-  return false;
+  return result;
 }
 
 function targetEventComparator (destEvent, sourceEvent) {
   return destEvent === sourceEvent || destEvent.name === sourceEvent.name;
 }
 
-function mergeEventTargets (destTargets, sourceTargets) {
-  if (destTargets !== sourceTargets) {
-    let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
-    resultTargets.forEach(resultTarget => {
-      const sameSourceTarget = sourceTargets.find(sourceTarget => eventTargetComparator(resultTarget, sourceTarget));
-      if (sameSourceTarget) {
-        const resultTargetEvents = unionWith(resultTarget.events, sameSourceTarget.events, targetEventComparator);
-        if (resultTargetEvents && resultTargetEvents.length > 0) {
-          resultTargetEvents.forEach(resultTargetEvent => {
-            let sameSourceTargetEvent;
-            if (sameSourceTarget.events && sameSourceTarget.events.length > 0) {
-              sameSourceTargetEvent =
-                sameSourceTarget.events.find(sourceTargetEvent => targetEventComparator(resultTargetEvent, sourceTargetEvent));
-            } else if (resultTarget.events && resultTarget.events.length > 0) {
-              sameSourceTargetEvent =
-                resultTarget.events.find(sourceTargetEvent => targetEventComparator(resultTargetEvent, sourceTargetEvent));
-            }
-            if (sameSourceTargetEvent) {
-              resultTargetEvent.targets = mergeEventTargets(resultTargetEvent.targets, sameSourceTargetEvent.targets);
-            }
-          });
-        }
-        resultTarget.events = resultTargetEvents;
+function mergeTargetEvents (destEvents, sourceEvents) {
+  let resultEvents = unionWith(destEvents, sourceEvents, targetEventComparator);
+  if (sourceEvents && sourceEvents.length > 0) {
+    let foundDestEvent;
+    sourceEvents.forEach(sourceEvent => {
+      foundDestEvent = resultEvents.find(i => targetEventComparator(i, sourceEvent));
+      if (foundDestEvent) {
+        foundDestEvent.targets = foundDestEvent.targets || [];
+        sourceEvent.targets = sourceEvent.targets || [];
+        foundDestEvent.targets = mergeEventTargets(foundDestEvent.targets, sourceEvent.targets);
+      } else {
+        resultEvents.push(sourceEvent);
       }
     });
-    return resultTargets;
   }
-  return destTargets;
+  return resultEvents;
+}
+
+function mergeEventTargets (destTargets, sourceTargets) {
+    let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
+    if (sourceTargets && sourceTargets.length > 0) {
+      let foundDestTarget;
+      sourceTargets.forEach(sourceTarget => {
+        foundDestTarget = resultTargets.find(i => eventTargetComparator(i, sourceTarget));
+        if (foundDestTarget) {
+          foundDestTarget.events = foundDestTarget.events || [];
+          sourceTarget.events = sourceTarget.events || [];
+          foundDestTarget.events = mergeTargetEvents(foundDestTarget.events, sourceTarget.events);
+        } else {
+          resultTargets.push(sourceTarget);
+        }
+      });
+    }
+    return resultTargets;
 }
 
 function getActionSequences (handlers, actionSequences = {}) {
@@ -172,26 +177,28 @@ function getActionSequences (handlers, actionSequences = {}) {
                     mergeEventTargets(existingHandlerEvent.targets, eventSequence.targets);
                 }
               } else {
+                eventSequence.targets = mergeEventTargets(eventSequence.targets, eventSequence.targets);
                 handlerObject.events.push(eventSequence);
               }
               actionSequences[key] = handlerObject;
             }
-            getActionSequences(event.targets, actionSequences);
+            actionSequences = getActionSequences(event.targets, actionSequences);
           }
         });
       }
     });
   }
+  return actionSequences;
 }
 
 function createActionSequencesRecursively (handlers, actionSequences = {}) {
   forOwn(handlers, value => {
     if (isArray(value)) {
       // only arrays should be exported as flow sequences otherwise the object is assumed as a nested sequences
-      getActionSequences(value, actionSequences);
+      actionSequences = getActionSequences(value, actionSequences);
     } else if (isObject(value)) {
       // if the handlers is object - it means we have a nested handlers description
-      createActionSequencesRecursively(value, actionSequences);
+      actionSequences = createActionSequencesRecursively(value, actionSequences);
     }
   });
   return actionSequences;

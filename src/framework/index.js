@@ -69,6 +69,7 @@ class Application extends React.Component {
               type: constants.FRAMEWORK_MESSAGE_INIT_DEBUG,
               payload: {
                 actionSequences: this.actionSequences,
+                targetProperties: this.targetProperties,
               },
             });
           }, 0);
@@ -104,8 +105,9 @@ class Application extends React.Component {
     clearActionsCache();
     const { routes, pages, flows } = schema;
     const { actionSequences, targetProperties } = createActionSequences(flows, userFunctions);
-    // store action sequences in case we have to send them for debug
+    // store action sequences and components properties in case we have to send them for debug
     this.actionSequences = actionSequences;
+    this.targetProperties = targetProperties;
     return (
       <Provider store={store}>
         <StartWrapper
