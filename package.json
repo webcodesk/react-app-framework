@@ -36,13 +36,12 @@
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
     "react-scripts": "2.1.1",
-    "redux-mock-store": "^1.5.3",
-    "weak": "^1.0.1"
+    "redux-mock-store": "^1.5.3"
   },
   "scripts": {
     "start": "cross-env BROWSER=none NODE_PATH=./src PORT=3040 react-scripts start",
     "build": "cross-env NODE_PATH=./src react-scripts build",
-    "test": "react-scripts test --detectLeaks --runInBand --env=jsdom --modulePaths=src",
+    "test": "react-scripts test --env=jsdom --modulePaths=src",
     "eject": "react-scripts eject",
     "dist": "cross-env NODE_ENV=development gulp --gulpfile ./gulpfile.js build",
     "server": "cross-env PORT=8080 node ./server.js"
