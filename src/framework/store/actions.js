@@ -155,22 +155,21 @@ function createTasks (targets, taskEventName) {
           // the function is called with null error object before each user function invocation
           // this will let user to do not worry about the clearing of the error object
           const caughtExceptionFunction = (error, dispatch, getState, helpers) => {
-            const eventTargetsCount =
-              executeUserFunctionDispatch(
-                events, innerTasks, DISPATCH_ERROR_TYPE, error, dispatch, getState, helpers
-              );
-            if (eventTargetsCount === 0 && error) {
-              if (process.env.NODE_ENV !== 'production') {
-                sendDebugMessage({
-                  key: props.functionKey,
-                  eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
-                  eventName: DISPATCH_ERROR_TYPE,
-                  outputData: error && error.message,
-                  functionName: props.functionName,
-                  timestamp: Date.now(),
-                });
-              }
-              console.error(`In "${props.functionName}" function ${error}. To remove this line try to assign the "${DISPATCH_ERROR_TYPE}" dispatch event of this function.`);
+            if (process.env.NODE_ENV !== 'production' && error) {
+              sendDebugMessage({
+                key: props.functionKey,
+                eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
+                eventName: DISPATCH_ERROR_TYPE,
+                outputData: error && error.message,
+                functionName: props.functionName,
+                timestamp: Date.now(),
+              });
+            }
+            executeUserFunctionDispatch(
+              events, innerTasks, DISPATCH_ERROR_TYPE, error, dispatch, getState, helpers
+            );
+            if (error) {
+              console.error(`In "${props.functionName}" function ${error.message}.`);
             }
           };
           // push function reference for user function dispatch
