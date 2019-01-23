@@ -42,48 +42,48 @@ describe('Actions', () => {
 
   });
 
-  it('repeat 10 times', () => {
-    let used = process.memoryUsage().heapUsed / 1024 / 1024;
-    console.log(`repeat 10 times before: approximately ${used} MB`);
+  // it('repeat 10 times', () => {
+  //   let used = process.memoryUsage().heapUsed / 1024 / 1024;
+  //   console.log(`repeat 10 times before: approximately ${used} MB`);
+  //
+  //   let sequence = Promise.resolve();
+  //   for(let i = 0; i < 10; i++) {
+  //     sequence = sequence.then(() => {
+  //       const containerActions = createContainerActions(containerKey, containerEvents);
+  //       store.dispatch(containerActions['onSubmit']());
+  //       return new Promise(resolve => {
+  //         setTimeout(() => {
+  //           resolve();
+  //         }, 2000);
+  //       })
+  //     });
+  //   }
+  //   return sequence.then(() => {
+  //     used = process.memoryUsage().heapUsed / 1024 / 1024;
+  //     console.log(`repeat 10 times after: approximately ${used} MB`);
+  //   });
+  // });
 
-    let sequence = Promise.resolve();
-    for(let i = 0; i < 10; i++) {
-      sequence = sequence.then(() => {
-        const containerActions = createContainerActions(containerKey, containerEvents);
-        store.dispatch(containerActions['onSubmit']());
-        return new Promise(resolve => {
-          setTimeout(() => {
-            resolve();
-          }, 2000);
-        })
-      });
-    }
-    return sequence.then(() => {
-      used = process.memoryUsage().heapUsed / 1024 / 1024;
-      console.log(`repeat 10 times after: approximately ${used} MB`);
-    });
-  });
-
-  it('repeat 100 times', () => {
-    let used = process.memoryUsage().heapUsed / 1024 / 1024;
-    console.log(`repeat 100 times before: approximately ${used} MB`);
-
-    let sequence = Promise.resolve();
-    for(let i = 0; i < 100; i++) {
-      sequence = sequence.then(() => {
-        const containerActions = createContainerActions(containerKey, containerEvents);
-        store.dispatch(containerActions['onSubmit']());
-        return new Promise(resolve => {
-          setTimeout(() => {
-            resolve();
-          }, 2000);
-        })
-      });
-    }
-    return sequence.then(() => {
-      used = process.memoryUsage().heapUsed / 1024 / 1024;
-      console.log(`repeat 100 times after: approximately ${used} MB`);
-    });
-  });
+  // it('repeat 100 times', () => {
+  //   let used = process.memoryUsage().heapUsed / 1024 / 1024;
+  //   console.log(`repeat 100 times before: approximately ${used} MB`);
+  //
+  //   let sequence = Promise.resolve();
+  //   for(let i = 0; i < 100; i++) {
+  //     sequence = sequence.then(() => {
+  //       const containerActions = createContainerActions(containerKey, containerEvents);
+  //       store.dispatch(containerActions['onSubmit']());
+  //       return new Promise(resolve => {
+  //         setTimeout(() => {
+  //           resolve();
+  //         }, 2000);
+  //       })
+  //     });
+  //   }
+  //   return sequence.then(() => {
+  //     used = process.memoryUsage().heapUsed / 1024 / 1024;
+  //     console.log(`repeat 100 times after: approximately ${used} MB`);
+  //   });
+  // });
 
 });

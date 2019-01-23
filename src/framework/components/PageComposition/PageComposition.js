@@ -3,6 +3,7 @@ import forOwn from 'lodash/forOwn';
 import uniqueId from 'lodash/uniqueId';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import isUndefined from 'lodash/isUndefined';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import NotFoundComponent from '../NotFoundComponent';
@@ -120,11 +121,11 @@ class PageComposition extends Component {
       let populatedProps = {};
       let containerProperties = [];
       const propertiesObject = targetProperties[containerKey];
-      const parameterValue = pageParams ? pageParams['parameter'] : null;
+      const parameterValue = pageParams ? pageParams['parameter'] : undefined;
       const normalizedRoutePath = routePath.substr(1).replace('/:parameter?', '');
       if (propertiesObject) {
         containerProperties = Object.keys(propertiesObject);
-        if (parameterValue || (pageQuery && !isEmpty(pageQuery))) {
+        if (!isUndefined(parameterValue) || (pageQuery && !isEmpty(pageQuery))) {
           forOwn(propertiesObject, (value, key) => {
             if (value && value.forwardPath === normalizedRoutePath) {
               populatedProps[key] = parameterValue || pageQuery;
