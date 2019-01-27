@@ -20,13 +20,13 @@ function getTargetPropertiesFromEvents (events, targetProperties) {
         targets.forEach(target => {
           const { type, props, events } = target;
           if (type === COMPONENT_TYPE && props) {
-            const { componentName, componentInstance, propertyName, forwardPath } = props;
+            const { componentName, componentInstance, propertyName, populatePath } = props;
             if (propertyName) {
               key = `${componentName}_${componentInstance}`;
               propertiesObject = targetProperties[key] || {};
               // tell the that this property should be bind to the http request query
               propertiesObject[propertyName] = merge({}, propertiesObject[propertyName], {
-                forwardPath
+                populatePath
               });
               targetProperties[key] = propertiesObject;
             }
@@ -162,7 +162,11 @@ function getActionSequences (handlers, actionSequences = {}) {
           let handlerObject;
           if (event && event.name && event.targets && event.targets.length > 0) {
             if (type === COMPONENT_TYPE) {
-              key = `${props.componentName}_${props.componentInstance}`;
+              if (props.forwardPath) {
+                key = `applicationPage_${props.forwardPath}`;
+              } else {
+                key = `${props.componentName}_${props.componentInstance}`;
+              }
               handlerObject = actionSequences[key]
                 || { ...props, componentKey: uniqueId('seqNode'), events: [] };
               const eventSequence = getEventSequence(event);
