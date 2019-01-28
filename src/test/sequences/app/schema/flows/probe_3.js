@@ -104,10 +104,22 @@ export default [
             type: "component",
             props: {
               forwardPath: "landingPage",
-              componentName: "usr.Landing.Landing",
-              componentInstance: "landingPane",
-              propertyName: "formHistory",
-            }
+            },
+            events: [
+              {
+                name: "queryParams",
+                targets: [
+                  {
+                    type: "component",
+                    props: {
+                      componentName: "usr.Landing.Landing",
+                      componentInstance: "landingPane",
+                      propertyName: "formHistory",
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
