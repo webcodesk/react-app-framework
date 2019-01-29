@@ -2,6 +2,27 @@
 
 exports[`Sequences create action sequences 1`] = `
 Object {
+  "applicationPage_landingPage": Object {
+    "componentKey": "seqNode14",
+    "events": Array [
+      Object {
+        "name": "queryParams",
+        "targets": Array [
+          Object {
+            "events": Array [],
+            "props": Object {
+              "componentInstance": "landingPane",
+              "componentKey": "seqNode15",
+              "componentName": "usr.Landing.Landing",
+              "propertyName": "formHistory",
+            },
+            "type": "component",
+          },
+        ],
+      },
+    ],
+    "forwardPath": "landingPage",
+  },
   "usr.Form.Form_form": Object {
     "componentInstance": "form",
     "componentKey": "seqNode1",
@@ -119,11 +140,8 @@ Object {
           Object {
             "events": Array [],
             "props": Object {
-              "componentInstance": "landingPane",
               "componentKey": "seqNode13",
-              "componentName": "usr.Landing.Landing",
               "forwardPath": "landingPage",
-              "propertyName": "formHistory",
             },
             "type": "component",
           },
@@ -131,7 +149,7 @@ Object {
             "events": Array [],
             "props": Object {
               "componentInstance": "landingPane2",
-              "componentKey": "seqNode14",
+              "componentKey": "seqNode16",
               "componentName": "usr.Landing.Landing",
               "propertyName": "formHistory",
             },
@@ -171,32 +189,32 @@ exports[`Sequences create action sequences 2`] = `
 Object {
   "usr.Header.Header_headerTest": Object {
     "errorText": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
   },
   "usr.Header.Header_headerTest1": Object {
     "title": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
   },
   "usr.Landing.Landing_landingPane": Object {
     "formHistory": Object {
-      "forwardPath": "landingPage",
+      "populatePath": undefined,
     },
   },
   "usr.Landing.Landing_landingPane2": Object {
     "formHistory": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
   },
   "usr.PaneInfo.PaneInfo_paneInfo": Object {
     "data": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
   },
   "usr.SubmitForm.SubmitForm_form": Object {
     "errors": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
   },
 }
@@ -206,7 +224,7 @@ exports[`Sequences merge sequences 1`] = `
 Object {
   "usr.Form.Form_form": Object {
     "componentInstance": "form",
-    "componentKey": "seqNode16",
+    "componentKey": "seqNode18",
     "componentName": "usr.Form.Form",
     "events": Array [
       Object {
@@ -226,7 +244,7 @@ Object {
                             "events": Array [],
                             "props": Object {
                               "componentInstance": "pane",
-                              "componentKey": "seqNode19",
+                              "componentKey": "seqNode21",
                               "componentName": "usr.Pane.Pane",
                               "propertyName": "data",
                             },
@@ -236,7 +254,7 @@ Object {
                             "events": Array [],
                             "props": Object {
                               "componentInstance": "form",
-                              "componentKey": "seqNode27",
+                              "componentKey": "seqNode29",
                               "componentName": "usr.Form.Form",
                               "propertyName": "formData",
                             },
@@ -246,7 +264,7 @@ Object {
                             "events": Array [],
                             "props": Object {
                               "componentInstance": "pane",
-                              "componentKey": "seqNode30",
+                              "componentKey": "seqNode32",
                               "componentName": "usr.Pane.Pane",
                               "propertyName": "data3",
                             },
@@ -255,7 +273,7 @@ Object {
                           Object {
                             "events": Array [],
                             "props": Object {
-                              "functionKey": "seqNode40",
+                              "functionKey": "seqNode42",
                               "functionName": "usr.api.myFunctions.showTransformedData",
                             },
                             "type": "userFunction",
@@ -264,7 +282,7 @@ Object {
                       },
                     ],
                     "props": Object {
-                      "functionKey": "seqNode18",
+                      "functionKey": "seqNode20",
                       "functionName": "usr.api.myFunctions.transformData",
                     },
                     "type": "userFunction",
@@ -278,7 +296,7 @@ Object {
                     "events": Array [],
                     "props": Object {
                       "componentInstance": "pane",
-                      "componentKey": "seqNode20",
+                      "componentKey": "seqNode22",
                       "componentName": "usr.Pane.Pane",
                       "propertyName": "data",
                     },
@@ -288,34 +306,9 @@ Object {
                     "events": Array [],
                     "props": Object {
                       "componentInstance": "pane",
-                      "componentKey": "seqNode21",
+                      "componentKey": "seqNode23",
                       "componentName": "usr.Pane.Pane",
                       "propertyName": "data4",
-                    },
-                    "type": "component",
-                  },
-                  Object {
-                    "events": Array [],
-                    "props": Object {
-                      "componentInstance": "pane",
-                      "componentKey": "seqNode36",
-                      "componentName": "usr.Pane.Pane",
-                      "propertyName": "data2",
-                    },
-                    "type": "component",
-                  },
-                ],
-              },
-              Object {
-                "name": "error",
-                "targets": Array [
-                  Object {
-                    "events": Array [],
-                    "props": Object {
-                      "componentInstance": "errorPane",
-                      "componentKey": "seqNode37",
-                      "componentName": "usr.ErrorPane.ErrorPane",
-                      "propertyName": "error",
                     },
                     "type": "component",
                   },
@@ -331,9 +324,34 @@ Object {
                   },
                 ],
               },
+              Object {
+                "name": "error",
+                "targets": Array [
+                  Object {
+                    "events": Array [],
+                    "props": Object {
+                      "componentInstance": "errorPane",
+                      "componentKey": "seqNode39",
+                      "componentName": "usr.ErrorPane.ErrorPane",
+                      "propertyName": "error",
+                    },
+                    "type": "component",
+                  },
+                  Object {
+                    "events": Array [],
+                    "props": Object {
+                      "componentInstance": "pane",
+                      "componentKey": "seqNode40",
+                      "componentName": "usr.Pane.Pane",
+                      "propertyName": "data2",
+                    },
+                    "type": "component",
+                  },
+                ],
+              },
             ],
             "props": Object {
-              "functionKey": "seqNode17",
+              "functionKey": "seqNode19",
               "functionName": "usr.api.myFunctions.function1",
             },
             "type": "userFunction",
@@ -344,7 +362,7 @@ Object {
   },
   "usr.Pane.Pane_pane": Object {
     "componentInstance": "pane",
-    "componentKey": "seqNode22",
+    "componentKey": "seqNode24",
     "componentName": "usr.Pane.Pane",
     "events": Array [
       Object {
@@ -359,7 +377,7 @@ Object {
                     "events": Array [],
                     "props": Object {
                       "componentInstance": "form",
-                      "componentKey": "seqNode24",
+                      "componentKey": "seqNode26",
                       "componentName": "usr.Form.Form",
                       "propertyName": "formData",
                     },
@@ -369,7 +387,7 @@ Object {
               },
             ],
             "props": Object {
-              "functionKey": "seqNode23",
+              "functionKey": "seqNode25",
               "functionName": "usr.api.myFunctions.transformData",
             },
             "type": "userFunction",
@@ -386,26 +404,26 @@ exports[`Sequences merge sequences 2`] = `
 Object {
   "usr.ErrorPane.ErrorPane_errorPane": Object {
     "error": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
   },
   "usr.Form.Form_form": Object {
     "formData": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
   },
   "usr.Pane.Pane_pane": Object {
     "data": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
     "data2": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
     "data3": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
     "data4": Object {
-      "forwardPath": undefined,
+      "populatePath": undefined,
     },
   },
 }
