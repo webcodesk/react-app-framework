@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
 class ComponentWrapper extends Component {
 
-  constructor (props, content) {
-    super(props, content);
+  constructor(props) {
+    super(props);
 
     this.initDOMNode = this.initDOMNode.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -15,9 +15,9 @@ class ComponentWrapper extends Component {
 
   }
 
-  initDOMNode () {
-    if (!this.$DOMNode) {
-      this.$DOMNode = ReactDOM.findDOMNode(this);
+  initDOMNode() {
+    this.$DOMNode = this.$DOMNode || ReactDOM.findDOMNode(this);
+    if (this.$DOMNode) {
       this.$DOMNode.addEventListener('mousedown', this.handleMouseDown, false);
       this.$DOMNode.addEventListener('mouseover', this.handleMouseOver, false);
       this.$DOMNode.addEventListener('mouseout', this.handleMouseOut, false);
@@ -36,28 +36,32 @@ class ComponentWrapper extends Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.initDOMNode();
-    const { elementKey, isSelected } = this.props;
+    const {elementKey, isSelected} = this.props;
     if (isSelected) {
-      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {detail: {
+      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
+        detail: {
           elementKey,
           domNode: this.$DOMNode
-        }}));
+        }
+      }));
     }
   }
 
-  componentDidUpdate (prevProps, prevState, snapshot) {
-    const { elementKey, isSelected } = this.props;
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const {elementKey, isSelected} = this.props;
     if (isSelected) {
-      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {detail: {
+      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
+        detail: {
           elementKey,
           domNode: this.$DOMNode
-        }}));
+        }
+      }));
     }
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     if (this.$DOMNode) {
       this.$DOMNode.removeEventListener('mousedown', this.handleMouseDown);
       this.$DOMNode.removeEventListener('mouseover', this.handleMouseOver);
@@ -78,7 +82,7 @@ class ComponentWrapper extends Component {
     this.$DOMNode = undefined;
   }
 
-  handleMouseDown (e) {
+  handleMouseDown(e) {
     e.stopPropagation();
     e.preventDefault();
     const {elementKey, onMouseDown} = this.props;
@@ -87,34 +91,38 @@ class ComponentWrapper extends Component {
     }
   }
 
-  handleContextMenu (e) {
+  handleContextMenu(e) {
     e.stopPropagation();
     e.preventDefault();
   }
 
-  handleMouseOver (e) {
+  handleMouseOver(e) {
     const {elementKey} = this.props;
-    window.dispatchEvent(new CustomEvent('mouseOverComponentWrapper', {detail: {
-      elementKey,
-      domNode: this.$DOMNode
-    }}));
+    window.dispatchEvent(new CustomEvent('mouseOverComponentWrapper', {
+      detail: {
+        elementKey,
+        domNode: this.$DOMNode
+      }
+    }));
   }
 
-  handleMouseOut (e) {
+  handleMouseOut(e) {
     const {elementKey} = this.props;
-    window.dispatchEvent(new CustomEvent('mouseOutComponentWrapper', {detail: {
+    window.dispatchEvent(new CustomEvent('mouseOutComponentWrapper', {
+      detail: {
         elementKey,
         domNode: this.$DOMNode,
         remove: true,
-      }}));
+      }
+    }));
   }
 
-  handleNoop (e) {
-      e.stopPropagation();
-      e.preventDefault();
+  handleNoop(e) {
+    e.stopPropagation();
+    e.preventDefault();
   }
 
-  render () {
+  render() {
     const {wrappedComponent, wrappedProps, children} = this.props;
     return React.createElement(wrappedComponent, wrappedProps, children);
   }
