@@ -25,9 +25,9 @@ if (process.env.NODE_ENV !== 'production') {
 let store;
 let history;
 
-export const initStore = (name, version) => {
+export const initStore = (name, version, initialState = {}) => {
   history = createBrowserHistory();
-  store = configureStore({}, { history }, { name, version });
+  store = configureStore(initialState, { history }, { name, version });
 
   if (process.env.NODE_ENV !== 'production') {
     if (electron) {
