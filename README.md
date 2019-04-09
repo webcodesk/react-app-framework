@@ -1,3 +1,3 @@
 ### React Application Framework for Webcodesk
 
-work in progress...
+When the critical mass of the  We lose the high-level understanding of our app. 
