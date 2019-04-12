@@ -1,4 +1,4 @@
-### React Application Framework for Webcodesk
+# React Application Framework for Webcodesk
 
 When the amount of the Redux boilerplate code become critical, we lose the high-level understanding of our app. 
 As our app grows, a perception which container is responsible for specific data becomes increasingly difficult. 
