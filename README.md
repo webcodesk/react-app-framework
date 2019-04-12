@@ -19,7 +19,7 @@ The best way to explain something is to provide an example. The example below is
 
 Let's take a look at two different implementations of a simple use-case where the user enters its name into the input field in the form, and the header panel on the page displays greeting text with the entered name.
 
-Both implementations use pre-created and reusable React components: Form and TitlePanel.
+Both implementations use pre-created and reusable React components: `Form` and `TitlePanel`.
 
 ```javascript
 import React from 'react';
@@ -120,7 +120,7 @@ export default TitlePanel;
 
 ## Example with Redux
 
-The first implementation is a classic way to create a single Web application with Redux.
+The first implementation is a classic way to create a single page Web application with Redux.
 
 > If you don't want to create files and write code, get the source code of the example 
 from [simple_example_redux](https://github.com/ipselon/simple_example_redux)
