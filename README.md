@@ -9,7 +9,9 @@ places where we usually keep business logic - and can be contained and described
 
 Such a flow can be described using JSON, and our UI can directly be driven by its description.
 
-It does not mean that describing the logic in JSON format is easier to do or read by the human. Although, this approach let me built Webcodesk - a tool that makes JSON configurations on the fly and reduces the boilerplate code to zero.
+It does not mean that describing the logic in JSON format is easier to do or read by the human. 
+Although, this approach let me built Webcodesk - a tool that makes JSON configurations on the fly and 
+reduces the boilerplate code to zero.
 
 > Be patient and read through the article to understand how react-app-framework works and what are advantages of using Webcodesk.
 
@@ -118,12 +120,12 @@ export default TitlePanel;
 
 ## Example with Redux
 
-The first implementation is a classic way to create a single web application with Redux.
+The first implementation is a classic way to create a single Web application with Redux.
 
 > If you don't want to create files and write code, get the source code of the example 
 from [simple_example_redux](https://github.com/ipselon/simple_example_redux)
 
-Bootstrap the project with create-react-app:
+Bootstrap the project with `create-react-app`:
 ```
 npx create-react-app simple-example-1
 ```
@@ -133,7 +135,7 @@ Install Redux dependencies:
 yarn add redux react-redux
 ```
 
-Add Form and TitlePanel source code files into the `components` folder.
+Add `Form` and `TitlePanel` source code files into the `components` folder.
 
 Here is the initial project's file structure including `Form` and `TitlePanel` components files: 
 ```
@@ -284,7 +286,7 @@ src/
 
 Where:
 
-* `app` - a directory that react-app-framework uses for component index files, Redux storage config, page and routes configuration.
+* `app` - a directory that `react-app-framework` uses for component index files, Redux storage config, page and routes configuration.
 * `etc` - a directory with configuration files for Webcodesk, we don't use it now, because we are going to do everything manually.
 * `usr` - a directory, where we keep our source code.
 
@@ -321,7 +323,7 @@ import components from './components';
 export default {components};
 ```
 
-Doing this we set up index files that tell `react-app-framework` where is React components are.
+Doing this we set up index files that tell `react-app-framework` where the React components are.
 
 Now we should add components into the `main` page. 
 There is already a configuration for the `main` page in the `src/app/schema/pages` folder.
@@ -383,7 +385,7 @@ The `dispatch` is a callback method which is injected by the framework during th
 The first argument of the callback is the identification for the object which is passed in as the second argument. 
 This is similar to the action type in action creators in Redux.
 
-Remember the name of the `greeting` dispatch - we use it in the flow configuration.
+> Remember the name of the `greeting` dispatch - we use it in the flow configuration.
 
 The function in `react-app-framework` is considered as a decoupled and independent component too. 
 That's why we have to add the function into index files in the `src/app` directory in order the framework finds the function.
@@ -412,6 +414,12 @@ It's time to add the last piece of the application - a flow.
 The flow is a description that shows how components, functions, and pages are connected in the application.
 
 > You can think about the flow as the configuration of a use-case that should be implemented.
+
+> You may have a lot of use-cases in the real-world application. However, feel free to create any amount of the different flows in the application. 
+Even though you have to implement almost equal data flows with slightly different scenarios, 
+and with the same elements, `react-app-framework` reconciles all flows in one big flow where equal parts are merged. 
+Many separate flows that describe different use cases give you the ability to easily modify different parts of overall 
+application logic.
 
 Find the `start.js` file in `src/app/schema/flows` directory. 
 This is a sample flow config which we should replace with our configuration.
