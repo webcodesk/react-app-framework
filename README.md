@@ -10,7 +10,7 @@ places where we usually keep business logic - and can be contained and described
 Such a flow can be described using JSON, and our UI can directly be driven by its description.
 
 It does not mean that describing the logic in JSON format is easier to do or read by the human. 
-Although, this approach let me built Webcodesk - a tool that makes JSON configurations on the fly and 
+Although, this approach let me built [Webcodesk](https://webcodesk.com) - a tool that makes JSON configurations on the fly and 
 reduces the boilerplate code to zero.
 
 > Be patient and read through the article to understand how react-app-framework works and what are advantages of using Webcodesk.
