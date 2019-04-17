@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import createBrowserHistory from 'history/createBrowserHistory';
+import { createBrowserHistory } from 'history';
 import { configureStore } from './store/store';
 import { clearActionsCache } from './store/actions';
 import { createActionSequences } from './store/sequences';
