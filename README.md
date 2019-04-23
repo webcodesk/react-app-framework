@@ -9,15 +9,18 @@ places where we usually keep business logic - and can be contained and described
 
 Such a flow can be described using JSON, and our UI can directly be driven by its description.
 
-It does not mean that describing the logic in JSON format is easier to do or read by the human. 
+It does not mean that describing the logic in JSON format is more comfortable to write than any boilerplate code. 
 Although, this approach let me built [Webcodesk](https://webcodesk.com) - a tool that makes JSON configurations on the fly and 
 reduces the boilerplate code to zero.
 
 > Be patient and read through the article to understand how react-app-framework works and what are advantages of using Webcodesk.
 
-The best way to explain something is to provide an example. The example below is a simple proof of concept I have put together to show you how you can use the event flow description instead of writing Redux code.
+The best way to explain something is to provide an example. 
+The example below is a simple proof of concept I have put together to show you how you can use the event 
+flow description instead of writing Redux code.
 
-Let's take a look at two different implementations of a simple use-case where the user enters its name into the input field in the form, and the header panel on the page displays greeting text with the entered name.
+Let's take a look at two different implementations of a simple use-case where the user enters its name 
+into the input field in the form, and the header panel on the page displays greeting text with the entered name.
 
 Both implementations use pre-created and reusable React components: `Form` and `TitlePanel`.
 
