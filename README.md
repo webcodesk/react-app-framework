@@ -1,5 +1,17 @@
 # React Application Framework for Webcodesk
 
+#### Installation
+
+```
+yanr add @webcodesk/reac-app-framework
+```
+or
+```
+npm install @webcodesk/react-app-framework
+```
+
+## Philosophy and usage
+
 When the amount of the Redux boilerplate code become critical, we lose the high-level understanding of our app. 
 As our app grows, a perception which container is responsible for specific data becomes increasingly difficult. 
 We have to jump back and forth between files to understand the data flow in the particular use-case.
