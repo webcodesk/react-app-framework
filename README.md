@@ -3,7 +3,7 @@
 #### Installation
 
 ```
-yarn add @webcodesk/reac-app-framework
+yarn add @webcodesk/react-app-framework
 ```
 or
 ```
