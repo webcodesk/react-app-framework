@@ -505,3 +505,9 @@ Webcodesk creates all the necessary configs in the project automatically.
 The only thing you have to do is to drag and drop components into the pages and draw visual flow in the flow editor.
 
 Go to through [the beginner tutorial](https://webcodesk.com/documentation) where you can create a real-world application in Webcodesk.
+
+# License
+
+MIT License
+
+Copyright (c) 2019 [Oleksandr (Alex) Pustovalov](https://github.com/ipselon)
