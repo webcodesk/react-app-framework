@@ -13,8 +13,6 @@ It does not mean that describing the logic in JSON format is more comfortable to
 Although, this approach let me built [Webcodesk](https://webcodesk.com) - a tool that makes JSON configurations on the fly and 
 reduces the boilerplate code to zero.
 
-> Be patient and read through the article to understand how react-app-framework works and what are advantages of using Webcodesk.
-
 The best way to explain something is to provide an example. 
 The example below is a simple proof of concept I have put together to show you how you can use the event 
 flow description instead of writing Redux code.
@@ -495,6 +493,3 @@ Webcodesk creates all the necessary configs in the project automatically.
 The only thing you have to do is to drag and drop components into the pages and draw visual flow in the flow editor.
 
 Go to through [the beginner tutorial](https://webcodesk.com/documentation) where you can create a real-world application in Webcodesk.
-
-
- 
