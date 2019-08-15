@@ -14,11 +14,49 @@ if (process.env.NODE_ENV !== 'production') {
   constants = require('../commons/constants');
 }
 
+function transformFirstArgument (elementKey, transformInput, firstArgument, defaultArgument) {
+  let firstArgumentResult = null;
+  if (transformInput) {
+    // get the transformation function from the cache
+    let transformFunction = transformFunctionsCache.get(elementKey);
+    if (!transformFunction) {
+      try {
+        // if there is a transformation in props save it into the cache as new Function
+        const newTransformFunction = new Function('input', transformInput);
+        transformFunctionsCache.set(elementKey, newTransformFunction);
+        transformFunction = newTransformFunction;
+      } catch (error) {
+        console.error(`[Framework] In input transformation function "${transformInput.substr(0, 200)}${transformInput.length > 200 ? '...' : ''}" has error: "${error.message}".`);
+      }
+    }
+    try {
+      firstArgumentResult = transformFunction(firstArgument);
+    } catch (error) {
+      console.error(`Transformation function error: ${error.message}`);
+      firstArgumentResult = firstArgument;
+    }
+  } else {
+    firstArgumentResult = firstArgument;
+  }
+  // merge or set in case there is null in default argument
+  if (defaultArgument) {
+    if (isString(defaultArgument) || isNumber(defaultArgument) || isArray(defaultArgument)) {
+      firstArgumentResult = firstArgumentResult || defaultArgument
+    } else if (isObject(defaultArgument)) {
+      firstArgumentResult = {...firstArgumentResult, ...defaultArgument};
+    }
+  }
+  return firstArgumentResult;
+}
+
 function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) {
   if (props) {
     const {
-      componentName, componentInstance, propertyName, forwardPath, componentKey
+      componentName, componentInstance, propertyName, forwardPath, componentKey, transformInput
     } = props;
+    console.info('Component property payload before transform: ', payload);
+    payload = transformFirstArgument(componentKey, transformInput, payload);
+    console.info('Component property payload after transform: ', payload);
     if (forwardPath && helpers) {
       const { history } = helpers;
       if (history) {
@@ -127,7 +165,7 @@ function createTasks (targets, taskEventName) {
       if (type === USER_FUNCTION_TYPE && props) {
         const func = getUserFunctionByName(props.functionName);
         if (func) {
-          // First we need to check if there is a user function sequence
+          // we need to check if there is a user function sequence
           let innerTasks = {};
           if (events && events.length > 0) {
             events.forEach(innerEvent => {
@@ -169,7 +207,7 @@ function createTasks (targets, taskEventName) {
               events, innerTasks, DISPATCH_ERROR_TYPE, error, dispatch, getState, helpers
             );
             if (error) {
-              console.error(`In "${props.functionName}" function ${error.message}.`);
+              console.error(`[Framework] In "${props.functionName}" function ${error.message}.`);
             }
           };
           // push function reference for user function dispatch
@@ -189,7 +227,14 @@ function createTasks (targets, taskEventName) {
                     timestamp: Date.now(),
                   });
                 }
-                const userFunctionInstance = func.apply(null, [args[0]]);
+                // before execute the function we have to transform the input argument if needed
+                const firstArgument =
+                  transformFirstArgument(props.functionKey, props.transformInput, args[0], props.defaultArgument);
+                // the secondary argument is used in the store items function
+                // to determine if we are reading from the store item or writing to it
+                const userFunctionInstance = props.secondaryArgument
+                  ? func.apply(null, [firstArgument, props.secondaryArgument])
+                  : func.apply(null, [firstArgument]);
                 try {
                   // dispatch caughtException as null to the assigned targets
                   caughtExceptionFunction(null, dispatch, getState, helpers);
@@ -268,9 +313,11 @@ function createActions (eventHandlers) {
 }
 
 const actionsCache = new Map();
+const transformFunctionsCache = new Map();
 
 export function clearActionsCache () {
   actionsCache.clear();
+  transformFunctionsCache.clear();
 }
 
 export default function (eventHandlersKey, eventHandlers) {

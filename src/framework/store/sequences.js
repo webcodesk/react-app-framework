@@ -6,7 +6,9 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
+import isEqual from 'lodash/isEqual';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE } from './constants';
+import frameworkFunctions from './functions';
 
 let userFunctions = {};
 
@@ -89,19 +91,25 @@ function eventTargetComparator (destTarget, sourceTarget) {
   if (sourceType === destType) {
     if (sourceProps && destProps) {
       if (sourceProps.functionName && destProps.functionName) {
-        result = sourceProps.functionName === destProps.functionName;
+        // if there is only function test inputs
+        result = sourceProps.functionName === destProps.functionName
+          && sourceProps.transformInput === sourceProps.transformInput
+          && isEqual(sourceProps.defaultArgument || {}, destProps.defaultArgument || {})
+          && isEqual(sourceProps.secondaryArgument || {}, destProps.secondaryArgument || {});
       } else if (sourceProps.componentName && destProps.componentName) {
         if (sourceProps.forwardPath && destProps.forwardPath) {
           // if there is forwarding test all attributes
           result = sourceProps.componentName === destProps.componentName
             && sourceProps.componentInstance === destProps.componentInstance
             && sourceProps.propertyName === destProps.propertyName
-            && sourceProps.forwardPath === destProps.forwardPath;
+            && sourceProps.forwardPath === destProps.forwardPath
+            && sourceProps.transformInput === sourceProps.transformInput;
         } else {
           // if there is no forwarding test only component attributes
           result = sourceProps.componentName === destProps.componentName
             && sourceProps.componentInstance === destProps.componentInstance
-            && sourceProps.propertyName === destProps.propertyName;
+            && sourceProps.propertyName === destProps.propertyName
+            && sourceProps.transformInput === sourceProps.transformInput;
         }
       } else if (sourceProps.forwardPath && destProps.forwardPath) {
         // it is possible to set only forward path without component property target
@@ -209,7 +217,7 @@ function createActionSequencesRecursively (handlers, actionSequences = {}) {
 }
 
 export function createActionSequences (handlers, functions) {
-  userFunctions = functions;
+  userFunctions = {...functions, ...frameworkFunctions};
   const actionSequences = createActionSequencesRecursively(handlers);
   const targetProperties = deriveTargetProperties(actionSequences);
   return { actionSequences, targetProperties };
