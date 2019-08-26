@@ -4,6 +4,7 @@ import uniqueId from 'lodash/uniqueId';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import isUndefined from 'lodash/isUndefined';
+import isArray from 'lodash/isArray';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import NotFoundComponent from '../NotFoundComponent';
@@ -65,8 +66,17 @@ class PageComposition extends Component {
     const propsComponents = {};
     if (props) {
       forOwn(props, (value, prop) => {
-        if (value && value.type && value.instance) {
-          propsComponents[prop] = this.renderComponent(value);
+        if (value) {
+          if (isArray(value) && value.length > 0) {
+            propsComponents[prop] = [];
+            value.forEach(valueItem => {
+              if (valueItem && valueItem.type && valueItem.instance) {
+                propsComponents[prop].push(this.renderComponent(valueItem));
+              }
+            });
+          } else if (value && value.type && value.instance) {
+            propsComponents[prop] = this.renderComponent(value);
+          }
         }
       });
     }
@@ -156,7 +166,7 @@ class PageComposition extends Component {
         componentKey,
         containerHandlers,
         containerProperties,
-        { key: key || containerKey, ...props, ...populatedProps, ...propsComponents },
+        { key: key || `${containerKey}_${uniqueId('c')}`, ...props, ...populatedProps, ...propsComponents },
         nestedComponents
       );
     }

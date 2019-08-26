@@ -1,4 +1,6 @@
 import get from 'lodash/get';
+import set from 'lodash/set';
+import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 import PropTypes from 'prop-types';
 import ComponentWrapper from "./ComponentWrapper";
@@ -30,7 +32,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions) =
     if (!type || !props) {
       return result;
     }
-    const { componentName, elementProperty, isSelected } = props;
+    const { componentName, propertiesValue, elementProperty, isSelected } = props;
 
     result.key = elementProperty;
 
@@ -44,12 +46,12 @@ const renderComponent = (userComponents, description, serviceComponentOptions) =
       };
       result.value = React.createElement(Placeholder, placeholderProps);
     } else if (type === 'pageComponent') {
-      let propsComponents = {};
+      let propsComponents = cloneDeep(propertiesValue);
       if (children && children.length > 0) {
         children.forEach(child => {
           const { key, value } = renderComponent(userComponents, child, serviceComponentOptions);
           if (key) {
-            propsComponents[key] = value;
+            set(propsComponents, key, value);
           }
         });
       }

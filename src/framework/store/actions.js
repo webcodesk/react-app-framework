@@ -235,11 +235,12 @@ function createTasks (targets, taskEventName) {
                 const userFunctionInstance = props.secondaryArgument
                   ? func.apply(null, [firstArgument, props.secondaryArgument])
                   : func.apply(null, [firstArgument]);
+                console.info('PropTypes instance in call: ', props.functionName, args[1]);
                 try {
                   // dispatch caughtException as null to the assigned targets
                   caughtExceptionFunction(null, dispatch, getState, helpers);
                   // now execute dispatching of the events objects to the targets
-                  const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
+                  const userFunctionResult = userFunctionInstance((dispatchType, payload, propTypesInstance) => {
                     // user function is invoked now
                     if (process.env.NODE_ENV !== 'production') {
                       sendDebugMessage({
@@ -251,6 +252,7 @@ function createTasks (targets, taskEventName) {
                         timestamp: Date.now(),
                       });
                     }
+                    console.info('PropTypes instance in dispatch: ', props.functionName, dispatchType, propTypesInstance);
                     dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
                   });
                   // here user returns a Promise and there may be the error

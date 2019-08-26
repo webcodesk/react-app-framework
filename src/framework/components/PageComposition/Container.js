@@ -85,7 +85,8 @@ class Container extends React.Component {
                 timestamp: Date.now(),
               });
             }
-            handlerAction.apply(null, [args[0]]);
+            // console.info('In wrapper container default props: ', this.defaultProps);
+            handlerAction.apply(null, [args[0], args[1]]);
           } else {
             console.error(
               `[Framework] Event handler was not found for ${eventHandler.name} event in ${componentName} instance ${componentInstance}`
