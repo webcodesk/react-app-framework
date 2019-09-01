@@ -25,53 +25,125 @@ if (process.env.NODE_ENV !== 'production') {
 // https://github.com/gaearon/react-hot-loader/issues/934
 let storeComponentsTree;
 
-const renderComponent = (userComponents, description, serviceComponentOptions) => {
-  const result = {};
+const renderComponent = (userComponents, description, serviceComponentOptions, rootProps) => {
   if (description) {
     const {type, key, props, children} = description;
     if (!type || !props) {
-      return result;
+      return rootProps;
     }
-    const { componentName, propertiesValue, elementProperty, isSelected } = props;
-
-    result.key = elementProperty;
-
-    if (type === 'pagePlaceholder') {
+    const { componentName, propertyName, propertyValue, isSelected } = props;
+    if (type === constants.COMPONENT_PROPERTY_ELEMENT_TYPE) {
       const placeholderProps = {
-        ...props,
         key,
         elementKey: key,
-        elementProperty,
+        elementProperty: propertyName,
         ...serviceComponentOptions
       };
-      result.value = React.createElement(Placeholder, placeholderProps);
-    } else if (type === 'pageComponent') {
-      let propsComponents = cloneDeep(propertiesValue);
-      if (children && children.length > 0) {
-        children.forEach(child => {
-          const { key, value } = renderComponent(userComponents, child, serviceComponentOptions);
-          if (key) {
-            set(propsComponents, key, value);
-          }
-        });
+      const newElement = React.createElement(Placeholder, placeholderProps);
+      if (rootProps) {
+        if (propertyName) {
+          rootProps[propertyName] = newElement;
+        } else {
+          rootProps.push(newElement);
+        }
+      } else {
+        // only placeholder component can be the root element
+        rootProps = newElement;
       }
+    } else if (type === constants.PAGE_COMPONENT_TYPE) {
+      let newElement;
       const component = get(userComponents, componentName, null);
       if (component) {
+        let propsComponent = {};
+        if (children && children.length > 0) {
+          children.forEach(child => {
+            propsComponent = renderComponent(userComponents, child, serviceComponentOptions, propsComponent);
+          });
+        }
         const wrapperProps = {
           key,
           elementKey: key,
-          wrappedProps: propsComponents,
+          wrappedProps: propsComponent,
           wrappedComponent: component,
           isSelected,
           ...serviceComponentOptions,
         };
-        result.value = React.createElement(ComponentWrapper, wrapperProps);
+        newElement = React.createElement(ComponentWrapper, wrapperProps);
       } else {
-        result.value = React.createElement(NotFoundComponent, {componentName});
+        newElement = React.createElement(NotFoundComponent, {componentName});
+      }
+      if (rootProps) {
+        if (propertyName) {
+          // component assigned to some named property in the
+          rootProps[propertyName] = newElement;
+        } else {
+          rootProps.push(newElement);
+        }
+      } else {
+        // only page component can be the root element
+        rootProps = newElement;
+      }
+    } else if (type === constants.COMPONENT_PROPERTY_ARRAY_TYPE
+      || type === constants.COMPONENT_PROPERTY_OBJECT_TYPE) {
+      if (rootProps) {
+        if (propertyName) {
+          if (propertyValue) {
+            rootProps[propertyName] = cloneDeep(propertyValue);
+          } else {
+            rootProps[propertyName] = null;
+          }
+        } else {
+          if (propertyValue) {
+            rootProps = cloneDeep(propertyValue);
+          }
+        }
+      }
+    } else if (type === constants.COMPONENT_PROPERTY_SHAPE_TYPE) {
+      let newObject = {};
+      if (children && children.length > 0) {
+        children.forEach(child => {
+          newObject = renderComponent(userComponents, child, serviceComponentOptions, newObject);
+        });
+      }
+      if (rootProps) {
+        if (propertyName) {
+          rootProps[propertyName] = newObject;
+        } else {
+          rootProps.push(newObject);
+        }
+      }
+    } else if (type === constants.COMPONENT_PROPERTY_ARRAY_OF_TYPE) {
+      let newArrayModel = [];
+      if (children && children.length > 0) {
+        children.forEach(child => {
+          newArrayModel = renderComponent(userComponents, child, serviceComponentOptions, newArrayModel);
+        });
+      }
+      if (rootProps) {
+        if (propertyName) {
+          rootProps[propertyName] = newArrayModel;
+        } else {
+          rootProps.push(newArrayModel);
+        }
+      }
+    } else if (type === constants.COMPONENT_PROPERTY_STRING_TYPE
+      || type === constants.COMPONENT_PROPERTY_ONE_OF_TYPE
+      || type === constants.COMPONENT_PROPERTY_SYMBOL_TYPE
+      || type === constants.COMPONENT_PROPERTY_BOOL_TYPE
+      || type === constants.COMPONENT_PROPERTY_ANY_TYPE
+      || type === constants.COMPONENT_PROPERTY_NUMBER_TYPE) {
+      if (rootProps) {
+        if (propertyName) {
+          rootProps[propertyName] = propertyValue || null;
+        } else {
+          if (propertyValue) {
+            rootProps.push(propertyValue);
+          }
+        }
       }
     }
   }
-  return result;
+  return rootProps;
 };
 
 class PageComposer extends React.Component {
@@ -188,7 +260,7 @@ class PageComposer extends React.Component {
       draggedItem,
       onMouseDown: this.handleSelectCell,
     });
-    return rootComponent.value;
+    return rootComponent;
   }
 
   renderElectronError() {
