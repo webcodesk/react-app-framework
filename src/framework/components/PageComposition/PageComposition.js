@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import isUndefined from 'lodash/isUndefined';
 import isArray from 'lodash/isArray';
+import isPlainObject from 'lodash/isObject';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import NotFoundComponent from '../NotFoundComponent';
@@ -46,6 +47,52 @@ class PageComposition extends Component {
     this.renderComponent = this.renderComponent.bind(this);
   }
 
+  renderShape (descriptionShape) {
+    const result = {};
+    forOwn(descriptionShape, (value, prop) => {
+      if (value) {
+        if (isArray(value) && value.length > 0){
+          result[prop] = this.renderArray(value);
+        } else if (isPlainObject(value)) {
+          if (value.type && value.instance) {
+            result[prop] = this.renderComponent(value);
+          } else {
+            result[prop] = this.renderShape(value);
+          }
+        } else {
+          result[prop] = value;
+        }
+      } else {
+        result[prop] = value;
+      }
+    });
+    return result;
+  }
+
+  renderArray (descriptionArray) {
+    const result = [];
+    if (descriptionArray.length > 0) {
+      descriptionArray.forEach(descriptionItem => {
+        if (descriptionItem) {
+          if (isArray(descriptionItem)) {
+            result.push(this.renderArray(descriptionItem));
+          } else if (isPlainObject(descriptionItem)) {
+            if (descriptionItem.type && descriptionItem.instance) {
+              result.push(this.renderComponent(descriptionItem));
+            } else {
+              result.push(this.renderShape(descriptionItem));
+            }
+          } else {
+            result.push(descriptionItem);
+          }
+        } else {
+          result.push(descriptionItem);
+        }
+      });
+    }
+    return result;
+  }
+
   renderComponent (description) {
     const {
       userComponents,
@@ -59,6 +106,7 @@ class PageComposition extends Component {
     if (!description) {
       return null;
     }
+
     const { type, instance, key, props, children } = description;
     if (!type) {
       return null;
@@ -67,16 +115,19 @@ class PageComposition extends Component {
     if (props) {
       forOwn(props, (value, prop) => {
         if (value) {
-          if (isArray(value) && value.length > 0) {
-            propsComponents[prop] = [];
-            value.forEach(valueItem => {
-              if (valueItem && valueItem.type && valueItem.instance) {
-                propsComponents[prop].push(this.renderComponent(valueItem));
-              }
-            });
-          } else if (value && value.type && value.instance) {
-            propsComponents[prop] = this.renderComponent(value);
+          if (isArray(value)) {
+            propsComponents[prop] = this.renderArray(value);
+          } else if (isPlainObject(value)) {
+            if (value.type && value.instance) {
+              propsComponents[prop] = this.renderComponent(value);
+            } else {
+              propsComponents[prop] = this.renderShape(value);
+            }
+          } else {
+            propsComponents[props] = value;
           }
+        } else {
+          propsComponents[props] = value;
         }
       });
     }
