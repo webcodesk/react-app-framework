@@ -2,7 +2,9 @@ import { createSelector } from 'reselect';
 
 const select = (componentName, componentInstance, propertyName) => (state) => {
   const instanceState = state[`${componentName}_${componentInstance}`];
+  console.info('instanceState: ', instanceState);
   if (instanceState) {
+    console.info('instanceState: ', propertyName, instanceState[propertyName]);
     return instanceState[propertyName];
   }
   return undefined;

@@ -39,38 +39,19 @@ class ErrorBoundary extends React.Component {
 
 class Container extends React.Component {
 
-  shouldComponentUpdate (nextProps, nextState, nextContext) {
-    if (process.env.NODE_ENV !== 'production') {
-      if (nextProps.stateProps !== this.props.stateProps) {
-        const { componentName, componentInstance, componentKey } = this.props;
-        sendDebugMessage({
-          key: componentKey,
-          eventType: constants.DEBUG_MSG_NEW_PROPS_EVENT,
-          inputData: nextProps.stateProps,
-          componentName,
-          componentInstance,
-          timestamp: Date.now(),
-        });
-      }
-    }
-    return true;
-  }
-
-  render () {
+  constructor (props, context) {
+    super(props, context);
     const {
-      wrappedComponent,
       wrappedProps,
-      stateProps,
       componentName,
       componentInstance,
       componentKey,
-      children
     } = this.props;
-    const wrappedHandlers = {};
+    this.wrappedHandlers = {};
     const { containerEventHandlers, actions } = this.props;
     if (containerEventHandlers && containerEventHandlers.length > 0) {
       containerEventHandlers.forEach(eventHandler => {
-        wrappedHandlers[eventHandler.name] = function () {
+        this.wrappedHandlers[eventHandler.name] = function () {
           const args = arguments;
           const handlerAction = actions[eventHandler.name];
           if (handlerAction) {
@@ -95,7 +76,35 @@ class Container extends React.Component {
         };
       });
     }
-    return React.createElement(wrappedComponent, { ...stateProps, ...wrappedProps, ...wrappedHandlers }, children);
+    this.wrappedHandlers = { ...wrappedProps, ...this.wrappedHandlers };
+  }
+
+  shouldComponentUpdate (nextProps, nextState, nextContext) {
+    if (process.env.NODE_ENV !== 'production') {
+      if (nextProps.stateProps !== this.props.stateProps) {
+        const { componentName, componentInstance, componentKey } = this.props;
+        sendDebugMessage({
+          key: componentKey,
+          eventType: constants.DEBUG_MSG_NEW_PROPS_EVENT,
+          inputData: nextProps.stateProps,
+          componentName,
+          componentInstance,
+          timestamp: Date.now(),
+        });
+      }
+    }
+    return true;
+  }
+
+  render () {
+    const {
+      wrappedComponent,
+      stateProps,
+      children
+    } = this.props;
+    console.info('stateProps: ', stateProps);
+    console.info('wrappedHandlers: ', this.wrappedHandlers);
+    return React.createElement(wrappedComponent, { ...this.wrappedHandlers, ...stateProps }, children);
   }
 }
 
@@ -109,6 +118,7 @@ export default function createContainer (
   props = {},
   nestedComponents = null
 ) {
+  console.info('container properties: ', containerProperties);
   if ((containerProperties && containerProperties.length > 0)
     || (containerEventHandlers && containerEventHandlers.length > 0)) {
     // create a connected container only for components that participate in the flow
@@ -120,6 +130,8 @@ export default function createContainer (
     const innerStructuresSelectorObject = {};
     if (containerProperties && containerProperties.length > 0) {
       containerProperties.forEach(propertyName => {
+        console.info('container property: ', componentName, componentInstance);
+        console.info('container property: ', propertyName);
         innerStructuresSelectorObject[propertyName] =
           createContainerSelector(componentName, componentInstance, propertyName);
       });
