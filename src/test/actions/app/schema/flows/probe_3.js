@@ -13,14 +13,7 @@ export default [
             type: "userFunction",
             props: {
               functionName: "framework.storeItemFunction",
-              defaultArgument: {
-
-              },
-              secondaryArgument: {
-                storeItemName: "myInputObject",
-                storeItemAction: "getItem"
-              },
-              transformInput: "function (input) { return input; }"
+              transformScript: "function (input) { return input; }"
             },
             events: [
               {
@@ -32,7 +25,7 @@ export default [
                       componentName: "usr.Panel.Panel",
                       componentInstance: "panel",
                       propertyName: "notificationText",
-                      transformInput: "function (input) { return input; }"
+                      transformScript: "function (input) { return input; }"
                     },
                   }
                 ]
@@ -46,7 +39,7 @@ export default [
                       componentName: "usr.Form.Form",
                       componentInstance: "form",
                       propertyName: "delayedObject",
-                      transformInput: "function (input) { return input; }"
+                      transformScript: "function (input) { return input; }"
                     },
                   }
                 ]

@@ -1,10 +1,8 @@
 import get from 'lodash/get';
-import set from 'lodash/set';
 import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 import PropTypes from 'prop-types';
 import ComponentWrapper from "./ComponentWrapper";
-import Placeholder from './Placeholder';
 import NotFoundComponent from '../NotFoundComponent';
 import WarningComponent from '../WarningComponent';
 import * as mouseOverBoundaries from './mouseOverBoundaries';
@@ -37,9 +35,10 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
         key,
         elementKey: key,
         elementProperty: propertyName,
+        isSelected,
         ...serviceComponentOptions
       };
-      const newElement = React.createElement(Placeholder, placeholderProps);
+      const newElement = React.createElement(ComponentWrapper, placeholderProps);
       if (rootProps) {
         if (propertyName) {
           rootProps[propertyName] = newElement;
@@ -165,6 +164,8 @@ class PageComposer extends React.Component {
     this.itemWasDropped = this.itemWasDropped.bind(this);
 
     this.handleSelectCell = this.handleSelectCell.bind(this);
+    this.handleContextMenuClick = this.handleContextMenuClick.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
 
     this.state = {
       componentsTree: storeComponentsTree || {},
@@ -178,6 +179,7 @@ class PageComposer extends React.Component {
     }
     mouseOverBoundaries.initElements();
     selectedBoundaries.initElements();
+    window.addEventListener('keydown', this.handleKeyDown);
   }
 
   componentWillUnmount() {
@@ -186,6 +188,7 @@ class PageComposer extends React.Component {
     }
     mouseOverBoundaries.destroyElements();
     selectedBoundaries.destroyElements();
+    window.removeEventListener('keydown', this.handleKeyDown);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -249,6 +252,66 @@ class PageComposer extends React.Component {
     });
   }
 
+  handleContextMenuClick(cellKey) {
+    this.sendMessage({
+      type: constants.FRAMEWORK_MESSAGE_CONTEXT_MENU_CLICKED,
+      payload: {
+        targetKey: cellKey,
+      }
+    });
+  }
+
+  handleKeyDown(e) {
+    console.info(e);
+    console.info('Key code: ', e.keyCode, e.metaKey, e.ctrlKey);
+    if (e) {
+      const {keyCode, metaKey, ctrlKey} = e;
+      if (metaKey || ctrlKey) {
+        if (keyCode === 90) { // Undo
+          this.sendMessage({
+            type: constants.FRAMEWORK_MESSAGE_UNDO,
+          });
+        } else if (keyCode === 67) { // Copy
+          this.sendMessage({
+            type: constants.FRAMEWORK_MESSAGE_COPY,
+          });
+        } else if (keyCode === 86) { // Paste
+          this.sendMessage({
+            type: constants.FRAMEWORK_MESSAGE_PASTE,
+          });
+        } else if (keyCode === 88) { // Cut
+          this.sendMessage({
+            type: constants.FRAMEWORK_MESSAGE_CUT,
+          });
+        } else if (keyCode === 83) { // Save
+          this.sendMessage({
+            type: constants.FRAMEWORK_MESSAGE_SAVE,
+          });
+        } else if (keyCode === 82) { // Reload
+          this.sendMessage({
+            type: constants.FRAMEWORK_MESSAGE_RELOAD,
+          });
+        }
+      } else {
+        if (keyCode === 8 || keyCode === 46) { // Delete
+          this.sendMessage({
+            type: constants.FRAMEWORK_MESSAGE_DELETE,
+          });
+        }
+      }
+    }
+    // ctrl + z - Undo
+    // 90 + metaKey || ctrlKey
+    // ctrl + c - Copy
+    // 67 + metaKey || ctrlKey
+    // ctrl + v - Paste
+    // 86 + metaKey || ctrlKey
+    // ctrl + x - Cut
+    // 88
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
   renderPage() {
     const {userComponents} = this.props;
     const {
@@ -259,6 +322,7 @@ class PageComposer extends React.Component {
       itemWasDropped: this.itemWasDropped,
       draggedItem,
       onMouseDown: this.handleSelectCell,
+      onContextMenuClick: this.handleContextMenuClick,
     });
     return rootComponent;
   }

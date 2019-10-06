@@ -93,9 +93,7 @@ function eventTargetComparator (destTarget, sourceTarget) {
       if (sourceProps.functionName && destProps.functionName) {
         // if there is only function test inputs
         result = sourceProps.functionName === destProps.functionName
-          && sourceProps.transformInput === sourceProps.transformInput
-          && isEqual(sourceProps.defaultArgument || {}, destProps.defaultArgument || {})
-          && isEqual(sourceProps.secondaryArgument || {}, destProps.secondaryArgument || {});
+          && sourceProps.transformScript === sourceProps.transformScript;
       } else if (sourceProps.componentName && destProps.componentName) {
         if (sourceProps.forwardPath && destProps.forwardPath) {
           // if there is forwarding test all attributes
@@ -103,13 +101,13 @@ function eventTargetComparator (destTarget, sourceTarget) {
             && sourceProps.componentInstance === destProps.componentInstance
             && sourceProps.propertyName === destProps.propertyName
             && sourceProps.forwardPath === destProps.forwardPath
-            && sourceProps.transformInput === sourceProps.transformInput;
+            && sourceProps.transformScript === sourceProps.transformScript;
         } else {
           // if there is no forwarding test only component attributes
           result = sourceProps.componentName === destProps.componentName
             && sourceProps.componentInstance === destProps.componentInstance
             && sourceProps.propertyName === destProps.propertyName
-            && sourceProps.transformInput === sourceProps.transformInput;
+            && sourceProps.transformScript === sourceProps.transformScript;
         }
       } else if (sourceProps.forwardPath && destProps.forwardPath) {
         // it is possible to set only forward path without component property target
