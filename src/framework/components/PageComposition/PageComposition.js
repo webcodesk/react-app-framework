@@ -124,10 +124,10 @@ class PageComposition extends Component {
               propsComponents[prop] = this.renderShape(value);
             }
           } else {
-            propsComponents[props] = value;
+            propsComponents[prop] = value;
           }
         } else {
-          propsComponents[props] = value;
+          propsComponents[prop] = value;
         }
       });
     }

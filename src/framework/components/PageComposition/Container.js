@@ -42,7 +42,6 @@ class Container extends React.Component {
   constructor (props, context) {
     super(props, context);
     const {
-      wrappedProps,
       componentName,
       componentInstance,
       componentKey,
@@ -76,7 +75,6 @@ class Container extends React.Component {
         };
       });
     }
-    this.wrappedHandlers = { ...wrappedProps, ...this.wrappedHandlers };
   }
 
   shouldComponentUpdate (nextProps, nextState, nextContext) {
@@ -99,12 +97,15 @@ class Container extends React.Component {
   render () {
     const {
       wrappedComponent,
+      wrappedProps,
       stateProps,
       children
     } = this.props;
-    console.info('stateProps: ', stateProps);
-    console.info('wrappedHandlers: ', this.wrappedHandlers);
-    return React.createElement(wrappedComponent, { ...this.wrappedHandlers, ...stateProps }, children);
+    return React.createElement(
+      wrappedComponent,
+      { ...wrappedProps, ...this.wrappedHandlers, ...stateProps },
+      children
+    );
   }
 }
 
@@ -118,7 +119,7 @@ export default function createContainer (
   props = {},
   nestedComponents = null
 ) {
-  console.info('container properties: ', containerProperties);
+
   if ((containerProperties && containerProperties.length > 0)
     || (containerEventHandlers && containerEventHandlers.length > 0)) {
     // create a connected container only for components that participate in the flow
@@ -130,8 +131,6 @@ export default function createContainer (
     const innerStructuresSelectorObject = {};
     if (containerProperties && containerProperties.length > 0) {
       containerProperties.forEach(propertyName => {
-        console.info('container property: ', componentName, componentInstance);
-        console.info('container property: ', propertyName);
         innerStructuresSelectorObject[propertyName] =
           createContainerSelector(componentName, componentInstance, propertyName);
       });

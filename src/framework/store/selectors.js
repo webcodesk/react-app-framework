@@ -1,11 +1,18 @@
 import { createSelector } from 'reselect';
 
-const select = (componentName, componentInstance, propertyName) => (state) => {
+const select = (componentName, componentInstance, propertyName) => (state, props) => {
   const instanceState = state[`${componentName}_${componentInstance}`];
-  console.info('instanceState: ', instanceState);
   if (instanceState) {
-    console.info('instanceState: ', propertyName, instanceState[propertyName]);
-    return instanceState[propertyName];
+    if (props) {
+      if (instanceState[propertyName] !== undefined) {
+        return instanceState[propertyName];
+      }
+      return props.wrappedProps[propertyName];
+    } else {
+      return instanceState[propertyName]
+    }
+  } else if (props) {
+    return props.wrappedProps[propertyName];
   }
   return undefined;
 };
