@@ -2,11 +2,9 @@ import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 import PropTypes from 'prop-types';
-import ComponentWrapper from "./ComponentWrapper";
 import NotFoundComponent from '../NotFoundComponent';
 import WarningComponent from '../WarningComponent';
-import * as mouseOverBoundaries from './mouseOverBoundaries';
-import * as selectedBoundaries from './selectedBoundaries';
+import Placeholder from './Placeholder';
 
 let electron;
 if (window.require) {
@@ -18,33 +16,39 @@ if (process.env.NODE_ENV !== 'production') {
   constants = require('../../commons/constants');
 }
 
+// ToDo: remove once the WebpackDevServer fixes HMR - it should preserve React components state (now it does not)
+// https://github.com/webpack/webpack-dev-server/issues/1377
+// https://github.com/gaearon/react-hot-loader/issues/934
+let storeComponentsTree;
+
 function sendMessage(message) {
   if (message) {
     electron.ipcRenderer.sendToHost('message', message);
   }
 }
 
-// ToDo: remove once the WebpackDevServer fixes HMR - it should preserve React components state (now it does not)
-// https://github.com/webpack/webpack-dev-server/issues/1377
-// https://github.com/gaearon/react-hot-loader/issues/934
-let storeComponentsTree;
+const handleComponentEvent = (eventName) => (args) => {
+  if (process.env.NODE_ENV !== 'production') {
+    sendMessage({
+      type: constants.FRAMEWORK_MESSAGE_COMPONENT_EVENT,
+      payload: {
+        eventName,
+        args,
+        timestamp: Date.now(),
+      }
+    });
+  }
+};
 
-const renderComponent = (userComponents, description, serviceComponentOptions, rootProps) => {
+const renderComponent = (userComponents, description, rootProps) => {
   if (description) {
     const {type, key, props, children} = description;
     if (!type || !props) {
       return rootProps;
     }
-    const { componentName, propertyName, propertyValue, isSelected } = props;
+    const { componentName, propertyName, propertyValue } = props;
     if (type === constants.COMPONENT_PROPERTY_ELEMENT_TYPE) {
-      const placeholderProps = {
-        key,
-        elementKey: key,
-        elementProperty: propertyName,
-        isSelected,
-        ...serviceComponentOptions
-      };
-      const newElement = React.createElement(ComponentWrapper, placeholderProps);
+      const newElement = React.createElement(Placeholder, {key});
       if (rootProps) {
         if (propertyName) {
           rootProps[propertyName] = newElement;
@@ -62,18 +66,10 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
         let propsComponent = {};
         if (children && children.length > 0) {
           children.forEach(child => {
-            propsComponent = renderComponent(userComponents, child, serviceComponentOptions, propsComponent);
+            propsComponent = renderComponent(userComponents, child, propsComponent);
           });
         }
-        const wrapperProps = {
-          key,
-          elementKey: key,
-          wrappedProps: propsComponent,
-          wrappedComponent: component,
-          isSelected,
-          ...serviceComponentOptions,
-        };
-        newElement = React.createElement(ComponentWrapper, wrapperProps);
+        newElement = React.createElement(component, propsComponent, {key});
       } else {
         newElement = React.createElement(NotFoundComponent, {componentName});
       }
@@ -107,7 +103,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
       let newObject = {};
       if (children && children.length > 0) {
         children.forEach(child => {
-          newObject = renderComponent(userComponents, child, serviceComponentOptions, newObject);
+          newObject = renderComponent(userComponents, child, newObject);
         });
       }
       if (rootProps) {
@@ -117,11 +113,15 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
           rootProps.push(newObject);
         }
       }
+    } else if (type === constants.COMPONENT_PROPERTY_FUNCTION_TYPE) {
+      if (rootProps && propertyName) {
+        rootProps[propertyName] = handleComponentEvent(propertyName);
+      }
     } else if (type === constants.COMPONENT_PROPERTY_ARRAY_OF_TYPE) {
       let newArrayModel = [];
       if (children && children.length > 0) {
         children.forEach(child => {
-          newArrayModel = renderComponent(userComponents, child, serviceComponentOptions, newArrayModel);
+          newArrayModel = renderComponent(userComponents, child, newArrayModel);
         });
       }
       if (rootProps) {
@@ -151,7 +151,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
   return rootProps;
 };
 
-class PageComposer extends React.Component {
+class ComponentComposer extends React.Component {
   static propTypes = {
     userComponents: PropTypes.object,
   };
@@ -166,15 +166,9 @@ class PageComposer extends React.Component {
     this.renderPage = this.renderPage.bind(this);
     this.handleReceiveMessage = this.handleReceiveMessage.bind(this);
     this.renderElectronError = this.renderElectronError.bind(this);
-    this.itemWasDropped = this.itemWasDropped.bind(this);
-
-    this.handleSelectCell = this.handleSelectCell.bind(this);
-    this.handleContextMenuClick = this.handleContextMenuClick.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
 
     this.state = {
       componentsTree: storeComponentsTree || {},
-      draggedItem: null,
     };
   }
 
@@ -182,27 +176,17 @@ class PageComposer extends React.Component {
     if (electron) {
       electron.ipcRenderer.on('message', this.handleReceiveMessage);
     }
-    mouseOverBoundaries.initElements();
-    selectedBoundaries.initElements();
-    window.addEventListener('keydown', this.handleKeyDown);
   }
 
   componentWillUnmount() {
     if (electron) {
       electron.ipcRenderer.removeListener('message', this.handleReceiveMessage);
     }
-    mouseOverBoundaries.destroyElements();
-    selectedBoundaries.destroyElements();
-    window.removeEventListener('keydown', this.handleKeyDown);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const {
-      componentsTree,
-      draggedItem,
-    } = this.state;
-    return componentsTree !== nextState.componentsTree
-      || draggedItem !== nextState.draggedItem;
+    const { componentsTree } = this.state;
+    return componentsTree !== nextState.componentsTree;
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -219,109 +203,14 @@ class PageComposer extends React.Component {
         this.setState({
           componentsTree: payload,
         });
-      } else if(type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_START) {
-        this.setState({
-          draggedItem: payload,
-        })
-      } else if(type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_END) {
-        this.setState({
-          draggedItem: null,
-        })
-      } else if(type === constants.WEBCODESK_MESSAGE_DELETE_PAGE_COMPONENT) {
-        window.dispatchEvent(new CustomEvent('selectComponentWrapper', {detail: {
-            domNode: null
-          }}));
       }
     }
-  }
-
-  itemWasDropped(testItem) {
-    sendMessage({
-      type: constants.FRAMEWORK_MESSAGE_COMPONENT_ITEM_WAS_DROPPED,
-      payload: testItem
-    });
-  }
-
-  handleSelectCell(cellKey) {
-    sendMessage({
-      type: constants.FRAMEWORK_MESSAGE_PAGE_CELL_WAS_SELECTED,
-      payload: {
-        targetKey: cellKey,
-      }
-    });
-  }
-
-  handleContextMenuClick(cellKey) {
-    sendMessage({
-      type: constants.FRAMEWORK_MESSAGE_CONTEXT_MENU_CLICKED,
-      payload: {
-        targetKey: cellKey,
-      }
-    });
-  }
-
-  handleKeyDown(e) {
-    if (e) {
-      const {keyCode, metaKey, ctrlKey} = e;
-      if (metaKey || ctrlKey) {
-        if (keyCode === 90) { // Undo
-          sendMessage({
-            type: constants.FRAMEWORK_MESSAGE_UNDO,
-          });
-        } else if (keyCode === 67) { // Copy
-          sendMessage({
-            type: constants.FRAMEWORK_MESSAGE_COPY,
-          });
-        } else if (keyCode === 86) { // Paste
-          sendMessage({
-            type: constants.FRAMEWORK_MESSAGE_PASTE,
-          });
-        } else if (keyCode === 88) { // Cut
-          sendMessage({
-            type: constants.FRAMEWORK_MESSAGE_CUT,
-          });
-        } else if (keyCode === 83) { // Save
-          sendMessage({
-            type: constants.FRAMEWORK_MESSAGE_SAVE,
-          });
-        } else if (keyCode === 82) { // Reload
-          sendMessage({
-            type: constants.FRAMEWORK_MESSAGE_RELOAD,
-          });
-        }
-      } else {
-        if (keyCode === 8 || keyCode === 46) { // Delete
-          sendMessage({
-            type: constants.FRAMEWORK_MESSAGE_DELETE,
-          });
-        }
-      }
-    }
-    // ctrl + z - Undo
-    // 90 + metaKey || ctrlKey
-    // ctrl + c - Copy
-    // 67 + metaKey || ctrlKey
-    // ctrl + v - Paste
-    // 86 + metaKey || ctrlKey
-    // ctrl + x - Cut
-    // 88
-    e.stopPropagation();
-    e.preventDefault();
   }
 
   renderPage() {
-    const {userComponents} = this.props;
-    const {
-      componentsTree,
-      draggedItem,
-    } = this.state;
-    const rootComponent = renderComponent(userComponents, componentsTree, {
-      itemWasDropped: this.itemWasDropped,
-      draggedItem,
-      onMouseDown: this.handleSelectCell,
-      onContextMenuClick: this.handleContextMenuClick,
-    });
-    return rootComponent;
+    const { userComponents } = this.props;
+    const { componentsTree } = this.state;
+    return renderComponent(userComponents, componentsTree);
   }
 
   renderElectronError() {
@@ -339,4 +228,4 @@ class PageComposer extends React.Component {
   }
 }
 
-export default PageComposer;
+export default ComponentComposer;

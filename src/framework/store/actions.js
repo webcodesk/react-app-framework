@@ -50,9 +50,7 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
     const {
       componentName, componentInstance, propertyName, forwardPath, componentKey, transformScript
     } = props;
-    console.info('Component property payload before transform: ', {componentName, componentInstance, propertyName, forwardPath, componentKey, transformScript}, payload);
     const transformedPayload = transformFirstArgument(componentKey, transformScript, payload);
-    console.info('Component property payload after transform: ', {componentName, componentInstance, propertyName, forwardPath, componentKey, transformScript}, payload);
     if (forwardPath && helpers) {
       const { history } = helpers;
       if (history) {

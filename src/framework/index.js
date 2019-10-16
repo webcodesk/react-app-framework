@@ -9,6 +9,7 @@ import { resetStoreItems } from './store/functions';
 import PageRouter from './components/PageRouter';
 import StartWrapper from './components/StartWrapper';
 import WarningComponent from './components/WarningComponent';
+import ComponentComposer from './components/ComponentComposer';
 
 let constants;
 let ComponentView;
@@ -16,7 +17,7 @@ let PageComposer;
 let electron;
 if (process.env.NODE_ENV !== 'production') {
   constants = require('./commons/constants');
-  ComponentView = require('./components/ComponentView/ComponentView').default;
+  ComponentView = require('./components/ComponentComposer/ComponentComposer').default;
   PageComposer = require('./components/PageComposer/PageComposer').default;
   if (window.require) {
     electron = window.require('electron');
@@ -87,15 +88,12 @@ class Application extends React.Component {
         <WarningComponent message="Redux store is not initialized." />
       );
     }
-    const { schema, userComponents, userFunctions, userComponentStories } = this.props;
+    const { schema, userComponents, userFunctions } = this.props;
     if (process.env.NODE_ENV !== 'production') {
       const href = window.location.href;
       if (href.indexOf('/webcodesk__component_view') > 0) {
         return (
-          <ComponentView
-            userComponents={userComponents}
-            userComponentStories={userComponentStories}
-          />
+          <ComponentComposer userComponents={userComponents} />
         );
       } else if(href.indexOf('/webcodesk__page_composer') > 0) {
         return (

@@ -20,13 +20,10 @@ function testPrimaryArgument(primaryArgument) {
 
 const storeItemFunction = (primaryArgument, secondaryArgument) => (dispatch) => {
   let foundStoreItem = null;
-  console.info('[Framework] storeItemFunction: ', {primaryArgument});
   if (secondaryArgument) {
-    console.info('[Framework] storeItemFunction: ', {secondaryArgument});
     const {storeItemName, storeItemAction} = secondaryArgument;
     if (storeItemName && storeItemName.length > 0 && storeItemAction && storeItemAction.length > 0) {
       if (storeItemAction === STORE_ITEM_ACTION_SET) {
-        console.info('[Framework] storeItemFunction set item: ', {primaryArgument});
         // search for the existing item
         foundStoreItem = storeItemsMap.get(storeItemName);
         if (foundStoreItem) {
@@ -39,22 +36,18 @@ const storeItemFunction = (primaryArgument, secondaryArgument) => (dispatch) => 
             storeItemsMap.delete(storeItemName);
           }
         } else {
-          console.info('[Framework] storeItemFunction assign new: ', {primaryArgument});
           // we didn't find the existing item, so test the new object
           if (testPrimaryArgument(primaryArgument)) {
             foundStoreItem = {...primaryArgument};
           }
         }
         if (foundStoreItem) {
-          console.info('[Framework] storeItemFunction save new item: ', {storeItemName, foundStoreItem});
           // save the new item: merged or new one
           storeItemsMap.set(storeItemName, foundStoreItem);
         }
       } else if (storeItemAction === STORE_ITEM_ACTION_GET) {
         // search for the existing item
-        console.info('[Framework] storeItemFunction get item: ', {storeItemName});
         foundStoreItem = storeItemsMap.get(storeItemName);
-        console.info('[Framework] storeItemFunction get existing item: ', {foundStoreItem});
       }
     }
   }

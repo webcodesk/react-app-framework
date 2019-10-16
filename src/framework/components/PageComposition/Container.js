@@ -65,7 +65,6 @@ class Container extends React.Component {
                 timestamp: Date.now(),
               });
             }
-            // console.info('In wrapper container default props: ', this.defaultProps);
             handlerAction.apply(null, [args[0], args[1]]);
           } else {
             console.error(
