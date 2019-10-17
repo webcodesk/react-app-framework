@@ -49,7 +49,11 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
         if (propertyName) {
           rootProps[propertyName] = newElement;
         } else {
-          rootProps.push(newElement);
+          if (rootProps.push) {
+            rootProps.push(newElement);
+          } else {
+            console.error('It seems that you missed propertyName in the page component target in the page config.');
+          }
         }
       } else {
         // only placeholder component can be the root element
@@ -82,7 +86,11 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
           // component assigned to some named property in the
           rootProps[propertyName] = newElement;
         } else {
-          rootProps.push(newElement);
+          if (rootProps.push) {
+            rootProps.push(newElement);
+          } else {
+            console.error('It seems that you missed propertyName in the page component target in the page config.');
+          }
         }
       } else {
         // only page component can be the root element
@@ -114,7 +122,11 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
         if (propertyName) {
           rootProps[propertyName] = newObject;
         } else {
-          rootProps.push(newObject);
+          if (rootProps.push) {
+            rootProps.push(newObject);
+          } else {
+            console.error('It seems that you missed propertyName in the page component target in the page config.');
+          }
         }
       }
     } else if (type === constants.COMPONENT_PROPERTY_ARRAY_OF_TYPE) {
@@ -128,7 +140,11 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
         if (propertyName) {
           rootProps[propertyName] = newArrayModel;
         } else {
-          rootProps.push(newArrayModel);
+          if (rootProps.push) {
+            rootProps.push(newArrayModel);
+          } else {
+            console.error('It seems that you missed propertyName in the page component target in the page config.');
+          }
         }
       }
     } else if (type === constants.COMPONENT_PROPERTY_STRING_TYPE
@@ -142,7 +158,11 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
           rootProps[propertyName] = propertyValue || null;
         } else {
           if (propertyValue) {
-            rootProps.push(propertyValue);
+            if (rootProps.push) {
+              rootProps.push(propertyValue);
+            } else {
+              console.error('It seems that you missed propertyName in the page component target in the page config.');
+            }
           }
         }
       }
