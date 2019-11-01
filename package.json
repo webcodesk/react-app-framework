@@ -1,6 +1,6 @@
 {
   "name": "@webcodesk/react-app-framework",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
@@ -10,8 +10,8 @@
   "license": "MIT",
   "description": "React App Framework for Webcodesk",
   "dependencies": {
-    "lodash": "4.17.13",
-    "prop-types": "15.6.2",
+    "lodash": "4.17.15",
+    "prop-types": "15.7.2",
     "query-string": "6.2.0",
     "react-redux": "7.1.1",
     "react-router-dom": "5.1.2",
