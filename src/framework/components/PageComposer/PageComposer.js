@@ -2,16 +2,11 @@ import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 import PropTypes from 'prop-types';
+import queryString from 'query-string';
 import ComponentWrapper from "./ComponentWrapper";
 import NotFoundComponent from '../NotFoundComponent';
-import WarningComponent from '../WarningComponent';
 import * as mouseOverBoundaries from './mouseOverBoundaries';
 import * as selectedBoundaries from './selectedBoundaries';
-
-let electron;
-if (window.require) {
-  electron = window.require('electron');
-}
 
 let constants;
 if (process.env.NODE_ENV !== 'production') {
@@ -20,7 +15,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 function sendMessage(message) {
   if (message) {
-    electron.ipcRenderer.sendToHost('message', message);
+    window.parent.postMessage(message, '*');
   }
 }
 
@@ -185,7 +180,6 @@ class PageComposer extends React.Component {
 
     this.renderPage = this.renderPage.bind(this);
     this.handleReceiveMessage = this.handleReceiveMessage.bind(this);
-    this.renderElectronError = this.renderElectronError.bind(this);
     this.itemWasDropped = this.itemWasDropped.bind(this);
 
     this.handleSelectCell = this.handleSelectCell.bind(this);
@@ -195,34 +189,37 @@ class PageComposer extends React.Component {
     this.state = {
       componentsTree: storeComponentsTree || {},
       draggedItem: null,
+      draggedItemPosition: null,
     };
   }
 
   componentDidMount () {
-    if (electron) {
-      electron.ipcRenderer.on('message', this.handleReceiveMessage);
+    const paramsMap = queryString.parse(window.location.search);
+    if (paramsMap && paramsMap.iframeId) {
+      this.iframeId = paramsMap.iframeId;
     }
+    window.addEventListener("message", this.handleReceiveMessage, false);
     mouseOverBoundaries.initElements();
     selectedBoundaries.initElements();
-    window.addEventListener('keydown', this.handleKeyDown);
+    window.document.addEventListener('keydown', this.handleKeyDown);
   }
 
   componentWillUnmount() {
-    if (electron) {
-      electron.ipcRenderer.removeListener('message', this.handleReceiveMessage);
-    }
+    window.removeEventListener("message", this.handleReceiveMessage);
     mouseOverBoundaries.destroyElements();
     selectedBoundaries.destroyElements();
-    window.removeEventListener('keydown', this.handleKeyDown);
+    window.document.removeEventListener('keydown', this.handleKeyDown);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     const {
       componentsTree,
       draggedItem,
+      draggedItemPosition
     } = this.state;
     return componentsTree !== nextState.componentsTree
-      || draggedItem !== nextState.draggedItem;
+      || draggedItem !== nextState.draggedItem
+      || draggedItemPosition !== nextState.draggedItemPosition;
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -232,25 +229,35 @@ class PageComposer extends React.Component {
     }
   }
 
-  handleReceiveMessage(event, message) {
+  handleReceiveMessage(event) {
+    const {data: message} = event;
     if (message) {
-      const {type, payload} = message;
-      if (type === constants.WEBCODESK_MESSAGE_UPDATE_PAGE_COMPONENTS_TREE) {
-        this.setState({
-          componentsTree: payload,
-        });
-      } else if(type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_START) {
-        this.setState({
-          draggedItem: payload,
-        })
-      } else if(type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_END) {
-        this.setState({
-          draggedItem: null,
-        })
-      } else if(type === constants.WEBCODESK_MESSAGE_DELETE_PAGE_COMPONENT) {
-        window.dispatchEvent(new CustomEvent('selectComponentWrapper', {detail: {
-            domNode: null
-          }}));
+      const {type, payload, sourceId} = message;
+      if (sourceId === this.iframeId) {
+        if (type === constants.WEBCODESK_MESSAGE_UPDATE_PAGE_COMPONENTS_TREE) {
+          this.setState({
+            componentsTree: payload,
+          });
+        } else if (type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_START) {
+          this.setState({
+            draggedItem: payload,
+          });
+        } else if (type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_END) {
+          this.setState({
+            draggedItem: null,
+            draggedItemPosition: null,
+          });
+        } else if (type === constants.WEBCODESK_MESSAGE_COMPONENT_ITEM_DRAG_MOVE) {
+          this.setState({
+            draggedItemPosition: payload,
+          });
+        } else if (type === constants.WEBCODESK_MESSAGE_DELETE_PAGE_COMPONENT) {
+          window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
+            detail: {
+              domNode: null
+            }
+          }));
+        }
       }
     }
   }
@@ -258,7 +265,8 @@ class PageComposer extends React.Component {
   itemWasDropped(testItem) {
     sendMessage({
       type: constants.FRAMEWORK_MESSAGE_COMPONENT_ITEM_WAS_DROPPED,
-      payload: testItem
+      payload: testItem,
+      sourceId: this.iframeId
     });
   }
 
@@ -267,7 +275,8 @@ class PageComposer extends React.Component {
       type: constants.FRAMEWORK_MESSAGE_PAGE_CELL_WAS_SELECTED,
       payload: {
         targetKey: cellKey,
-      }
+      },
+      sourceId: this.iframeId
     });
   }
 
@@ -276,7 +285,8 @@ class PageComposer extends React.Component {
       type: constants.FRAMEWORK_MESSAGE_CONTEXT_MENU_CLICKED,
       payload: {
         targetKey: cellKey,
-      }
+      },
+      sourceId: this.iframeId
     });
   }
 
@@ -287,32 +297,39 @@ class PageComposer extends React.Component {
         if (keyCode === 90) { // Undo
           sendMessage({
             type: constants.FRAMEWORK_MESSAGE_UNDO,
+            sourceId: this.iframeId
           });
         } else if (keyCode === 67) { // Copy
           sendMessage({
             type: constants.FRAMEWORK_MESSAGE_COPY,
+            sourceId: this.iframeId
           });
         } else if (keyCode === 86) { // Paste
           sendMessage({
             type: constants.FRAMEWORK_MESSAGE_PASTE,
+            sourceId: this.iframeId
           });
         } else if (keyCode === 88) { // Cut
           sendMessage({
             type: constants.FRAMEWORK_MESSAGE_CUT,
+            sourceId: this.iframeId
           });
         } else if (keyCode === 83) { // Save
           sendMessage({
             type: constants.FRAMEWORK_MESSAGE_SAVE,
+            sourceId: this.iframeId
           });
         } else if (keyCode === 82) { // Reload
           sendMessage({
             type: constants.FRAMEWORK_MESSAGE_RELOAD,
+            sourceId: this.iframeId
           });
         }
       } else {
         if (keyCode === 8 || keyCode === 46) { // Delete
           sendMessage({
             type: constants.FRAMEWORK_MESSAGE_DELETE,
+            sourceId: this.iframeId
           });
         }
       }
@@ -334,24 +351,20 @@ class PageComposer extends React.Component {
     const {
       componentsTree,
       draggedItem,
+      draggedItemPosition
     } = this.state;
     const rootComponent = renderComponent(userComponents, componentsTree, {
       itemWasDropped: this.itemWasDropped,
       draggedItem,
+      draggedItemPosition,
       onMouseDown: this.handleSelectCell,
       onContextMenuClick: this.handleContextMenuClick,
     });
     return rootComponent;
   }
 
-  renderElectronError() {
-    return (
-      <WarningComponent message="Works only in Electron" />
-    );
-  }
-
   render () {
-    let content = electron ? this.renderPage() : this.renderElectronError();
+    let content = this.renderPage();
     if (content) {
       return content;
     }

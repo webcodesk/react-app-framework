@@ -3,13 +3,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 import PropTypes from 'prop-types';
 import NotFoundComponent from '../NotFoundComponent';
-import WarningComponent from '../WarningComponent';
 import Placeholder from './Placeholder';
-
-let electron;
-if (window.require) {
-  electron = window.require('electron');
-}
 
 let constants;
 if (process.env.NODE_ENV !== 'production') {
@@ -23,7 +17,7 @@ let storeComponentsTree;
 
 function sendMessage(message) {
   if (message) {
-    electron.ipcRenderer.sendToHost('message', message);
+    window.parent.postMessage(message, '*');
   }
 }
 
@@ -165,7 +159,6 @@ class ComponentComposer extends React.Component {
 
     this.renderPage = this.renderPage.bind(this);
     this.handleReceiveMessage = this.handleReceiveMessage.bind(this);
-    this.renderElectronError = this.renderElectronError.bind(this);
 
     this.state = {
       componentsTree: storeComponentsTree || {},
@@ -173,15 +166,11 @@ class ComponentComposer extends React.Component {
   }
 
   componentDidMount () {
-    if (electron) {
-      electron.ipcRenderer.on('message', this.handleReceiveMessage);
-    }
+    window.addEventListener("message", this.handleReceiveMessage, false);
   }
 
   componentWillUnmount() {
-    if (electron) {
-      electron.ipcRenderer.removeListener('message', this.handleReceiveMessage);
-    }
+    window.removeEventListener("message", this.handleReceiveMessage);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -196,7 +185,8 @@ class ComponentComposer extends React.Component {
     }
   }
 
-  handleReceiveMessage(event, message) {
+  handleReceiveMessage(event) {
+    const {data: message} = event;
     if (message) {
       const {type, payload} = message;
       if (type === constants.WEBCODESK_MESSAGE_UPDATE_PAGE_COMPONENTS_TREE) {
@@ -213,14 +203,8 @@ class ComponentComposer extends React.Component {
     return renderComponent(userComponents, componentsTree);
   }
 
-  renderElectronError() {
-    return (
-      <WarningComponent message="Works only in Electron" />
-    );
-  }
-
   render () {
-    let content = electron ? this.renderPage() : this.renderElectronError();
+    let content = this.renderPage();
     if (content) {
       return content;
     }

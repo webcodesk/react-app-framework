@@ -14,14 +14,10 @@ import ComponentComposer from './components/ComponentComposer';
 let constants;
 let ComponentView;
 let PageComposer;
-let electron;
 if (process.env.NODE_ENV !== 'production') {
   constants = require('./commons/constants');
   ComponentView = require('./components/ComponentComposer/ComponentComposer').default;
   PageComposer = require('./components/PageComposer/PageComposer').default;
-  if (window.require) {
-    electron = window.require('electron');
-  }
 }
 
 let store;
@@ -32,13 +28,11 @@ export const initStore = (name, version, initialState = {}) => {
   store = configureStore(initialState, { history }, { name, version });
 
   if (process.env.NODE_ENV !== 'production') {
-    if (electron) {
-      window.__sendFrameworkMessage = (message) => {
-        if (message) {
-          electron.ipcRenderer.sendToHost('message', message);
-        }
-      };
-    }
+    window.__sendFrameworkMessage = (message) => {
+      if (message) {
+        window.parent.postMessage(message, '*');
+      }
+    };
   }
 };
 
@@ -46,22 +40,19 @@ class Application extends React.Component {
 
   componentDidMount () {
     if (process.env.NODE_ENV !== 'production') {
-      if (electron) {
-        electron.ipcRenderer.on('message', this.handleReceiveMessage);
-      }
+      window.addEventListener("message", this.handleReceiveMessage, false);
     }
   }
 
   componentWillUnmount () {
     if (process.env.NODE_ENV !== 'production') {
-      if (electron) {
-        electron.ipcRenderer.removeListener('message', this.handleReceiveMessage);
-      }
+      window.removeEventListener("message", this.handleReceiveMessage);
     }
   }
 
-  handleReceiveMessage = (event, message) => {
+  handleReceiveMessage = (event) => {
     if (process.env.NODE_ENV !== 'production') {
+      const {data: message} = event;
       if (message) {
         const { type } = message;
         if (type === constants.WEBCODESK_MESSAGE_START_LISTENING_TO_FRAMEWORK) {

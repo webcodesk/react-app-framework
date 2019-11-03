@@ -2,6 +2,10 @@ export function offset(el) {
   return getPosition2(el);
 }
 
+export function offsetInViewPort(el) {
+  return getPosition(el);
+}
+
 function getPosition1(el) {
   let xPos = 0;
   let yPos = 0;
@@ -28,6 +32,16 @@ function getPosition1(el) {
     top: yPos,
     right: xPos + width,
     bottom: yPos + height,
+  };
+}
+
+function getPosition(el) {
+  const rect = el.getBoundingClientRect();
+  return {
+    top: (rect.top + scrollTop),
+    left: (rect.left + scrollLeft),
+    right: rect.right + scrollLeft,
+    bottom: rect.bottom + scrollTop
   };
 }
 

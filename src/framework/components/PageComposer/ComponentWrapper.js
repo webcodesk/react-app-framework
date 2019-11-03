@@ -1,3 +1,4 @@
+import isEqual from 'lodash/isEqual';
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
@@ -64,7 +65,6 @@ class ComponentWrapper extends Component {
 
     this.handleDragEnter = this.handleDragEnter.bind(this);
     this.handleDragLeave = this.handleDragLeave.bind(this);
-    this.handleDragOver = this.handleDragOver.bind(this);
     this.handleDrop = this.handleDrop.bind(this);
 
   }
@@ -78,17 +78,7 @@ class ComponentWrapper extends Component {
       this.$DOMNode.addEventListener('click', this.handleNoop, false);
       this.$DOMNode.addEventListener('doubleclick', this.handleNoop, false);
       this.$DOMNode.addEventListener('mouseup', this.handleNoop, false);
-      // this.$DOMNode.addEventListener('drag', this.handleNoop, false);
-      // this.$DOMNode.addEventListener('dragend', this.handleNoop, false);
-      // this.$DOMNode.addEventListener('dragexit', this.handleNoop, false);
-      // this.$DOMNode.addEventListener('dragstart', this.handleNoop, false);
       this.$DOMNode.addEventListener('contextmenu', this.handleContextMenu, false);
-      if (!this.props.wrappedComponent) {
-        this.$DOMNode.addEventListener('dragenter', this.handleDragEnter, false);
-        this.$DOMNode.addEventListener('dragleave', this.handleDragLeave, false);
-        this.$DOMNode.addEventListener('dragover', this.handleDragOver, false);
-        this.$DOMNode.addEventListener('drop', this.handleDrop, false);
-      }
     }
   }
 
@@ -106,14 +96,40 @@ class ComponentWrapper extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    const {elementKey, isSelected} = this.props;
-    if (isSelected) {
+    const {elementKey, isSelected, draggedItem, draggedItemPosition, wrappedComponent} = this.props;
+    if (isSelected && !prevProps.isSelected) {
       window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
         detail: {
           elementKey,
           domNode: this.$DOMNode
         }
       }));
+    }
+    if (!wrappedComponent) {
+      if (
+        draggedItem && draggedItemPosition
+        && (
+          !prevProps.draggedItemPosition
+          || (
+            draggedItemPosition !== prevProps.draggedItemPosition
+            && !isEqual(draggedItemPosition, prevProps.draggedItemPosition)
+          )
+        )
+      ) {
+        const pos = this.$DOMNode.getBoundingClientRect();
+        if (
+          draggedItemPosition.top > pos.top
+          && draggedItemPosition.top < pos.bottom
+          && draggedItemPosition.left > pos.left
+          && draggedItemPosition.left < pos.right
+        ) {
+          this.handleDragEnter();
+        } else {
+          this.handleDragLeave();
+        }
+      } else if (!draggedItem && !draggedItemPosition && prevProps.draggedItem && prevProps.draggedItemPosition) {
+        this.handleDrop();
+      }
     }
   }
 
@@ -125,17 +141,7 @@ class ComponentWrapper extends Component {
       this.$DOMNode.removeEventListener('click', this.handleNoop);
       this.$DOMNode.removeEventListener('doubleclick', this.handleNoop);
       this.$DOMNode.removeEventListener('mouseup', this.handleNoop);
-      // this.$DOMNode.removeEventListener('drag', this.handleNoop, false);
-      // this.$DOMNode.removeEventListener('dragend', this.handleNoop, false);
-      // this.$DOMNode.removeEventListener('dragexit', this.handleNoop, false);
-      // this.$DOMNode.removeEventListener('dragstart', this.handleNoop, false);
       this.$DOMNode.removeEventListener('contextmenu', this.handleContextMenu);
-      if (!this.props.wrappedComponent) {
-        this.$DOMNode.addEventListener('dragenter', this.handleDragEnter, false);
-        this.$DOMNode.addEventListener('dragleave', this.handleDragLeave, false);
-        this.$DOMNode.addEventListener('dragover', this.handleDragOver, false);
-        this.$DOMNode.addEventListener('drop', this.handleDrop, false);
-      }
     }
     this.$DOMNode = undefined;
   }
@@ -179,14 +185,7 @@ class ComponentWrapper extends Component {
     }));
   }
 
-  handleDragOver(e) {
-    const {isDragOver, isItemAccepting} = this.state;
-    if (isDragOver && isItemAccepting) {
-      e.preventDefault();
-    }
-  }
-
-  handleDragEnter(e) {
+  handleDragEnter() {
     const {draggedItem} = this.props;
     if (draggedItem) {
       this.setState({
@@ -196,14 +195,14 @@ class ComponentWrapper extends Component {
     }
   }
 
-  handleDragLeave(e) {
+  handleDragLeave() {
     this.setState({
       isItemAccepting: false,
       isDragOver: false,
     });
   }
 
-  handleDrop(e) {
+  handleDrop() {
     const {elementKey, itemWasDropped, draggedItem} = this.props;
     const {isItemAccepting, isDragOver} = this.state;
     if (isItemAccepting && isDragOver && itemWasDropped) {
