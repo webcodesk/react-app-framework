@@ -67,6 +67,11 @@ class ComponentWrapper extends Component {
     this.handleDragLeave = this.handleDragLeave.bind(this);
     this.handleDrop = this.handleDrop.bind(this);
 
+    const { elementKey, onComponentInstanceInitialize } = this.props;
+    if (onComponentInstanceInitialize) {
+      onComponentInstanceInitialize(elementKey, this);
+    }
+
   }
 
   initDOMNode() {
@@ -84,27 +89,10 @@ class ComponentWrapper extends Component {
 
   componentDidMount() {
     this.initDOMNode();
-    const {elementKey, isSelected} = this.props;
-    if (isSelected) {
-      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
-        detail: {
-          elementKey,
-          domNode: this.$DOMNode
-        }
-      }));
-    }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    const {elementKey, isSelected, draggedItem, draggedItemPosition, wrappedComponent} = this.props;
-    if (isSelected && !prevProps.isSelected) {
-      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
-        detail: {
-          elementKey,
-          domNode: this.$DOMNode
-        }
-      }));
-    }
+    const {draggedItem, draggedItemPosition, wrappedComponent} = this.props;
     if (!wrappedComponent) {
       if (
         draggedItem && draggedItemPosition
@@ -144,7 +132,21 @@ class ComponentWrapper extends Component {
       this.$DOMNode.removeEventListener('contextmenu', this.handleContextMenu);
     }
     this.$DOMNode = undefined;
+    const { elementKey, onComponentInstanceDestroy } = this.props;
+    if (onComponentInstanceDestroy) {
+      onComponentInstanceDestroy(elementKey);
+    }
   }
+
+  selectComponent () {
+    const {elementKey} = this.props;
+    window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
+      detail: {
+        elementKey,
+        domNode: this.$DOMNode
+      }
+    }));
+  };
 
   handleMouseDown(e) {
     e.stopPropagation();

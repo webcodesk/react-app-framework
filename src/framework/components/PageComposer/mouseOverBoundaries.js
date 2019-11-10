@@ -98,6 +98,7 @@ function showBoundaries(position) {
     startPoint.style.height = '1px';
     startPoint.style.position = 'absolute';
     startPoint.style.display = 'block';
+    startPoint.style.zIndex = 999999999;
     if (topLine) {
       topLine.style.position = 'absolute';
       topLine.style.top = '0px';

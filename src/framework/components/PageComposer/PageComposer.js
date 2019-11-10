@@ -24,6 +24,8 @@ function sendMessage(message) {
 // https://github.com/gaearon/react-hot-loader/issues/934
 let storeComponentsTree;
 
+let selectedKeys = [];
+
 const renderComponent = (userComponents, description, serviceComponentOptions, rootProps) => {
   if (description) {
     const {type, key, props, children} = description;
@@ -31,6 +33,9 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
       return rootProps;
     }
     const { componentName, propertyName, propertyValue, isSelected } = props;
+    if (isSelected) {
+      selectedKeys.push(key);
+    }
     if (type === constants.COMPONENT_PROPERTY_ELEMENT_TYPE) {
       const placeholderProps = {
         key,
@@ -180,11 +185,15 @@ class PageComposer extends React.Component {
 
     this.renderPage = this.renderPage.bind(this);
     this.handleReceiveMessage = this.handleReceiveMessage.bind(this);
+    this.handleComponentInstanceInitialize = this.handleComponentInstanceInitialize.bind(this);
+    this.handleComponentInstanceDestroy = this.handleComponentInstanceDestroy.bind(this);
     this.itemWasDropped = this.itemWasDropped.bind(this);
 
     this.handleSelectCell = this.handleSelectCell.bind(this);
     this.handleContextMenuClick = this.handleContextMenuClick.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
+
+    this.componentInstancesMap = {};
 
     this.state = {
       componentsTree: storeComponentsTree || {},
@@ -202,6 +211,7 @@ class PageComposer extends React.Component {
     mouseOverBoundaries.initElements();
     selectedBoundaries.initElements();
     window.document.addEventListener('keydown', this.handleKeyDown);
+    this.traverseComponentInstances();
   }
 
   componentWillUnmount() {
@@ -226,7 +236,33 @@ class PageComposer extends React.Component {
     const { componentsTree } = this.state;
     if (componentsTree !== prevState.componentsTree) {
       storeComponentsTree = componentsTree;
+      this.traverseComponentInstances();
     }
+  }
+
+  traverseComponentInstances() {
+    if (selectedKeys && selectedKeys.length > 0) {
+      selectedKeys.forEach(selectedKeyItem => {
+        const componentInstance = this.componentInstancesMap[selectedKeyItem];
+        if (componentInstance && componentInstance.selectComponent) {
+          componentInstance.selectComponent();
+        }
+      });
+    } else {
+      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
+        detail: {
+          domNode: null
+        }
+      }));
+    }
+  }
+
+  handleComponentInstanceInitialize(elementKey, componentRef) {
+    this.componentInstancesMap[elementKey] = componentRef;
+  }
+
+  handleComponentInstanceDestroy(elementKey) {
+    delete this.componentInstancesMap[elementKey];
   }
 
   handleReceiveMessage(event) {
@@ -353,12 +389,15 @@ class PageComposer extends React.Component {
       draggedItem,
       draggedItemPosition
     } = this.state;
+    selectedKeys = [];
     const rootComponent = renderComponent(userComponents, componentsTree, {
       itemWasDropped: this.itemWasDropped,
       draggedItem,
       draggedItemPosition,
       onMouseDown: this.handleSelectCell,
       onContextMenuClick: this.handleContextMenuClick,
+      onComponentInstanceInitialize: this.handleComponentInstanceInitialize,
+      onComponentInstanceDestroy: this.handleComponentInstanceDestroy
     });
     return rootComponent;
   }
