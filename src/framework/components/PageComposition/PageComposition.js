@@ -148,7 +148,7 @@ class PageComposition extends Component {
     } else {
       // this is a user custom component, create container for it
       const wrappedComponent = get(userComponents, validType, null);
-      if (!wrappedComponent || (typeof wrappedComponent !== 'function')) {
+      if (!wrappedComponent) {
         return React.createElement(
           NotFoundComponent,
           { key: uniqueId('notFound'), componentName: validType }
