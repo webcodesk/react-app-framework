@@ -1,6 +1,7 @@
 import isEqual from 'lodash/isEqual';
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
+import { isVisible } from './utilities';
 
 const style = {
   width: '100%',
@@ -66,16 +67,10 @@ class ComponentWrapper extends Component {
     this.handleDragEnter = this.handleDragEnter.bind(this);
     this.handleDragLeave = this.handleDragLeave.bind(this);
     this.handleDrop = this.handleDrop.bind(this);
-
-    const { elementKey, onComponentInstanceInitialize } = this.props;
-    if (onComponentInstanceInitialize) {
-      onComponentInstanceInitialize(elementKey, this);
-    }
-
   }
 
   initDOMNode() {
-    this.$DOMNode = this.$DOMNode || ReactDOM.findDOMNode(this);
+    this.$DOMNode = ReactDOM.findDOMNode(this);
     if (this.$DOMNode) {
       this.$DOMNode.addEventListener('mousedown', this.handleMouseDown, false);
       this.$DOMNode.addEventListener('mouseover', this.handleMouseOver, false);
@@ -87,8 +82,25 @@ class ComponentWrapper extends Component {
     }
   }
 
+  clearDOMNode() {
+    if (this.$DOMNode) {
+      this.$DOMNode.removeEventListener('mousedown', this.handleMouseDown);
+      this.$DOMNode.removeEventListener('mouseover', this.handleMouseOver);
+      this.$DOMNode.removeEventListener('mouseout', this.handleMouseOut);
+      this.$DOMNode.removeEventListener('click', this.handleNoop);
+      this.$DOMNode.removeEventListener('doubleclick', this.handleNoop);
+      this.$DOMNode.removeEventListener('mouseup', this.handleNoop);
+      this.$DOMNode.removeEventListener('contextmenu', this.handleContextMenu);
+    }
+    this.$DOMNode = undefined;
+  }
+
   componentDidMount() {
     this.initDOMNode();
+    const { elementKey, onComponentInstanceInitialize } = this.props;
+    if (onComponentInstanceInitialize) {
+      onComponentInstanceInitialize(elementKey, this);
+    }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -122,30 +134,23 @@ class ComponentWrapper extends Component {
   }
 
   componentWillUnmount() {
-    if (this.$DOMNode) {
-      this.$DOMNode.removeEventListener('mousedown', this.handleMouseDown);
-      this.$DOMNode.removeEventListener('mouseover', this.handleMouseOver);
-      this.$DOMNode.removeEventListener('mouseout', this.handleMouseOut);
-      this.$DOMNode.removeEventListener('click', this.handleNoop);
-      this.$DOMNode.removeEventListener('doubleclick', this.handleNoop);
-      this.$DOMNode.removeEventListener('mouseup', this.handleNoop);
-      this.$DOMNode.removeEventListener('contextmenu', this.handleContextMenu);
-    }
-    this.$DOMNode = undefined;
+    this.clearDOMNode();
     const { elementKey, onComponentInstanceDestroy } = this.props;
     if (onComponentInstanceDestroy) {
-      onComponentInstanceDestroy(elementKey);
+      onComponentInstanceDestroy(elementKey, this);
     }
   }
 
   selectComponent () {
     const {elementKey} = this.props;
-    window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
-      detail: {
-        elementKey,
-        domNode: this.$DOMNode
-      }
-    }));
+    if (isVisible(this.$DOMNode)) {
+      window.dispatchEvent(new CustomEvent('selectComponentWrapper', {
+        detail: {
+          elementKey,
+          domNode: this.$DOMNode
+        }
+      }));
+    }
   };
 
   handleMouseDown(e) {

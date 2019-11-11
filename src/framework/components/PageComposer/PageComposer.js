@@ -243,9 +243,13 @@ class PageComposer extends React.Component {
   traverseComponentInstances() {
     if (selectedKeys && selectedKeys.length > 0) {
       selectedKeys.forEach(selectedKeyItem => {
-        const componentInstance = this.componentInstancesMap[selectedKeyItem];
-        if (componentInstance && componentInstance.selectComponent) {
-          componentInstance.selectComponent();
+        const componentRefs = this.componentInstancesMap[selectedKeyItem];
+        if (componentRefs && componentRefs.length > 0) {
+          componentRefs.forEach(componentInstance => {
+            if (componentInstance && componentInstance.selectComponent) {
+              componentInstance.selectComponent();
+            }
+          });
         }
       });
     } else {
@@ -258,11 +262,23 @@ class PageComposer extends React.Component {
   }
 
   handleComponentInstanceInitialize(elementKey, componentRef) {
-    this.componentInstancesMap[elementKey] = componentRef;
+    this.componentInstancesMap[elementKey] = this.componentInstancesMap[elementKey] || [];
+    this.componentInstancesMap[elementKey].push(componentRef);
   }
 
-  handleComponentInstanceDestroy(elementKey) {
-    delete this.componentInstancesMap[elementKey];
+  handleComponentInstanceDestroy(elementKey, componentRef) {
+    const componentRefs = this.componentInstancesMap[elementKey];
+    if (componentRefs) {
+      if (componentRefs.length === 1) {
+        delete this.componentInstancesMap[elementKey];
+      } else if (componentRefs.length > 1) {
+        const foundIndex = componentRefs.findIndex(i => i === componentRef);
+        if (foundIndex >= 0) {
+          componentRefs.splice(foundIndex, 1);
+          this.componentInstancesMap[elementKey] = componentRefs;
+        }
+      }
+    }
   }
 
   handleReceiveMessage(event) {

@@ -6,6 +6,27 @@ export function offsetInViewPort(el) {
   return getPosition(el);
 }
 
+export function isVisible(el) {
+  if (el) {
+    let styleDisplay = el.style.display;
+    let styleVisibility = el.style.visibility;
+    if (styleDisplay === 'none' || styleVisibility === 'hidden') {
+      return false;
+    } else {
+      const computedStyle = window.getComputedStyle(el, null);
+      if (computedStyle) {
+        styleDisplay = computedStyle.getPropertyValue('display');
+        styleVisibility = computedStyle.getPropertyValue('visibility');
+        if (styleDisplay === 'none' || styleVisibility === 'hidden') {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 function getPosition1(el) {
   let xPos = 0;
   let yPos = 0;
