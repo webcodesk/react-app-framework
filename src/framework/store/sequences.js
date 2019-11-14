@@ -6,7 +6,6 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
-import isEqual from 'lodash/isEqual';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE } from './constants';
 import frameworkFunctions from './functions';
 

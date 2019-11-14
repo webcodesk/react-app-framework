@@ -33,6 +33,14 @@ export const initStore = (name, version, initialState = {}) => {
         window.parent.postMessage(message, '*');
       }
     };
+    // Listen for changes to the current location.
+    history.listen((location) => {
+      // location is an object like window.location
+      window.__sendFrameworkMessage({
+        type: constants.FRAMEWORK_MESSAGE_CHANGE_URL,
+        payload: `${location.pathname}${location.search}${location.hash}`,
+      });
+    });
   }
 };
 
