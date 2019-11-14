@@ -210,7 +210,12 @@ class PageComposition extends Component {
         componentKey,
         containerHandlers,
         containerProperties,
-        { key: key || `${containerKey}_${uniqueId('c')}`, ...props, ...populatedProps, ...propsComponents },
+        {
+          key: key || `${containerKey}_${uniqueId('c')}`,
+          ...props,
+          ...propsComponents,
+          ...populatedProps
+        },
         nestedComponents
       );
     }
