@@ -107,7 +107,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
           }
         } else {
           if (propertyValue) {
-            rootProps = cloneDeep(propertyValue);
+            rootProps.push(cloneDeep(propertyValue));
           }
         }
       }

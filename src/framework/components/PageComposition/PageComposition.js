@@ -51,7 +51,7 @@ class PageComposition extends Component {
     const result = {};
     forOwn(descriptionShape, (value, prop) => {
       if (value) {
-        if (isArray(value) && value.length > 0){
+        if (isArray(value)){
           result[prop] = this.renderArray(value);
         } else if (isPlainObject(value)) {
           if (value.type && value.instance) {
@@ -111,25 +111,9 @@ class PageComposition extends Component {
     if (!type) {
       return null;
     }
-    const propsComponents = {};
+    let propsComponents = {};
     if (props) {
-      forOwn(props, (value, prop) => {
-        if (value) {
-          if (isArray(value)) {
-            propsComponents[prop] = this.renderArray(value);
-          } else if (isPlainObject(value)) {
-            if (value.type && value.instance) {
-              propsComponents[prop] = this.renderComponent(value);
-            } else {
-              propsComponents[prop] = this.renderShape(value);
-            }
-          } else {
-            propsComponents[prop] = value;
-          }
-        } else {
-          propsComponents[prop] = value;
-        }
-      });
+      propsComponents = this.renderShape(props);
     }
     let nestedComponents = [];
     if (children && children.length > 0) {
@@ -213,9 +197,9 @@ class PageComposition extends Component {
         {
           key: key || `${containerKey}_${uniqueId('c')}`,
           ...props,
-          ...propsComponents,
-          ...populatedProps
+          ...propsComponents
         },
+        populatedProps,
         nestedComponents
       );
     }

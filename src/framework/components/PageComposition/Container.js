@@ -4,7 +4,6 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import createContainerSelector from '../../store/selectors';
 import createContainerActions from '../../store/actions';
-import { getComponentName } from '../NotFoundComponent/NotFoundComponent';
 
 let sendDebugMessage;
 let constants;
@@ -12,33 +11,8 @@ if (process.env.NODE_ENV !== 'production') {
   sendDebugMessage = require('../../commons/sendMessage').default;
   constants = require('../../commons/constants');
 }
-class ErrorBoundary extends React.Component {
-  constructor (props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  componentDidCatch (error, info) {
-    this.setState({ hasError: true, error });
-  }
-
-  render () {
-    const {hasError, error} = this.state;
-    if (hasError) {
-      const { componentName } = this.props;
-      return (
-        <div style={{color: 'white', backgroundColor: 'red', borderRadius: '4px', padding: '.5em'}}>
-          <code>Error occurred in "{getComponentName(componentName)}" component: </code>
-          <code>{error && error.message}</code>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
 
 class Container extends React.Component {
-
   constructor (props, context) {
     super(props, context);
     const {
@@ -98,11 +72,29 @@ class Container extends React.Component {
       wrappedComponent,
       wrappedProps,
       stateProps,
+      populatedProps,
+      cloneProps, // this props may come from the parent component that wants to clone this instance
       children
     } = this.props;
     return React.createElement(
       wrappedComponent,
-      { ...wrappedProps, ...this.wrappedHandlers, ...stateProps },
+      { ...wrappedProps, ...cloneProps, ...this.wrappedHandlers, ...populatedProps, ...stateProps },
+      children
+    );
+  }
+}
+
+class Component extends React.Component {
+  render () {
+    const {
+      wrappedComponent,
+      wrappedProps,
+      cloneProps, // this props may come from the parent component that wants to clone this instance
+      children
+    } = this.props;
+    return React.createElement(
+      wrappedComponent,
+      { ...wrappedProps, ...cloneProps },
       children
     );
   }
@@ -116,6 +108,7 @@ export default function createContainer (
   containerEventHandlers,
   containerProperties,
   props = {},
+  populatedProps,
   nestedComponents = null
 ) {
 
@@ -147,26 +140,20 @@ export default function createContainer (
       containerEventHandlers,
       containerProperties,
       wrappedProps: props,
+      populatedProps,
       wrappedComponent,
     };
 
-    return (
-      <ErrorBoundary key={`errorBoundary_${props.key}`} componentName={componentName}>
-        {React.createElement(
-          connect(mapStateToProps, mapDispatchToProps)(Container),
-          wrapperProps,
-          nestedComponents
-        )}
-      </ErrorBoundary>
+    return React.createElement(
+      connect(mapStateToProps, mapDispatchToProps)(Container),
+      { ...wrapperProps, key: `container_${props.key}` },
+      nestedComponents
     );
   }
-  return (
-    <ErrorBoundary key={`errorBoundary_${props.key}`} componentName={componentName}>
-      {React.createElement(
-        wrappedComponent,
-        props,
-        nestedComponents
-      )}
-    </ErrorBoundary>
+
+  return React.createElement(
+    Component,
+    { wrappedComponent, wrappedProps: props, key: `component_${props.key}` },
+    nestedComponents
   );
 }

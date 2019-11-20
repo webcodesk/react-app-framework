@@ -2,6 +2,7 @@ import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 import PropTypes from 'prop-types';
+import ComponentWrapper from './ComponentWrapper';
 import NotFoundComponent from '../NotFoundComponent';
 import Placeholder from './Placeholder';
 
@@ -63,7 +64,10 @@ const renderComponent = (userComponents, description, rootProps) => {
             propsComponent = renderComponent(userComponents, child, propsComponent);
           });
         }
-        newElement = React.createElement(component, propsComponent, {key});
+        newElement = React.createElement(
+          ComponentWrapper,
+          {wrappedComponent: component, propsComponent, key}
+        );
       } else {
         newElement = React.createElement(NotFoundComponent, {componentName});
       }
@@ -89,7 +93,7 @@ const renderComponent = (userComponents, description, rootProps) => {
           }
         } else {
           if (propertyValue) {
-            rootProps = cloneDeep(propertyValue);
+            rootProps.push(cloneDeep(propertyValue));
           }
         }
       }

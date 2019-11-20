@@ -249,7 +249,7 @@ class ComponentWrapper extends Component {
   }
 
   render() {
-    const {elementKey, wrappedComponent, wrappedProps, children} = this.props;
+    const {elementKey, wrappedComponent, wrappedProps, cloneProps, children} = this.props;
     if (!wrappedComponent) {
       return (
         <div key={elementKey} style={style}>
@@ -264,7 +264,7 @@ class ComponentWrapper extends Component {
         </div>
       );
     }
-    return React.createElement(wrappedComponent, wrappedProps, children);
+    return React.createElement(wrappedComponent, {...wrappedProps, ...cloneProps}, children);
   }
 }
 
