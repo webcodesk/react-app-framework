@@ -42,6 +42,8 @@ export const initStore = (name, version, initialState = {}) => {
       });
     });
   }
+
+  return {store, history};
 };
 
 class Application extends React.Component {
