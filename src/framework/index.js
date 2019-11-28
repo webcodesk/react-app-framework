@@ -9,14 +9,13 @@ import { resetStoreItems } from './store/functions';
 import PageRouter from './components/PageRouter';
 import StartWrapper from './components/StartWrapper';
 import WarningComponent from './components/WarningComponent';
-import ComponentComposer from './components/ComponentComposer';
 
 let constants;
-let ComponentView;
+let ComponentComposer;
 let PageComposer;
 if (process.env.NODE_ENV !== 'production') {
   constants = require('./commons/constants');
-  ComponentView = require('./components/ComponentComposer/ComponentComposer').default;
+  ComponentComposer = require('./components/ComponentComposer/ComponentComposer').default;
   PageComposer = require('./components/PageComposer/PageComposer').default;
 }
 

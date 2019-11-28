@@ -30,7 +30,7 @@ function transformFirstArgument (elementKey, transformScript, firstArgument) {
           console.error(`[Framework] The transformation script should return a JavaScript function: ${transformScript}`);
         }
       } catch (error) {
-        console.error(`[Framework] In input transformation function "${transformScript.substr(0, 200)}${transformInput.length > 200 ? '...' : ''}" has error: "${error.message}".`);
+        console.error(`[Framework] In input transformation function "${transformScript.substr(0, 200)}${transformScript.length > 200 ? '...' : ''}" has error: "${error.message}".`);
       }
     }
     try {
