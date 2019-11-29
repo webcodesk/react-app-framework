@@ -89,10 +89,10 @@ const renderComponent = (userComponents, description, rootProps) => {
           if (propertyValue) {
             rootProps[propertyName] = cloneDeep(propertyValue);
           } else {
-            rootProps[propertyName] = null;
+            rootProps[propertyName] = propertyValue;
           }
         } else {
-          if (propertyValue) {
+          if (typeof propertyValue !== 'undefined') {
             rootProps.push(cloneDeep(propertyValue));
           }
         }
@@ -137,10 +137,14 @@ const renderComponent = (userComponents, description, rootProps) => {
       || type === constants.COMPONENT_PROPERTY_NUMBER_TYPE) {
       if (rootProps) {
         if (propertyName) {
-          rootProps[propertyName] = propertyValue || null;
+          rootProps[propertyName] = propertyValue;
         } else {
-          if (propertyValue) {
-            rootProps.push(propertyValue);
+          if (typeof propertyValue !== 'undefined') {
+            if (rootProps.push) {
+              rootProps.push(propertyValue);
+            } else {
+              console.error('It seems that you missed propertyName in the page component target in the page config.');
+            }
           }
         }
       }

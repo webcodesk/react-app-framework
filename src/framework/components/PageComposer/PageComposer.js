@@ -103,7 +103,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
           if (propertyValue) {
             rootProps[propertyName] = cloneDeep(propertyValue);
           } else {
-            rootProps[propertyName] = null;
+            rootProps[propertyName] = propertyValue;
           }
         } else {
           if (typeof propertyValue !== 'undefined') {
