@@ -106,7 +106,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
             rootProps[propertyName] = null;
           }
         } else {
-          if (propertyValue) {
+          if (typeof propertyValue !== 'undefined') {
             rootProps.push(cloneDeep(propertyValue));
           }
         }
@@ -155,9 +155,9 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
       || type === constants.COMPONENT_PROPERTY_NUMBER_TYPE) {
       if (rootProps) {
         if (propertyName) {
-          rootProps[propertyName] = propertyValue || null;
+          rootProps[propertyName] = propertyValue;
         } else {
-          if (propertyValue) {
+          if (typeof propertyValue !== 'undefined') {
             if (rootProps.push) {
               rootProps.push(propertyValue);
             } else {
