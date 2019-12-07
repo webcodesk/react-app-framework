@@ -4,7 +4,6 @@ import { createBrowserHistory } from 'history';
 import { configureStore } from './store/store';
 import { clearActionsCache } from './store/actions';
 import { createActionSequences } from './store/sequences';
-import { resetStoreItems } from './store/functions';
 
 import PageRouter from './components/PageRouter';
 import StartWrapper from './components/StartWrapper';
@@ -101,7 +100,6 @@ class Application extends React.Component {
         )
       }
     }
-    resetStoreItems();
     clearActionsCache();
     const { routes, pages, flows } = schema;
     const { actionSequences, targetProperties } = createActionSequences(flows, userFunctions);

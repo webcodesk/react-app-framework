@@ -8,6 +8,8 @@ import isUndefined from 'lodash/isUndefined';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE, DISPATCH_ERROR_TYPE} from './constants';
 import { getUserFunctionByName } from './sequences';
 
+const TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING = 'TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING';
+
 let sendDebugMessage;
 let constants;
 if (process.env.NODE_ENV !== 'production') {
@@ -36,8 +38,10 @@ function transformFirstArgument (elementKey, transformScript, firstArgument) {
     try {
       firstArgumentResult = transformFunction(firstArgument);
     } catch (error) {
-      console.error(`[Framework] Transformation function error: ${error.message}`);
-      firstArgumentResult = firstArgument;
+      throw Error(`Transformation function error: ${error.message}`);
+    }
+    if (typeof firstArgumentResult === 'undefined') {
+      throw Error(TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING);
     }
   } else {
     firstArgumentResult = firstArgument;
@@ -50,40 +54,56 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
     const {
       componentName, componentInstance, propertyName, forwardPath, componentKey, transformScript
     } = props;
-    const transformedPayload = transformFirstArgument(componentKey, transformScript, payload);
-    if (forwardPath && helpers) {
-      const { history } = helpers;
-      if (history) {
-        // hmmm... why there can not be the history helper?
-        let pathString = `/${forwardPath}`;
-        if (!isUndefined(transformedPayload)) {
-          if (isNumber(transformedPayload) || isString(transformedPayload)) {
-            // if user function dispatches string or number we pass it as the :parameter in the http request
-            pathString = `${pathString}/${transformedPayload}`;
-          } else if (isObject(transformedPayload) || isArray(transformedPayload)) {
-            // if user function dispatches an object or an array we pass it as the request query
-            pathString = `${pathString}?${queryString.stringify(transformedPayload)}`;
-          } else {
-            console.error(
-              '[Framework] The mapping to parameters in URL is possible only for ' +
-              'a string, a number, an object, or an array.'
-            );
+    try {
+      const transformedPayload = transformFirstArgument(componentKey, transformScript, payload);
+      if (forwardPath && helpers) {
+        const { history } = helpers;
+        if (history) {
+          // hmmm... why there can not be the history helper?
+          let pathString = `/${forwardPath}`;
+          if (!isUndefined(transformedPayload)) {
+            if (isNumber(transformedPayload) || isString(transformedPayload)) {
+              // if user function dispatches string or number we pass it as the :parameter in the http request
+              pathString = `${pathString}/${transformedPayload}`;
+            } else if (isObject(transformedPayload) || isArray(transformedPayload)) {
+              // if user function dispatches an object or an array we pass it as the request query
+              pathString = `${pathString}?${queryString.stringify(transformedPayload)}`;
+            } else {
+              console.error(
+                '[Framework] The mapping to parameters in URL is possible only for ' +
+                'a string, a number, an object, or an array.'
+              );
+            }
           }
+          if (process.env.NODE_ENV !== 'production') {
+            sendDebugMessage({
+              key: componentKey,
+              eventType: constants.DEBUG_MSG_FORWARD_EVENT,
+              forwardPath,
+              inputData: transformedPayload,
+              propertyName,
+              pathString,
+              timestamp: Date.now(),
+            });
+          }
+          history.push(pathString);
+        } else if (propertyName) {
+          // hmmm... why there can not be the history helper?
+          const targetKey = `${componentName}_${componentInstance}`;
+          if (process.env.NODE_ENV !== 'production') {
+            sendDebugMessage({
+              key: componentKey,
+              eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
+              inputData: transformedPayload,
+              componentName,
+              componentInstance,
+              propertyName,
+              timestamp: Date.now(),
+            });
+          }
+          dispatch({ type: targetKey, payload: { [propertyName]: transformedPayload } });
         }
-        if (process.env.NODE_ENV !== 'production') {
-          sendDebugMessage({
-            key: componentKey,
-            eventType: constants.DEBUG_MSG_FORWARD_EVENT,
-            forwardPath,
-            inputData: transformedPayload,
-            propertyName,
-            pathString,
-            timestamp: Date.now(),
-          });
-        }
-        history.push(pathString);
-      } else if (propertyName) {
-        // hmmm... why there can not be the history helper?
+      } else {
         const targetKey = `${componentName}_${componentInstance}`;
         if (process.env.NODE_ENV !== 'production') {
           sendDebugMessage({
@@ -98,20 +118,10 @@ function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) 
         }
         dispatch({ type: targetKey, payload: { [propertyName]: transformedPayload } });
       }
-    } else {
-      const targetKey = `${componentName}_${componentInstance}`;
-      if (process.env.NODE_ENV !== 'production') {
-        sendDebugMessage({
-          key: componentKey,
-          eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
-          inputData: transformedPayload,
-          componentName,
-          componentInstance,
-          propertyName,
-          timestamp: Date.now(),
-        });
+    } catch (e) {
+      if (e && e.message !== TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING) {
+        console.error(`[Framework] ${e.message}`);
       }
-      dispatch({ type: targetKey, payload: { [propertyName]: transformedPayload } });
     }
   }
 }
@@ -212,47 +222,53 @@ function createTasks (targets, taskEventName) {
               const args = arguments;
               return (dispatch, getState, helpers) => {
                 // before execute the function we have to transform the input argument if needed
-                const firstArgument =
-                  transformFirstArgument(props.functionKey, props.transformScript, args[0]);
-                // execute user function with passed in args
-                if (process.env.NODE_ENV !== 'production') {
-                  sendDebugMessage({
-                    key: props.functionKey,
-                    eventType: constants.DEBUG_MSG_FUNCTION_CALL_EVENT,
-                    inputData: firstArgument,
-                    functionName: props.functionName,
-                    timestamp: Date.now(),
-                  });
-                }
-                // the secondary argument is used in the store items function
-                // to determine if we are reading from the store item or writing to it
-                const userFunctionInstance = func.apply(null, [firstArgument]);
                 try {
-                  // dispatch caughtException as null to the assigned targets
-                  caughtExceptionFunction(null, dispatch, getState, helpers);
-                  // now execute dispatching of the events objects to the targets
-                  const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
-                    // user function is invoked now
-                    if (process.env.NODE_ENV !== 'production') {
-                      sendDebugMessage({
-                        key: props.functionKey,
-                        eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
-                        eventName: dispatchType,
-                        outputData: payload,
-                        functionName: props.functionName,
-                        timestamp: Date.now(),
-                      });
-                    }
-                    dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
-                  });
-                  // here user returns a Promise and there may be the error
-                  if (userFunctionResult && userFunctionResult.then) {
-                    userFunctionResult.catch(error => {
-                      caughtExceptionFunction(error, dispatch, getState, helpers);
+                  const firstArgument =
+                    transformFirstArgument(props.functionKey, props.transformScript, args[0]);
+                  // execute user function with passed in args
+                  if (process.env.NODE_ENV !== 'production') {
+                    sendDebugMessage({
+                      key: props.functionKey,
+                      eventType: constants.DEBUG_MSG_FUNCTION_CALL_EVENT,
+                      inputData: firstArgument,
+                      functionName: props.functionName,
+                      timestamp: Date.now(),
                     });
                   }
-                } catch (error) {
-                  caughtExceptionFunction(error, dispatch, getState, helpers);
+                  // the secondary argument is used in the store items function
+                  // to determine if we are reading from the store item or writing to it
+                  const userFunctionInstance = func.apply(null, [firstArgument]);
+                  try {
+                    // dispatch caughtException as null to the assigned targets
+                    caughtExceptionFunction(null, dispatch, getState, helpers);
+                    // now execute dispatching of the events objects to the targets
+                    const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
+                      // user function is invoked now
+                      if (process.env.NODE_ENV !== 'production') {
+                        sendDebugMessage({
+                          key: props.functionKey,
+                          eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
+                          eventName: dispatchType,
+                          outputData: payload,
+                          functionName: props.functionName,
+                          timestamp: Date.now(),
+                        });
+                      }
+                      dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
+                    });
+                    // here user returns a Promise and there may be the error
+                    if (userFunctionResult && userFunctionResult.then) {
+                      userFunctionResult.catch(error => {
+                        caughtExceptionFunction(error, dispatch, getState, helpers);
+                      });
+                    }
+                  } catch (error) {
+                    caughtExceptionFunction(error, dispatch, getState, helpers);
+                  }
+                } catch (e) {
+                  if (e && e.message !== TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING) {
+                    console.error(`[Framework] ${e.message}`);
+                  }
                 }
               };
             }

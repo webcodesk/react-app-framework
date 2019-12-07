@@ -7,7 +7,6 @@ import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE } from './constants';
-import frameworkFunctions from './functions';
 
 let userFunctions = {};
 
@@ -214,7 +213,7 @@ function createActionSequencesRecursively (handlers, actionSequences = {}) {
 }
 
 export function createActionSequences (handlers, functions) {
-  userFunctions = {...functions, ...frameworkFunctions};
+  userFunctions = {...functions};
   const actionSequences = createActionSequencesRecursively(handlers);
   const targetProperties = deriveTargetProperties(actionSequences);
   return { actionSequences, targetProperties };

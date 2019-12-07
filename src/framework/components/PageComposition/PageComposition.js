@@ -8,6 +8,7 @@ import isArray from 'lodash/isArray';
 import isPlainObject from 'lodash/isObject';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ErrorBoundary from './ErrorBoundary';
 import NotFoundComponent from '../NotFoundComponent';
 import createContainer from './Container';
 import WarningComponent from '../WarningComponent';
@@ -214,7 +215,11 @@ class PageComposition extends Component {
   }
 
   render () {
-    return this.renderPage();
+    return (
+      <ErrorBoundary pageName={this.props.routePath}>
+        {this.renderPage()}
+      </ErrorBoundary>
+    );
   }
 }
 
