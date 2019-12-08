@@ -25,14 +25,14 @@ function transformFirstArgument (elementKey, transformScript, firstArgument) {
     if (!transformFunction) {
       try {
         // if there is a transformation in props save it into the cache as new Function
-        const newTransformFunction = new Function('data', transformScript)();
+        const newTransformFunction = new Function('data', `return ${transformScript}`)();
         transformFunctionsCache.set(elementKey, newTransformFunction);
         transformFunction = newTransformFunction;
         if (!isFunction(newTransformFunction)) {
-          console.error(`[Framework] The transformation script should return a JavaScript function: ${transformScript}`);
+          console.error(`[Framework] The transformation script should be a JavaScript function. Check the transformation script: ${transformScript}`);
         }
       } catch (error) {
-        console.error(`[Framework] In input transformation function "${transformScript.substr(0, 200)}${transformScript.length > 200 ? '...' : ''}" has error: "${error.message}".`);
+        console.error(`[Framework] The transformation function "${transformScript.substr(0, 200)}${transformScript.length > 200 ? '...' : ''}" has the error: "${error.message}".`);
       }
     }
     try {
