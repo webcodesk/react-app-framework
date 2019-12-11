@@ -1,5 +1,6 @@
 import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
+import isArray from 'lodash/isArray';
 import React from 'react';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
@@ -77,7 +78,12 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
           isSelected,
           ...serviceComponentOptions,
         };
-        newElement = React.createElement(ComponentWrapper, wrapperProps);
+        let nestedComponents = [];
+        if (propsComponent.children && isArray(propsComponent.children)) {
+          nestedComponents = propsComponent.children;
+          delete propsComponent.children;
+        }
+        newElement = React.createElement(ComponentWrapper, wrapperProps, nestedComponents);
       } else {
         newElement = React.createElement(NotFoundComponent, {componentName});
       }

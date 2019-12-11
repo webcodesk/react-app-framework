@@ -1,5 +1,6 @@
 import get from 'lodash/get';
 import cloneDeep from 'lodash/cloneDeep';
+import isArray from 'lodash/isArray';
 import React from 'react';
 import PropTypes from 'prop-types';
 import ComponentWrapper from './ComponentWrapper';
@@ -64,9 +65,15 @@ const renderComponent = (userComponents, description, rootProps) => {
             propsComponent = renderComponent(userComponents, child, propsComponent);
           });
         }
+        let nestedComponents = [];
+        if (propsComponent.children && isArray(propsComponent.children)) {
+          nestedComponents = propsComponent.children;
+          delete propsComponent.children;
+        }
         newElement = React.createElement(
           ComponentWrapper,
-          {wrappedComponent: component, propsComponent, key}
+          {wrappedComponent: component, propsComponent, key},
+          nestedComponents
         );
       } else {
         newElement = React.createElement(NotFoundComponent, {componentName});

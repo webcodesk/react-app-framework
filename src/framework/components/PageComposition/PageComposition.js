@@ -122,6 +122,10 @@ class PageComposition extends Component {
         return this.renderComponent(child);
       });
     }
+    if (propsComponents.children && isArray(propsComponents.children)) {
+      nestedComponents = nestedComponents.concat(propsComponents.children);
+      delete propsComponents.children;
+    }
     const validType = type || 'div';
     if (validType.charAt(0) === '_') {
       const pageComponentType = validType.substr(1);
