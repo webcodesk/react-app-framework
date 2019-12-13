@@ -60,7 +60,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
         // only placeholder component can be the root element
         rootProps = newElement;
       }
-    } else if (type === constants.PAGE_COMPONENT_TYPE) {
+    } else if (type === constants.PAGE_COMPONENT_TYPE || type === constants.PAGE_NODE_TYPE) {
       let newElement;
       const component = get(userComponents, componentName, null);
       if (component) {

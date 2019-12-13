@@ -44,6 +44,7 @@ module.exports = {
   COMPONENT_PROPERTY_ONE_OF_TYPE: 'COMPONENT_PROPERTY_ONE_OF_TYPE',
 
   PAGE_COMPONENT_TYPE: 'PAGE_COMPONENT_TYPE',
+  PAGE_NODE_TYPE: 'PAGE_NODE_TYPE',
 
   // do not change these values - they are used in webcodesk debugger
   DEBUG_MSG_APPLICATION_START_EVENT: 'onApplicationStart',
