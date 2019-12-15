@@ -1,6 +1,6 @@
 {
   "name": "@webcodesk/react-app-framework",
-  "version": "2.0.17",
+  "version": "2.0.19",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
@@ -34,7 +34,7 @@
     "gulp-babel": "8.0.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
-    "react-scripts": "3.2.0",
+    "react-scripts": "3.3.0",
     "redux-mock-store": "^1.5.3"
   },
   "scripts": {
