@@ -23,34 +23,34 @@ export function isVisible(el) {
   return false;
 }
 
-function getPosition1(el) {
-  let xPos = 0;
-  let yPos = 0;
-  let width = el.offsetWidth;
-  let height = el.offsetHeight;
-
-  while (el) {
-    if (el.tagName === 'BODY') {
-      // deal with browser quirks with body/window/document and page scroll
-      let xScroll = window.pageXOffset || document.documentElement.scrollLeft;
-      let yScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-      xPos += (el.offsetLeft - xScroll + el.clientLeft);
-      yPos += (el.offsetTop - yScroll + el.clientTop);
-    } else {
-      // for all other non-BODY elements
-      xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
-      yPos += (el.offsetTop - el.scrollTop + el.clientTop);
-    }
-    el = el.offsetParent;
-  }
-  return {
-    left: xPos,
-    top: yPos,
-    right: xPos + width,
-    bottom: yPos + height,
-  };
-}
+// function getPosition1(el) {
+//   let xPos = 0;
+//   let yPos = 0;
+//   let width = el.offsetWidth;
+//   let height = el.offsetHeight;
+//
+//   while (el) {
+//     if (el.tagName === 'BODY') {
+//       // deal with browser quirks with body/window/document and page scroll
+//       let xScroll = window.pageXOffset || document.documentElement.scrollLeft;
+//       let yScroll = window.pageYOffset || document.documentElement.scrollTop;
+//
+//       xPos += (el.offsetLeft - xScroll + el.clientLeft);
+//       yPos += (el.offsetTop - yScroll + el.clientTop);
+//     } else {
+//       // for all other non-BODY elements
+//       xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+//       yPos += (el.offsetTop - el.scrollTop + el.clientTop);
+//     }
+//     el = el.offsetParent;
+//   }
+//   return {
+//     left: xPos,
+//     top: yPos,
+//     right: xPos + width,
+//     bottom: yPos + height,
+//   };
+// }
 
 function getPosition2(el) {
   const rect = el.getBoundingClientRect();

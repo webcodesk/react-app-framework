@@ -1,4 +1,5 @@
 import isEqual from 'lodash/isEqual';
+import { pickInObject, omitInObject } from '../../commons/utilities';
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import { isVisible } from './utilities';
@@ -249,7 +250,27 @@ class ComponentWrapper extends Component {
   }
 
   render() {
-    const {elementKey, wrappedComponent, wrappedProps, cloneProps, children} = this.props;
+    const wrapperPicked = pickInObject(this.props, ['elementKey', 'wrappedComponent', 'wrappedProps', 'children']);
+    const restPicked = omitInObject(
+      this.props,
+      [
+        'isSelected',
+        'elementKey',
+        'wrappedComponent',
+        'wrappedProps',
+        'cloneProps',
+        'children',
+        'itemWasDropped',
+        'draggedItem',
+        'draggedItemPosition',
+        'onMouseDown',
+        'onContextMenuClick',
+        'onComponentInstanceInitialize',
+        'onComponentInstanceDestroy',
+        'doNotUseInFlows'
+      ]
+    );
+    const {elementKey, wrappedComponent, wrappedProps, children} = wrapperPicked;
     if (!wrappedComponent) {
       return (
         <div key={elementKey} style={style}>
@@ -264,7 +285,7 @@ class ComponentWrapper extends Component {
         </div>
       );
     }
-    return React.createElement(wrappedComponent, {...wrappedProps, ...cloneProps}, children);
+    return React.createElement(wrappedComponent, {...restPicked, ...wrappedProps}, children);
   }
 }
 

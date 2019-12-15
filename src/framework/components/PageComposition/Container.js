@@ -1,4 +1,5 @@
 import React from 'react';
+import { pickInObject, omitInObject } from '../../commons/utilities';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -68,17 +69,34 @@ class Container extends React.Component {
   }
 
   render () {
+    const wrapperPicked = pickInObject(
+      this.props,
+      ['wrappedComponent', 'wrappedProps', 'stateProps', 'populatedProps', 'children']
+    );
+    const restPicked = omitInObject(
+      this.props,
+      [
+        'componentKey',
+        'componentName',
+        'componentInstance',
+        'containerEventHandlers',
+        'containerProperties',
+        'wrappedProps',
+        'populatedProps',
+        'wrappedComponent',
+        'children'
+      ]
+    );
     const {
       wrappedComponent,
       wrappedProps,
       stateProps,
       populatedProps,
-      cloneProps, // this props may come from the parent component that wants to clone this instance
       children
-    } = this.props;
+    } = wrapperPicked;
     return React.createElement(
       wrappedComponent,
-      { ...wrappedProps, ...cloneProps, ...this.wrappedHandlers, ...populatedProps, ...stateProps },
+      { ...restPicked, ...wrappedProps, ...this.wrappedHandlers, ...populatedProps, ...stateProps },
       children
     );
   }
@@ -86,15 +104,22 @@ class Container extends React.Component {
 
 class Component extends React.Component {
   render () {
+    const wrapperPicked = pickInObject(
+      this.props,
+      ['wrappedComponent', 'wrappedProps', 'children']
+    );
+    const restPicked = omitInObject(
+      this.props,
+      ['wrappedComponent', 'wrappedProps', 'children']
+    );
     const {
       wrappedComponent,
       wrappedProps,
-      cloneProps, // this props may come from the parent component that wants to clone this instance
       children
-    } = this.props;
+    } = wrapperPicked;
     return React.createElement(
       wrappedComponent,
-      { ...wrappedProps, ...cloneProps },
+      { ...restPicked, ...wrappedProps },
       children
     );
   }
@@ -133,7 +158,6 @@ export default function createContainer (
     });
 
     const wrapperProps = {
-      key: props.key,
       componentKey,
       componentName,
       componentInstance,

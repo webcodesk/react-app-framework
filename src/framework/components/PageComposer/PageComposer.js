@@ -70,6 +70,11 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
             propsComponent = renderComponent(userComponents, child, serviceComponentOptions, propsComponent);
           });
         }
+        let nestedComponents = [];
+        if (propsComponent.children && isArray(propsComponent.children)) {
+          nestedComponents = propsComponent.children;
+          delete propsComponent.children;
+        }
         const wrapperProps = {
           key,
           elementKey: key,
@@ -78,11 +83,6 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
           isSelected,
           ...serviceComponentOptions,
         };
-        let nestedComponents = [];
-        if (propsComponent.children && isArray(propsComponent.children)) {
-          nestedComponents = propsComponent.children;
-          delete propsComponent.children;
-        }
         newElement = React.createElement(ComponentWrapper, wrapperProps, nestedComponents);
       } else {
         newElement = React.createElement(NotFoundComponent, {componentName});
@@ -160,7 +160,7 @@ const renderComponent = (userComponents, description, serviceComponentOptions, r
       || type === constants.COMPONENT_PROPERTY_ANY_TYPE
       || type === constants.COMPONENT_PROPERTY_NUMBER_TYPE) {
       if (rootProps) {
-        if (propertyName) {
+        if (propertyName && propertyName !== constants.COMPONENT_PROPERTY_DO_NOT_USE_IN_FLOWS_NAME) {
           rootProps[propertyName] = propertyValue;
         } else {
           if (typeof propertyValue !== 'undefined') {

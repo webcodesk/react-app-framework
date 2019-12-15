@@ -56,4 +56,6 @@ module.exports = {
   DEBUG_MSG_FORWARD_EVENT: 'forwardToPath',
   DEBUG_MSG_CREATE_CONTAINER_EVENT: 'createContainer',
 
+  COMPONENT_PROPERTY_DO_NOT_USE_IN_FLOWS_NAME: 'doNotUseInFlows',
+
 };
