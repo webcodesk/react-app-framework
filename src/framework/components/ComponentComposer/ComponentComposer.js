@@ -143,8 +143,10 @@ const renderComponent = (userComponents, description, rootProps) => {
       || type === constants.COMPONENT_PROPERTY_ANY_TYPE
       || type === constants.COMPONENT_PROPERTY_NUMBER_TYPE) {
       if (rootProps) {
-        if (propertyName && propertyName !== constants.COMPONENT_PROPERTY_DO_NOT_USE_IN_FLOWS_NAME) {
-          rootProps[propertyName] = propertyValue;
+        if (propertyName) {
+          if (propertyName !== constants.COMPONENT_PROPERTY_DO_NOT_USE_IN_FLOWS_NAME) {
+            rootProps[propertyName] = propertyValue;
+          }
         } else {
           if (typeof propertyValue !== 'undefined') {
             if (rootProps.push) {
