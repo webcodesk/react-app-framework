@@ -1,6 +1,4 @@
 import React from 'react';
-import mergeWith from 'lodash/mergeWith';
-import isArray from 'lodash/isArray';
 import { pickInObject, omitInObject } from '../../commons/utilities';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -13,12 +11,6 @@ let constants;
 if (process.env.NODE_ENV !== 'production') {
   sendDebugMessage = require('../../commons/sendMessage').default;
   constants = require('../../commons/constants');
-}
-
-function mergeCustomizer(objValue, srcValue) {
-  if (isArray(objValue)) {
-    return srcValue;
-  }
 }
 
 class Container extends React.Component {
@@ -104,11 +96,7 @@ class Container extends React.Component {
     } = wrapperPicked;
     return React.createElement(
       wrappedComponent,
-      mergeWith(
-        { ...restPicked, ...wrappedProps, ...this.wrappedHandlers, ...populatedProps},
-        stateProps,
-        mergeCustomizer
-      ),
+      { ...restPicked, ...wrappedProps, ...this.wrappedHandlers, ...populatedProps, ...stateProps },
       children
     );
   }
