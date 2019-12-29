@@ -49,7 +49,7 @@ function transformFirstArgument (elementKey, transformScript, firstArgument) {
   return firstArgumentResult;
 }
 
-function dispatchToComponent (taskEventName, props, payload, dispatch, helpers) {
+function dispatchToComponent (props, payload, dispatch, helpers) {
   if (props) {
     const {
       componentName, componentInstance, propertyName, forwardPath, componentKey, transformScript
@@ -138,30 +138,57 @@ function findEventTargets (events, type) {
 }
 
 function executeUserFunctionDispatch (
-  events, innerTasks, dispatchType, payload, dispatch, getState, helpers
+  events, innerTasks, functionKey, functionName, dispatchPayloads, dispatch, getState, helpers
 ) {
-  let targetsCount = 0;
-  // check if the user function dispatches any event
-  const eventTargets = findEventTargets(events, dispatchType);
-  if (eventTargets && eventTargets.length > 0) {
-    targetsCount = eventTargets.length;
-    eventTargets.forEach(eventTarget => {
-      const { type: eventTargetType, props: eventTargetProps } = eventTarget;
-      if (eventTargetType === COMPONENT_TYPE) {
-        dispatchToComponent(dispatchType, eventTargetProps, payload, dispatch, helpers);
+  const dispatchTypeKeys = dispatchPayloads ? Object.keys(dispatchPayloads) : null;
+  let dispatchType;
+  let payload;
+  if (dispatchTypeKeys && dispatchTypeKeys.length > 0) {
+    for (let i = 0; i < dispatchTypeKeys.length; i++) {
+      dispatchType = dispatchTypeKeys[i];
+      // check if the user function dispatches any event
+      const eventTargets = findEventTargets(events, dispatchType);
+      if (eventTargets && eventTargets.length > 0) {
+        eventTargets.forEach(eventTarget => {
+          const { type: eventTargetType, props: eventTargetProps } = eventTarget;
+          if (eventTargetType === COMPONENT_TYPE) {
+            payload = dispatchPayloads[dispatchType];
+            if (process.env.NODE_ENV !== 'production') {
+              sendDebugMessage({
+                key: functionKey,
+                eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
+                eventName: dispatchType,
+                outputData: payload,
+                functionName: functionName,
+                timestamp: Date.now(),
+              });
+            }
+            dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
+          }
+        });
+        if (innerTasks[dispatchType] && innerTasks[dispatchType].length > 0) {
+          payload = dispatchPayloads[dispatchType];
+          if (process.env.NODE_ENV !== 'production') {
+            sendDebugMessage({
+              key: functionKey,
+              eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
+              eventName: dispatchType,
+              outputData: payload,
+              functionName: functionName,
+              timestamp: Date.now(),
+            });
+          }
+          innerTasks[dispatchType].forEach(task => {
+            const { func } = task;
+            func.apply(null, [payload])(dispatch, getState, helpers);
+          });
+        }
       }
-    });
-    if (innerTasks[dispatchType] && innerTasks[dispatchType].length > 0) {
-      innerTasks[dispatchType].forEach(task => {
-        const { func } = task;
-        func.apply(null, [payload])(dispatch, getState, helpers);
-      });
     }
   }
-  return targetsCount;
 }
 
-function createTasks (targets, taskEventName) {
+function createTasks (targets) {
   const tasks = [];
   if (targets && targets.length > 0) {
     targets.forEach(target => {
@@ -181,34 +208,31 @@ function createTasks (targets, taskEventName) {
                   innerTasks[innerEvent.name] = innerTasks[innerEvent.name] || [];
                   innerTasks[innerEvent.name] = [
                     ...innerTasks[innerEvent.name],
-                    ...createTasks(userFunctionTargets, innerEvent.name)
+                    ...createTasks(userFunctionTargets)
                   ];
                 }
               }
             });
           }
           // create dispatchFunction in order to reuse its instance in the action function body
-          const dispatchFunction = (dispatchType, payload, dispatch, getState, helpers) => {
+          const dispatchFunction = (functionKey, functionName, dispatchPayloads, dispatch, getState, helpers) => {
             executeUserFunctionDispatch(
-              events, innerTasks, dispatchType, payload, dispatch, getState, helpers
+              events, innerTasks, functionKey, functionName, dispatchPayloads, dispatch, getState, helpers
             );
           };
           // this function is used to pass the error object caught by the exception caching
           // the function is called with null error object before each user function invocation
           // this will let user to do not worry about the clearing of the error object
-          const caughtExceptionFunction = (error, dispatch, getState, helpers) => {
-            if (process.env.NODE_ENV !== 'production' && error) {
-              sendDebugMessage({
-                key: props.functionKey,
-                eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
-                eventName: DISPATCH_ERROR_TYPE,
-                outputData: error && error.message,
-                functionName: props.functionName,
-                timestamp: Date.now(),
-              });
-            }
+          const caughtExceptionFunction = (functionKey, functionName, error, dispatch, getState, helpers) => {
             executeUserFunctionDispatch(
-              events, innerTasks, DISPATCH_ERROR_TYPE, error, dispatch, getState, helpers
+              events,
+              innerTasks,
+              functionKey,
+              functionName,
+              {[DISPATCH_ERROR_TYPE]: error ? error.message : null},
+              dispatch,
+              getState,
+              helpers
             );
             if (error) {
               console.error(`[Framework] In "${props.functionName}" function ${error.message}.`);
@@ -240,30 +264,48 @@ function createTasks (targets, taskEventName) {
                   const userFunctionInstance = func.apply(null, [firstArgument]);
                   try {
                     // dispatch caughtException as null to the assigned targets
-                    caughtExceptionFunction(null, dispatch, getState, helpers);
+                    caughtExceptionFunction(
+                      props.functionKey,
+                      props.functionName,
+                      null,
+                      dispatch,
+                      getState,
+                      helpers
+                    );
                     // now execute dispatching of the events objects to the targets
-                    const userFunctionResult = userFunctionInstance((dispatchType, payload) => {
+                    const userFunctionResult = userFunctionInstance((dispatchPayloads) => {
                       // user function is invoked now
-                      if (process.env.NODE_ENV !== 'production') {
-                        sendDebugMessage({
-                          key: props.functionKey,
-                          eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
-                          eventName: dispatchType,
-                          outputData: payload,
-                          functionName: props.functionName,
-                          timestamp: Date.now(),
-                        });
-                      }
-                      dispatchFunction(dispatchType, payload, dispatch, getState, helpers);
+                      dispatchFunction(
+                        props.functionKey,
+                        props.functionName,
+                        dispatchPayloads,
+                        dispatch,
+                        getState,
+                        helpers
+                      );
                     });
                     // here user returns a Promise and there may be the error
                     if (userFunctionResult && userFunctionResult.then) {
                       userFunctionResult.catch(error => {
-                        caughtExceptionFunction(error, dispatch, getState, helpers);
+                        caughtExceptionFunction(
+                          props.functionKey,
+                          props.functionName,
+                          error,
+                          dispatch,
+                          getState,
+                          helpers
+                        );
                       });
                     }
                   } catch (error) {
-                    caughtExceptionFunction(error, dispatch, getState, helpers);
+                    caughtExceptionFunction(
+                      props.functionKey,
+                      props.functionName,
+                      error,
+                      dispatch,
+                      getState,
+                      helpers
+                    );
                   }
                 } catch (e) {
                   if (e && e.message !== TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING) {
@@ -287,7 +329,7 @@ function createTasks (targets, taskEventName) {
               payload = args[0];
             }
             return (dispatch, getState, helpers) => {
-              dispatchToComponent(taskEventName, props, payload, dispatch, helpers);
+              dispatchToComponent(props, payload, dispatch, helpers);
             };
           }
         });
@@ -302,7 +344,7 @@ function createActions (eventHandlers) {
   if (eventHandlers && eventHandlers.length > 0) {
     eventHandlers.forEach(eventHandler => {
       const { name, targets } = eventHandler;
-      const tasks = createTasks(targets, name);
+      const tasks = createTasks(targets);
       actions[name] = function () {
         const args = arguments;
         return (dispatch, getState, helpers) => {

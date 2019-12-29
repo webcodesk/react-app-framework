@@ -4,7 +4,7 @@ const select = (componentName, componentInstance, propertyName) => (state, props
   const instanceState = state[`${componentName}_${componentInstance}`];
   if (instanceState) {
     if (props) {
-      if (instanceState[propertyName] !== undefined) {
+      if (typeof instanceState[propertyName] !== 'undefined') {
         return instanceState[propertyName];
       }
       return props.wrappedProps[propertyName];
