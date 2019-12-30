@@ -149,35 +149,24 @@ function executeUserFunctionDispatch (
       // check if the user function dispatches any event
       const eventTargets = findEventTargets(events, dispatchType);
       if (eventTargets && eventTargets.length > 0) {
+        payload = dispatchPayloads[dispatchType];
+        if (process.env.NODE_ENV !== 'production') {
+          sendDebugMessage({
+            key: functionKey,
+            eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
+            eventName: dispatchType,
+            outputData: payload,
+            functionName: functionName,
+            timestamp: Date.now(),
+          });
+        }
         eventTargets.forEach(eventTarget => {
           const { type: eventTargetType, props: eventTargetProps } = eventTarget;
           if (eventTargetType === COMPONENT_TYPE) {
-            payload = dispatchPayloads[dispatchType];
-            if (process.env.NODE_ENV !== 'production') {
-              sendDebugMessage({
-                key: functionKey,
-                eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
-                eventName: dispatchType,
-                outputData: payload,
-                functionName: functionName,
-                timestamp: Date.now(),
-              });
-            }
             dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
           }
         });
         if (innerTasks[dispatchType] && innerTasks[dispatchType].length > 0) {
-          payload = dispatchPayloads[dispatchType];
-          if (process.env.NODE_ENV !== 'production') {
-            sendDebugMessage({
-              key: functionKey,
-              eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
-              eventName: dispatchType,
-              outputData: payload,
-              functionName: functionName,
-              timestamp: Date.now(),
-            });
-          }
           innerTasks[dispatchType].forEach(task => {
             const { func } = task;
             func.apply(null, [payload])(dispatch, getState, helpers);
@@ -229,7 +218,7 @@ function createTasks (targets) {
               innerTasks,
               functionKey,
               functionName,
-              {[DISPATCH_ERROR_TYPE]: error ? error.message : null},
+              {[DISPATCH_ERROR_TYPE]: error},
               dispatch,
               getState,
               helpers
