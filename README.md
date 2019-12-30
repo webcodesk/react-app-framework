@@ -385,7 +385,7 @@ Create the `actions.js` file in the `src/usr/api` folder and add the following c
 
 ```javascript
 export const makeGreetingText = (userName) => (dispatch) => {
-  dispatch('greeting', userName ? `Hello, ${userName} !!!` : 'Hello, Noname !!!');
+  dispatch({greeting: userName ? `Hello, ${userName} !!!` : 'Hello, Noname !!!'});
 };
 ```
 
@@ -395,10 +395,9 @@ This is done intentionally because the framework recognizes only such syntax of 
 Another feature of the function is a `dispatch` argument in the second function in the chain. 
 The `dispatch` is a callback method which is injected by the framework during the function execution. 
 
-The first argument of the callback is the identification for the object which is passed in as the second argument. 
-This is similar to the action type in action creators in Redux.
+The argument of the callback is the object with keys that serve as names for output payloads.
 
-> Remember the name of the `greeting` dispatch - we use it in the flow configuration.
+> Remember the name of the `greeting` key in the dispatch - we use it in the flow configuration.
 
 The function in `react-app-framework` is considered as a decoupled and independent component too. 
 That's why we have to add the function into index files in the `src/app` directory in order the framework finds the function.
@@ -485,7 +484,7 @@ However, in the case of `userFunction` the events are any of `dispatch` mentione
 
 Please note, component's events and function's dispatches produce only the first argument. 
 
-> For example, in `dispatch('greeting', someText, anotherText)` - `anotherText` will not be passed in the target property.
+> For example, in `dispatch({greeting: someText}, anotherText)` - `anotherText` will not be passed in the target property.
 
 Once we've added all configurations, we can start the development server:
 ```
