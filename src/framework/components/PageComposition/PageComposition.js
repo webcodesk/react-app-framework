@@ -6,6 +6,7 @@ import get from 'lodash/get';
 import isUndefined from 'lodash/isUndefined';
 import isArray from 'lodash/isArray';
 import isPlainObject from 'lodash/isObject';
+import cloneDeep from 'lodash/cloneDeep';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ErrorBoundary from './ErrorBoundary';
@@ -179,17 +180,19 @@ class PageComposition extends Component {
         }
       }
       if (process.env.NODE_ENV !== 'production') {
-        if (!isEmpty(populatedProps)) {
-          sendDebugMessage({
-            key: componentKey,
-            eventType: constants.DEBUG_MSG_CREATE_CONTAINER_EVENT,
-            inputData: populatedProps,
-            populatePath: normalizedRoutePath,
-            propertyName,
-            componentName: type,
-            componentInstance: instance,
-            timestamp: Date.now(),
-          });
+        if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+          if (!isEmpty(populatedProps)) {
+            sendDebugMessage({
+              key: componentKey,
+              eventType: constants.DEBUG_MSG_CREATE_CONTAINER_EVENT,
+              inputData: cloneDeep(populatedProps),
+              populatePath: normalizedRoutePath,
+              propertyName,
+              componentName: type,
+              componentInstance: instance,
+              timestamp: Date.now(),
+            });
+          }
         }
       }
       return createContainer(

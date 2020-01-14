@@ -5,6 +5,7 @@ import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 import isFunction from 'lodash/isFunction';
 import isUndefined from 'lodash/isUndefined';
+import cloneDeep from 'lodash/cloneDeep';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE, DISPATCH_ERROR_TYPE} from './constants';
 import { getUserFunctionByName } from './sequences';
 
@@ -76,45 +77,51 @@ function dispatchToComponent (props, payload, dispatch, helpers) {
             }
           }
           if (process.env.NODE_ENV !== 'production') {
-            sendDebugMessage({
-              key: componentKey,
-              eventType: constants.DEBUG_MSG_FORWARD_EVENT,
-              forwardPath,
-              inputData: transformedPayload,
-              propertyName,
-              pathString,
-              timestamp: Date.now(),
-            });
+            if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+              sendDebugMessage({
+                key: componentKey,
+                eventType: constants.DEBUG_MSG_FORWARD_EVENT,
+                forwardPath,
+                inputData: cloneDeep(transformedPayload),
+                propertyName,
+                pathString,
+                timestamp: Date.now(),
+              });
+            }
           }
           history.push(pathString);
         } else if (propertyName) {
           // hmmm... why there can not be the history helper?
           const targetKey = `${componentName}_${componentInstance}`;
           if (process.env.NODE_ENV !== 'production') {
-            sendDebugMessage({
-              key: componentKey,
-              eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
-              inputData: transformedPayload,
-              componentName,
-              componentInstance,
-              propertyName,
-              timestamp: Date.now(),
-            });
+            if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+              sendDebugMessage({
+                key: componentKey,
+                eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
+                inputData: cloneDeep(transformedPayload),
+                componentName,
+                componentInstance,
+                propertyName,
+                timestamp: Date.now(),
+              });
+            }
           }
           dispatch({ type: targetKey, payload: { [propertyName]: transformedPayload } });
         }
       } else {
         const targetKey = `${componentName}_${componentInstance}`;
         if (process.env.NODE_ENV !== 'production') {
-          sendDebugMessage({
-            key: componentKey,
-            eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
-            inputData: transformedPayload,
-            componentName,
-            componentInstance,
-            propertyName,
-            timestamp: Date.now(),
-          });
+          if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+            sendDebugMessage({
+              key: componentKey,
+              eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
+              inputData: cloneDeep(transformedPayload),
+              componentName,
+              componentInstance,
+              propertyName,
+              timestamp: Date.now(),
+            });
+          }
         }
         dispatch({ type: targetKey, payload: { [propertyName]: transformedPayload } });
       }
@@ -151,14 +158,16 @@ function executeUserFunctionDispatch (
       if (eventTargets && eventTargets.length > 0) {
         payload = dispatchPayloads[dispatchType];
         if (process.env.NODE_ENV !== 'production') {
-          sendDebugMessage({
-            key: functionKey,
-            eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
-            eventName: dispatchType,
-            outputData: payload,
-            functionName: functionName,
-            timestamp: Date.now(),
-          });
+          if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+            sendDebugMessage({
+              key: functionKey,
+              eventType: constants.DEBUG_MSG_FUNCTION_FIRE_EVENT,
+              eventName: dispatchType,
+              outputData: cloneDeep(payload),
+              functionName: functionName,
+              timestamp: Date.now(),
+            });
+          }
         }
         eventTargets.forEach(eventTarget => {
           const { type: eventTargetType, props: eventTargetProps } = eventTarget;
@@ -240,13 +249,15 @@ function createTasks (targets) {
                     transformFirstArgument(props.functionKey, props.transformScript, args[0]);
                   // execute user function with passed in args
                   if (process.env.NODE_ENV !== 'production') {
-                    sendDebugMessage({
-                      key: props.functionKey,
-                      eventType: constants.DEBUG_MSG_FUNCTION_CALL_EVENT,
-                      inputData: firstArgument,
-                      functionName: props.functionName,
-                      timestamp: Date.now(),
-                    });
+                    if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+                      sendDebugMessage({
+                        key: props.functionKey,
+                        eventType: constants.DEBUG_MSG_FUNCTION_CALL_EVENT,
+                        inputData: cloneDeep(firstArgument),
+                        functionName: props.functionName,
+                        timestamp: Date.now(),
+                      });
+                    }
                   }
                   // the secondary argument is used in the store items function
                   // to determine if we are reading from the store item or writing to it

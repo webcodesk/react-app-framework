@@ -250,27 +250,7 @@ class ComponentWrapper extends Component {
   }
 
   render() {
-    const wrapperPicked = pickInObject(this.props, ['elementKey', 'wrappedComponent', 'wrappedProps', 'children']);
-    const restPicked = omitInObject(
-      this.props,
-      [
-        'isSelected',
-        'elementKey',
-        'wrappedComponent',
-        'wrappedProps',
-        'cloneProps',
-        'children',
-        'itemWasDropped',
-        'draggedItem',
-        'draggedItemPosition',
-        'onMouseDown',
-        'onContextMenuClick',
-        'onComponentInstanceInitialize',
-        'onComponentInstanceDestroy',
-        'doNotUseInFlows'
-      ]
-    );
-    const {elementKey, wrappedComponent, wrappedProps, children} = wrapperPicked;
+    const {elementKey, wrappedComponent, wrappedProps, children} = this.props;
     if (!wrappedComponent) {
       return (
         <div key={elementKey} style={style}>
@@ -285,7 +265,7 @@ class ComponentWrapper extends Component {
         </div>
       );
     }
-    return React.createElement(wrappedComponent, {...restPicked, ...wrappedProps}, children);
+    return React.createElement(wrappedComponent, wrappedProps, children);
   }
 }
 

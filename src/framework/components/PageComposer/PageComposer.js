@@ -414,7 +414,7 @@ class PageComposer extends React.Component {
       draggedItemPosition
     } = this.state;
     selectedKeys = [];
-    const rootComponent = renderComponent(userComponents, componentsTree, {
+    return renderComponent(userComponents, componentsTree, {
       itemWasDropped: this.itemWasDropped,
       draggedItem,
       draggedItemPosition,
@@ -423,7 +423,6 @@ class PageComposer extends React.Component {
       onComponentInstanceInitialize: this.handleComponentInstanceInitialize,
       onComponentInstanceDestroy: this.handleComponentInstanceDestroy
     });
-    return rootComponent;
   }
 
   render () {

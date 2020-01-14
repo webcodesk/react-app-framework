@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 import PropTypes from 'prop-types';
 import createContainerActions from '../../store/actions';
@@ -33,13 +34,15 @@ class StartWrapper extends React.Component {
       const onDidMountAction = actions['onApplicationStart'];
       if (onDidMountAction) {
         if (process.env.NODE_ENV !== 'production') {
-          sendDebugMessage({
-            key: componentKey,
-            eventType: constants.DEBUG_MSG_APPLICATION_START_EVENT,
-            componentName,
-            componentInstance,
-            timestamp: Date.now(),
-          });
+          if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+            sendDebugMessage({
+              key: componentKey,
+              eventType: constants.DEBUG_MSG_APPLICATION_START_EVENT,
+              componentName,
+              componentInstance,
+              timestamp: Date.now(),
+            });
+          }
         }
         store.dispatch(onDidMountAction.apply(null, null));
       }

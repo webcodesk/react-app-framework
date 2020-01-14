@@ -1,5 +1,5 @@
+import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
-import { pickInObject, omitInObject } from '../../commons/utilities';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -30,15 +30,17 @@ class Container extends React.Component {
           const handlerAction = actions[eventHandler.name];
           if (handlerAction) {
             if (process.env.NODE_ENV !== 'production') {
-              sendDebugMessage({
-                key: componentKey,
-                eventType: constants.DEBUG_MSG_COMPONENT_FIRE_EVENT,
-                eventName: eventHandler.name,
-                outputData: args && args.length > 0 ? args[0] : undefined,
-                componentName,
-                componentInstance,
-                timestamp: Date.now(),
-              });
+              if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+                sendDebugMessage({
+                  key: componentKey,
+                  eventType: constants.DEBUG_MSG_COMPONENT_FIRE_EVENT,
+                  eventName: eventHandler.name,
+                  outputData: args && args.length > 0 ? cloneDeep(args[0]) : undefined,
+                  componentName,
+                  componentInstance,
+                  timestamp: Date.now(),
+                });
+              }
             }
             handlerAction.apply(null, [args[0], args[1]]);
           } else {
@@ -54,49 +56,33 @@ class Container extends React.Component {
   shouldComponentUpdate (nextProps, nextState, nextContext) {
     if (process.env.NODE_ENV !== 'production') {
       if (nextProps.stateProps !== this.props.stateProps) {
-        const { componentName, componentInstance, componentKey } = this.props;
-        sendDebugMessage({
-          key: componentKey,
-          eventType: constants.DEBUG_MSG_NEW_PROPS_EVENT,
-          inputData: nextProps.stateProps,
-          componentName,
-          componentInstance,
-          timestamp: Date.now(),
-        });
+        if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+          const { componentName, componentInstance, componentKey } = this.props;
+          sendDebugMessage({
+            key: componentKey,
+            eventType: constants.DEBUG_MSG_NEW_PROPS_EVENT,
+            inputData: cloneDeep(nextProps.stateProps),
+            componentName,
+            componentInstance,
+            timestamp: Date.now(),
+          });
+        }
       }
     }
     return true;
   }
 
   render () {
-    const wrapperPicked = pickInObject(
-      this.props,
-      ['wrappedComponent', 'wrappedProps', 'stateProps', 'populatedProps', 'children']
-    );
-    const restPicked = omitInObject(
-      this.props,
-      [
-        'componentKey',
-        'componentName',
-        'componentInstance',
-        'containerEventHandlers',
-        'containerProperties',
-        'wrappedProps',
-        'populatedProps',
-        'wrappedComponent',
-        'children'
-      ]
-    );
     const {
       wrappedComponent,
       wrappedProps,
       stateProps,
       populatedProps,
       children
-    } = wrapperPicked;
+    } = this.props;
     return React.createElement(
       wrappedComponent,
-      { ...restPicked, ...wrappedProps, ...this.wrappedHandlers, ...populatedProps, ...stateProps },
+      { ...wrappedProps, ...this.wrappedHandlers, ...populatedProps, ...stateProps },
       children
     );
   }
@@ -104,22 +90,14 @@ class Container extends React.Component {
 
 class Component extends React.Component {
   render () {
-    const wrapperPicked = pickInObject(
-      this.props,
-      ['wrappedComponent', 'wrappedProps', 'children']
-    );
-    const restPicked = omitInObject(
-      this.props,
-      ['wrappedComponent', 'wrappedProps', 'children']
-    );
     const {
       wrappedComponent,
       wrappedProps,
       children
-    } = wrapperPicked;
+    } = this.props;
     return React.createElement(
       wrappedComponent,
-      { ...restPicked, ...wrappedProps },
+      wrappedProps,
       children
     );
   }
