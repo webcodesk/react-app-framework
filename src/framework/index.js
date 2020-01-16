@@ -4,6 +4,7 @@ import { createBrowserHistory } from 'history';
 import { configureStore } from './store/store';
 import { clearActionsCache } from './store/actions';
 import { createActionSequences } from './store/sequences';
+import { createInitialState } from './store/state';
 
 import PageRouter from './components/PageRouter';
 import StartWrapper from './components/StartWrapper';
@@ -18,12 +19,10 @@ if (process.env.NODE_ENV !== 'production') {
   PageComposer = require('./components/PageComposer/PageComposer').default;
 }
 
-let store;
-let history;
-
-export const initStore = (name, version, initialState = {}) => {
-  history = createBrowserHistory();
-  store = configureStore(initialState, { history }, { name, version });
+const initStore = (pages, name, version) => {
+  const initialState = createInitialState(pages);
+  const history = createBrowserHistory();
+  const store = configureStore(initialState, { history }, { name, version });
 
   if (process.env.NODE_ENV !== 'production') {
     window.__sendFrameworkMessage = (message) => {
@@ -82,12 +81,7 @@ class Application extends React.Component {
   };
 
   render () {
-    if (!store) {
-      return (
-        <WarningComponent message="Redux store is not initialized." />
-      );
-    }
-    const { schema, userComponents, userFunctions } = this.props;
+    const { schema, userComponents, userFunctions, name, version } = this.props;
     if (process.env.NODE_ENV !== 'production') {
       const href = window.location.href;
       if (href.indexOf('/webcodesk__component_view') > 0) {
@@ -100,8 +94,15 @@ class Application extends React.Component {
         )
       }
     }
-    clearActionsCache();
     const { routes, pages, flows } = schema;
+    const {store, history } = initStore(pages, name, version);
+    if (!store) {
+      return (
+        <WarningComponent message="Redux store is not initialized." />
+      );
+    }
+    window.__applicationBrowserHistory = history;
+    clearActionsCache();
     const { actionSequences, targetProperties } = createActionSequences(flows, userFunctions);
     // store action sequences and components properties in case we have to send them for debug
     this.actionSequences = actionSequences;

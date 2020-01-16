@@ -6,6 +6,7 @@ import isNumber from 'lodash/isNumber';
 import isFunction from 'lodash/isFunction';
 import isUndefined from 'lodash/isUndefined';
 import cloneDeep from 'lodash/cloneDeep';
+import forOwn from 'lodash/forOwn';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE, DISPATCH_ERROR_TYPE} from './constants';
 import { getUserFunctionByName } from './sequences';
 
@@ -196,6 +197,7 @@ function createTasks (targets) {
         if (func) {
           // we need to check if there is a user function sequence
           let innerTasks = {};
+          let componentTargetsStateMapping;
           if (events && events.length > 0) {
             events.forEach(innerEvent => {
               if (innerEvent && innerEvent.targets) {
@@ -208,6 +210,26 @@ function createTasks (targets) {
                     ...innerTasks[innerEvent.name],
                     ...createTasks(userFunctionTargets)
                   ];
+                }
+                if (props.isUsingTargetState) {
+                  const componentTargets =
+                    innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === COMPONENT_TYPE);
+                  if (componentTargets.length > 0) {
+                    const mapping = [];
+                    let innerEventTarget;
+                    for (let it = 0; it < innerEvent.targets.length; it++) {
+                      innerEventTarget = innerEvent.targets[it];
+                      if (innerEventTarget && innerEventTarget.props) {
+                        const { componentName, componentInstance, propertyName } = innerEventTarget.props;
+                        mapping.push({
+                          targetInstanceKey: `${componentName}_${componentInstance}`,
+                          targetPropertyKey: propertyName,
+                        });
+                      }
+                    }
+                    componentTargetsStateMapping = componentTargetsStateMapping || {};
+                    componentTargetsStateMapping[innerEvent.name] = mapping;
+                  }
                 }
               }
             });
@@ -259,9 +281,25 @@ function createTasks (targets) {
                       });
                     }
                   }
-                  // the secondary argument is used in the store items function
-                  // to determine if we are reading from the store item or writing to it
-                  const userFunctionInstance = func.apply(null, [firstArgument]);
+                  let targetsStates;
+                  if (componentTargetsStateMapping) {
+                    targetsStates = {};
+                    const currentGlobalState = getState();
+                    let targetPropertyState;
+                    forOwn(componentTargetsStateMapping, (value, key) => {
+                      if (value && value.length > 0) {
+                        targetsStates[key] = {};
+                        for (let vi = 0; vi < value.length; vi++) {
+                          targetPropertyState = currentGlobalState[value[vi].targetInstanceKey];
+                          if (targetPropertyState) {
+                            targetsStates[key][value[vi].targetPropertyKey] =
+                              cloneDeep(targetPropertyState[value[vi].targetPropertyKey]);
+                          }
+                        }
+                      }
+                    });
+                  }
+                  const userFunctionInstance = func.apply(null, [firstArgument, targetsStates]);
                   try {
                     // dispatch caughtException as null to the assigned targets
                     caughtExceptionFunction(

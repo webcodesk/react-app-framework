@@ -6,6 +6,7 @@ import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
 import unionWith from 'lodash/unionWith';
+import isEqual from 'lodash/isEqual';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE } from './constants';
 
 let userFunctions = {};
@@ -82,16 +83,45 @@ function getEventSequence (event) {
   return eventSequence;
 }
 
+function getTargetComparatorObjectForEvents(events) {
+  let result = {};
+  if (events && events.length > 0) {
+    let sourceTargetEventTargets;
+    for(let sei = 0; sei < events.length; sei++) {
+      sourceTargetEventTargets = events[sei].targets;
+      if (sourceTargetEventTargets && sourceTargetEventTargets.length > 0) {
+        result[events[sei].name] = {};
+        for (let seti = 0; seti < sourceTargetEventTargets.length; seti++) {
+          const { type, props } = sourceTargetEventTargets[seti];
+          if (type === COMPONENT_TYPE && props) {
+            const {componentName, componentInstance, propertyName} = props;
+            result[events[sei].name][`${componentName}_${componentInstance}_${propertyName}`] = true;
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+
 function eventTargetComparator (destTarget, sourceTarget) {
-  const { type: sourceType, props: sourceProps } = sourceTarget;
-  const { type: destType, props: destProps } = destTarget;
+  const { type: sourceType, props: sourceProps, events: sourceEvents } = sourceTarget;
+  const { type: destType, props: destProps, events: destEvents } = destTarget;
   let result = false;
   if (sourceType === destType) {
     if (sourceProps && destProps) {
       if (sourceProps.functionName && destProps.functionName) {
-        // if there is only function test inputs
-        result = sourceProps.functionName === destProps.functionName
-          && sourceProps.transformScript === destProps.transformScript;
+        // check only functions that do not use second argument to access the target component state
+        if (!sourceProps.isUsingTargetState && !destProps.isUsingTargetState) {
+          result = sourceProps.functionName === destProps.functionName
+            && sourceProps.transformScript === destProps.transformScript;
+        } else {
+          let sourceTargetComparatorObject = getTargetComparatorObjectForEvents(sourceEvents);
+          let destTargetComparatorObject = getTargetComparatorObjectForEvents(destEvents);
+          result = sourceProps.functionName === destProps.functionName
+            && sourceProps.transformScript === destProps.transformScript
+            && isEqual(destTargetComparatorObject, sourceTargetComparatorObject);
+        }
       } else if (sourceProps.componentName && destProps.componentName) {
         if (sourceProps.forwardPath && destProps.forwardPath) {
           // if there is forwarding test all attributes
@@ -139,21 +169,21 @@ function mergeTargetEvents (destEvents, sourceEvents) {
 }
 
 function mergeEventTargets (destTargets, sourceTargets) {
-    let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
-    if (sourceTargets && sourceTargets.length > 0) {
-      let foundDestTarget;
-      sourceTargets.forEach(sourceTarget => {
-        foundDestTarget = resultTargets.find(i => eventTargetComparator(i, sourceTarget));
-        if (foundDestTarget) {
-          foundDestTarget.events = foundDestTarget.events || [];
-          sourceTarget.events = sourceTarget.events || [];
-          foundDestTarget.events = mergeTargetEvents(foundDestTarget.events, sourceTarget.events);
-        } else {
-          resultTargets.push(sourceTarget);
-        }
-      });
-    }
-    return resultTargets;
+  let resultTargets = unionWith(destTargets, sourceTargets, eventTargetComparator);
+  if (sourceTargets && sourceTargets.length > 0) {
+    let foundDestTarget;
+    sourceTargets.forEach(sourceTarget => {
+      foundDestTarget = resultTargets.find(i => eventTargetComparator(i, sourceTarget));
+      if (foundDestTarget) {
+        foundDestTarget.events = foundDestTarget.events || [];
+        sourceTarget.events = sourceTarget.events || [];
+        foundDestTarget.events = mergeTargetEvents(foundDestTarget.events, sourceTarget.events);
+      } else {
+        resultTargets.push(sourceTarget);
+      }
+    });
+  }
+  return resultTargets;
 }
 
 function getActionSequences (handlers, actionSequences = {}) {
@@ -213,7 +243,7 @@ function createActionSequencesRecursively (handlers, actionSequences = {}) {
 }
 
 export function createActionSequences (handlers, functions) {
-  userFunctions = {...functions};
+  userFunctions = { ...functions };
   const actionSequences = createActionSequencesRecursively(handlers);
   const targetProperties = deriveTargetProperties(actionSequences);
   return { actionSequences, targetProperties };
