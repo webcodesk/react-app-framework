@@ -1,5 +1,4 @@
 import isEqual from 'lodash/isEqual';
-import { pickInObject, omitInObject } from '../../commons/utilities';
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import { isVisible } from './utilities';
@@ -11,6 +10,10 @@ const style = {
   alignItems: 'center',
   justifyContent: 'center',
   position: 'relative',
+};
+
+const preStyle = {
+  margin: '1em',
 };
 
 const shadowStyle = {
@@ -255,9 +258,9 @@ class ComponentWrapper extends Component {
       return (
         <div key={elementKey} style={style}>
           <div>
-        <pre>
+        <pre style={preStyle}>
           <code>
-            Drag and drop here
+            &oplus;
           </code>
         </pre>
           </div>
