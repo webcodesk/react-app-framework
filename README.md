@@ -384,8 +384,12 @@ Once we've changed the page config, we should create a function that is responsi
 Create the `actions.js` file in the `src/usr/api` folder and add the following code there:
 
 ```javascript
-export const makeGreetingText = (userName) => (dispatch) => {
-  dispatch({greeting: userName ? `Hello, ${userName} !!!` : 'Hello, Noname !!!'});
+export const makeGreetingText = (userName, {stateByDispatch, history}) => (dispatch) => {
+  if (stateByDispatch) {
+    const { props } = stateByDispatch;
+    const newProps = {...props, greeting: userName ? `Hello, ${userName} !!!` : 'Hello, Noname !!!'};
+    dispatch({props: newProps});
+  }
 };
 ```
 
@@ -453,8 +457,7 @@ export default [{
           type: 'component',
           props: {
             componentName: 'usr.components.TitlePanel',
-            componentInstance: 'titlePanel',
-            propertyName: 'title'
+            componentInstance: 'titlePanel'
           }
         }]
       }]
@@ -480,11 +483,8 @@ However, in the case of `userFunction` the events are any of `dispatch` mentione
 
 * `targets` - a list of the component instances or functions that receive data produced by the parent event. 
 
-> Target component should have the `propertyName` in the `props` description to specify what property receives the data.
-
-Please note, component's events and function's dispatches produce only the first argument. 
-
-> For example, in `dispatch({greeting: someText}, anotherText)` - `anotherText` will not be passed in the target property.
+> Please note, component's events and function's dispatches produce only the first argument. 
+> The second argument is the helper object with the state of the component instance and React Router history.
 
 Once we've added all configurations, we can start the development server:
 ```
@@ -502,8 +502,6 @@ But...
 There is [Webcodesk](https://webcodesk.com) - a visual tool that uses `react-app-framework` to build Web applications. 
 Webcodesk creates all the necessary configs in the project automatically. 
 The only thing you have to do is to drag and drop components into the pages and draw visual flow in the flow editor.
-
-Go to through [the beginner tutorial](https://webcodesk.com/documentation) where you can create a real-world application in Webcodesk.
 
 # License
 
