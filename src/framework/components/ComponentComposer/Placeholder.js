@@ -9,6 +9,10 @@ const style = {
   position: 'relative',
 };
 
+const preStyle = {
+  margin: '1em'
+};
+
 const shadowStyle = {
   position: 'absolute',
   top: 0,
@@ -25,9 +29,9 @@ class Placeholder extends React.Component {
     return (
       <div style={style}>
         <div>
-        <pre>
+        <pre style={preStyle}>
           <code>
-            Placeholder
+            &empty;
           </code>
         </pre>
         </div>
