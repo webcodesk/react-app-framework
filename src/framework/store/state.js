@@ -3,45 +3,69 @@ import isArray from 'lodash/isArray';
 import isPlainObject from 'lodash/isObject';
 
 function createArrayState (arrayModel, initialState) {
-  const result = [];
+  let result = undefined;
   if (arrayModel.length > 0) {
-    arrayModel.forEach(descriptionItem => {
+    let descriptionItem;
+    let resultItem;
+    for (let i = 0; i < arrayModel.length; i++) {
+      descriptionItem = arrayModel[i];
       if (descriptionItem) {
         if (isArray(descriptionItem)) {
-          result.push(createArrayState(descriptionItem, initialState));
+          resultItem = createArrayState(descriptionItem, initialState);
+          if (resultItem) {
+            result = result || [];
+            result.push(resultItem);
+          }
         } else if (isPlainObject(descriptionItem)) {
           if (descriptionItem.type && descriptionItem.instance) {
             createComponentState(descriptionItem, initialState);
           } else {
-            result.push(createShapeState(descriptionItem, initialState));
+            resultItem = createShapeState(descriptionItem, initialState);
+            if (resultItem) {
+              result = result || [];
+              result.push(resultItem);
+            }
           }
         } else {
+          result = result || [];
           result.push(descriptionItem);
         }
       } else {
+        result = result || [];
         result.push(descriptionItem);
       }
-    });
+    }
   }
   return result;
 }
 
 function createShapeState (shapeModel, initialState) {
-  const result = {};
+  let result;
+  let resultItem;
   forOwn(shapeModel, (value, prop) => {
     if (value) {
       if (isArray(value)){
-        result[prop] = createArrayState(value, initialState);
+        resultItem = createArrayState(value, initialState);
+        if (resultItem) {
+          result = result || {};
+          result[prop] = resultItem
+        }
       } else if (isPlainObject(value)) {
         if (value.type && value.instance) {
           createComponentState(value, initialState);
         } else {
-          result[prop] = createShapeState(value, initialState);
+          resultItem = createShapeState(value, initialState);
+          if (resultItem) {
+            result = result || {};
+            result[prop] = resultItem
+          }
         }
       } else {
+        result = result || {};
         result[prop] = value;
       }
     } else {
+      result = result || {};
       result[prop] = value;
     }
   });

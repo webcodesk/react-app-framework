@@ -1,16 +1,7 @@
-import queryString from 'query-string';
-import isArray from 'lodash/isArray';
-import isObject from 'lodash/isObject';
-import isString from 'lodash/isString';
-import isNumber from 'lodash/isNumber';
-import isFunction from 'lodash/isFunction';
-import isUndefined from 'lodash/isUndefined';
 import cloneDeep from 'lodash/cloneDeep';
 import forOwn from 'lodash/forOwn';
 import { COMPONENT_TYPE, USER_FUNCTION_TYPE, DISPATCH_ERROR_TYPE} from './constants';
 import { getUserFunctionByName } from './sequences';
-
-const TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING = 'TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING';
 
 let sendDebugMessage;
 let constants;
@@ -19,118 +10,25 @@ if (process.env.NODE_ENV !== 'production') {
   constants = require('../commons/constants');
 }
 
-function transformFirstArgument (elementKey, transformScript, firstArgument) {
-  let firstArgumentResult = null;
-  if (transformScript) {
-    // get the transformation function from the cache
-    let transformFunction = transformFunctionsCache.get(elementKey);
-    if (!transformFunction) {
-      try {
-        // if there is a transformation in props save it into the cache as new Function
-        const newTransformFunction = new Function('data', `return ${transformScript}`)();
-        transformFunctionsCache.set(elementKey, newTransformFunction);
-        transformFunction = newTransformFunction;
-        if (!isFunction(newTransformFunction)) {
-          console.error(`[Framework] The transformation script should be a JavaScript function. Check the transformation script: ${transformScript}`);
-        }
-      } catch (error) {
-        console.error(`[Framework] The transformation function "${transformScript.substr(0, 200)}${transformScript.length > 200 ? '...' : ''}" has the error: "${error.message}".`);
-      }
-    }
-    try {
-      firstArgumentResult = transformFunction(firstArgument);
-    } catch (error) {
-      throw Error(`Transformation function error: ${error.message}`);
-    }
-    if (typeof firstArgumentResult === 'undefined') {
-      throw Error(TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING);
-    }
-  } else {
-    firstArgumentResult = firstArgument;
-  }
-  return firstArgumentResult;
-}
-
-function dispatchToComponent (props, payload, dispatch, helpers) {
+function dispatchToComponent (props, payload, dispatch) {
   if (props) {
     const {
-      componentName, componentInstance, propertyName, forwardPath, componentKey, transformScript
+      componentName, componentInstance, componentKey
     } = props;
-    try {
-      const transformedPayload = transformFirstArgument(componentKey, transformScript, payload);
-      if (forwardPath && helpers) {
-        const { history } = helpers;
-        if (history) {
-          // hmmm... why there can not be the history helper?
-          let pathString = `/${forwardPath}`;
-          if (!isUndefined(transformedPayload)) {
-            if (isNumber(transformedPayload) || isString(transformedPayload)) {
-              // if user function dispatches string or number we pass it as the :parameter in the http request
-              pathString = `${pathString}/${transformedPayload}`;
-            } else if (isObject(transformedPayload) || isArray(transformedPayload)) {
-              // if user function dispatches an object or an array we pass it as the request query
-              pathString = `${pathString}?${queryString.stringify(transformedPayload)}`;
-            } else {
-              console.error(
-                '[Framework] The mapping to parameters in URL is possible only for ' +
-                'a string, a number, an object, or an array.'
-              );
-            }
-          }
-          if (process.env.NODE_ENV !== 'production') {
-            if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
-              sendDebugMessage({
-                key: componentKey,
-                eventType: constants.DEBUG_MSG_FORWARD_EVENT,
-                forwardPath,
-                inputData: cloneDeep(transformedPayload),
-                propertyName,
-                pathString,
-                timestamp: Date.now(),
-              });
-            }
-          }
-          history.push(pathString);
-        } else if (propertyName) {
-          // hmmm... why there can not be the history helper?
-          const targetKey = `${componentName}_${componentInstance}`;
-          if (process.env.NODE_ENV !== 'production') {
-            if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
-              sendDebugMessage({
-                key: componentKey,
-                eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
-                inputData: cloneDeep(transformedPayload),
-                componentName,
-                componentInstance,
-                propertyName,
-                timestamp: Date.now(),
-              });
-            }
-          }
-          dispatch({ type: targetKey, payload: { [propertyName]: transformedPayload } });
-        }
-      } else {
-        const targetKey = `${componentName}_${componentInstance}`;
-        if (process.env.NODE_ENV !== 'production') {
-          if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
-            sendDebugMessage({
-              key: componentKey,
-              eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
-              inputData: cloneDeep(transformedPayload),
-              componentName,
-              componentInstance,
-              propertyName,
-              timestamp: Date.now(),
-            });
-          }
-        }
-        dispatch({ type: targetKey, payload: { [propertyName]: transformedPayload } });
-      }
-    } catch (e) {
-      if (e && e.message !== TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING) {
-        console.error(`[Framework] ${e.message}`);
+    const targetKey = `${componentName}_${componentInstance}`;
+    if (process.env.NODE_ENV !== 'production') {
+      if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
+        sendDebugMessage({
+          key: componentKey,
+          eventType: constants.DEBUG_MSG_REDUCE_DATA_EVENT,
+          inputData: cloneDeep(payload),
+          componentName,
+          componentInstance,
+          timestamp: Date.now(),
+        });
       }
     }
+    dispatch({ type: targetKey, payload });
   }
 }
 
@@ -173,7 +71,7 @@ function executeUserFunctionDispatch (
         eventTargets.forEach(eventTarget => {
           const { type: eventTargetType, props: eventTargetProps } = eventTarget;
           if (eventTargetType === COMPONENT_TYPE) {
-            dispatchToComponent(eventTargetProps, payload, dispatch, helpers);
+            dispatchToComponent(eventTargetProps, payload, dispatch);
           }
         });
         if (innerTasks[dispatchType] && innerTasks[dispatchType].length > 0) {
@@ -211,24 +109,19 @@ function createTasks (targets) {
                     ...createTasks(userFunctionTargets)
                   ];
                 }
-                if (props.isUsingTargetState) {
-                  const componentTargets =
-                    innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === COMPONENT_TYPE);
-                  if (componentTargets.length > 0) {
-                    const mapping = [];
-                    let innerEventTarget;
-                    for (let it = 0; it < innerEvent.targets.length; it++) {
-                      innerEventTarget = innerEvent.targets[it];
-                      if (innerEventTarget && innerEventTarget.props) {
-                        const { componentName, componentInstance, propertyName } = innerEventTarget.props;
-                        mapping.push({
-                          targetInstanceKey: `${componentName}_${componentInstance}`,
-                          targetPropertyKey: propertyName,
-                        });
-                      }
+                // now find all connected components and get the instance key of the first one
+                const componentTargets =
+                  innerEvent.targets.filter(innerEventTarget => innerEventTarget.type === COMPONENT_TYPE);
+                if (componentTargets.length > 0) {
+                  if (innerEvent.targets.length > 0) {
+                    // we can pass only the first connected target state.
+                    // It means that the connection should be only one
+                    const innerEventTarget = innerEvent.targets[0];
+                    if (innerEventTarget && innerEventTarget.props) {
+                      const { componentName, componentInstance } = innerEventTarget.props;
+                      componentTargetsStateMapping = componentTargetsStateMapping || {};
+                      componentTargetsStateMapping[innerEvent.name] = `${componentName}_${componentInstance}`;
                     }
-                    componentTargetsStateMapping = componentTargetsStateMapping || {};
-                    componentTargetsStateMapping[innerEvent.name] = mapping;
                   }
                 }
               }
@@ -267,8 +160,7 @@ function createTasks (targets) {
               return (dispatch, getState, helpers) => {
                 // before execute the function we have to transform the input argument if needed
                 try {
-                  const firstArgument =
-                    transformFirstArgument(props.functionKey, props.transformScript, args[0]);
+                  const firstArgument = args[0];
                   // execute user function with passed in args
                   if (process.env.NODE_ENV !== 'production') {
                     if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
@@ -281,25 +173,25 @@ function createTasks (targets) {
                       });
                     }
                   }
-                  let targetsStates;
+
+                  let stateByDispatch;
                   if (componentTargetsStateMapping) {
-                    targetsStates = {};
+                    stateByDispatch = {};
                     const currentGlobalState = getState();
-                    let targetPropertyState;
                     forOwn(componentTargetsStateMapping, (value, key) => {
                       if (value && value.length > 0) {
-                        targetsStates[key] = {};
-                        for (let vi = 0; vi < value.length; vi++) {
-                          targetPropertyState = currentGlobalState[value[vi].targetInstanceKey];
-                          if (targetPropertyState) {
-                            targetsStates[key][value[vi].targetPropertyKey] =
-                              cloneDeep(targetPropertyState[value[vi].targetPropertyKey]);
-                          }
-                        }
+                        stateByDispatch[key] = currentGlobalState[value];
                       }
                     });
                   }
-                  const userFunctionInstance = func.apply(null, [firstArgument, targetsStates]);
+
+                  const userFunctionInstance = func.apply(
+                    null,
+                    [
+                      firstArgument,
+                      {stateByDispatch, history: helpers.history}
+                    ]
+                  );
                   try {
                     // dispatch caughtException as null to the assigned targets
                     caughtExceptionFunction(
@@ -346,9 +238,7 @@ function createTasks (targets) {
                     );
                   }
                 } catch (e) {
-                  if (e && e.message !== TRANSFORMATION_ERROR_SKIP_DATA_TRANSFERRING) {
-                    console.error(`[Framework] ${e.message}`);
-                  }
+                  console.error(`[Framework] ${e.message}`);
                 }
               };
             }

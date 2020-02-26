@@ -5,7 +5,6 @@ import { configureStore } from './store/store';
 import { clearActionsCache } from './store/actions';
 import { createActionSequences } from './store/sequences';
 import { createInitialState } from './store/state';
-
 import PageRouter from './components/PageRouter';
 import StartWrapper from './components/StartWrapper';
 import WarningComponent from './components/WarningComponent';
@@ -68,8 +67,7 @@ class Application extends React.Component {
             window.__sendFrameworkMessage({
               type: constants.FRAMEWORK_MESSAGE_INIT_DEBUG,
               payload: {
-                actionSequences: this.actionSequences,
-                targetProperties: this.targetProperties,
+                actionSequences: this.actionSequences
               },
             });
           }, 0);
@@ -81,9 +79,9 @@ class Application extends React.Component {
   };
 
   render () {
-    const { schema, userComponents, userFunctions, name, version } = this.props;
+    const { userComponents } = this.props;
+    const href = window.location.href;
     if (process.env.NODE_ENV !== 'production') {
-      const href = window.location.href;
       if (href.indexOf('/webcodesk__component_view') > 0) {
         return (
           <ComponentComposer userComponents={userComponents} />
@@ -94,8 +92,14 @@ class Application extends React.Component {
         )
       }
     }
-    const { routes, pages, flows } = schema;
-    const {store, history } = initStore(pages, name, version);
+    const { schema, userFunctions, name, version } = this.props;
+    let routes, pages, flows;
+    if (schema) {
+      routes = schema.routes;
+      pages = schema.pages;
+      flows = schema.flows;
+    }
+    const { store, history } = initStore(pages, name, version);
     if (!store) {
       return (
         <WarningComponent message="Redux store is not initialized." />
@@ -103,10 +107,9 @@ class Application extends React.Component {
     }
     window.__applicationBrowserHistory = history;
     clearActionsCache();
-    const { actionSequences, targetProperties } = createActionSequences(flows, userFunctions);
+    const {actionSequences, targets} = createActionSequences(flows, userFunctions);
     // store action sequences and components properties in case we have to send them for debug
     this.actionSequences = actionSequences;
-    this.targetProperties = targetProperties;
     return (
       <Provider store={store}>
         <StartWrapper
@@ -119,7 +122,7 @@ class Application extends React.Component {
             pages={pages}
             userComponents={userComponents}
             actionSequences={actionSequences}
-            targetProperties={targetProperties}
+            targets={targets}
           />
         </StartWrapper>
       </Provider>

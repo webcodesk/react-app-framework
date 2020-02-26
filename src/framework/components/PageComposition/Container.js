@@ -1,4 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
+import isArray from 'lodash/isArray';
+import isObject from 'lodash/isObject';
 import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -11,6 +13,34 @@ let constants;
 if (process.env.NODE_ENV !== 'production') {
   sendDebugMessage = require('../../commons/sendMessage').default;
   constants = require('../../commons/constants');
+}
+
+export function pickReactElements(obj2) {
+  let obj1 = undefined;
+  if (React.isValidElement(obj2)){
+    obj1 = obj2;
+  } else if (isArray(obj2)) {
+    let arrayItem;
+    for (let i = 0; i < obj2.length; i++) {
+      arrayItem = pickReactElements(obj2[i]);
+      if (arrayItem) {
+        obj1 = obj1 || [];
+        obj1.push(arrayItem);
+      }
+    }
+  } else if (isObject(obj2)) {
+    let objectField;
+    for (let item in obj2) {
+      if (obj2.hasOwnProperty(item)) {
+        objectField = pickReactElements(obj2[item]);
+        if (objectField) {
+          obj1 = obj1 || {};
+          obj1[item] = objectField;
+        }
+      }
+    }
+  }
+  return obj1;
 }
 
 class Container extends React.Component {
@@ -77,12 +107,12 @@ class Container extends React.Component {
       wrappedComponent,
       wrappedProps,
       stateProps,
-      populatedProps,
       children
     } = this.props;
+    const elementsProps = pickReactElements(wrappedProps) || {};
     return React.createElement(
       wrappedComponent,
-      { ...wrappedProps, ...this.wrappedHandlers, ...populatedProps, ...stateProps },
+      { ...wrappedProps, ...this.wrappedHandlers, ...stateProps,  ...elementsProps},
       children
     );
   }
@@ -109,53 +139,52 @@ export default function createContainer (
   componentInstance,
   componentKey,
   containerEventHandlers,
-  containerProperties,
+  isTargetContainer,
   props = {},
-  populatedProps,
   nestedComponents = null
 ) {
 
-  if ((containerProperties && containerProperties.length > 0)
-    || (containerEventHandlers && containerEventHandlers.length > 0)) {
+  if ((containerEventHandlers && containerEventHandlers.length > 0) || isTargetContainer) {
     // create a connected container only for components that participate in the flow
     const actions = createContainerActions(`${componentName}_${componentInstance}`, containerEventHandlers);
     const mapDispatchToProps = (dispatch) => {
       return { actions: bindActionCreators(actions, dispatch) };
     };
 
-    const innerStructuresSelectorObject = {};
-    if (containerProperties && containerProperties.length > 0) {
-      containerProperties.forEach(propertyName => {
-        innerStructuresSelectorObject[propertyName] =
-          createContainerSelector(componentName, componentInstance, propertyName);
-      });
-    }
+    // const innerStructuresSelectorObject = {};
+    // if (containerProperties && containerProperties.length > 0) {
+    //   containerProperties.forEach(propertyName => {
+    //     innerStructuresSelectorObject[propertyName] =
+    //       createContainerSelector(componentName, componentInstance, propertyName);
+    //   });
+    // }
 
     const mapStateToProps = createStructuredSelector({
-      stateProps: createStructuredSelector(innerStructuresSelectorObject),
+      stateProps: createContainerSelector(componentName, componentInstance),
     });
-
-    const wrapperProps = {
-      componentKey,
-      componentName,
-      componentInstance,
-      containerEventHandlers,
-      containerProperties,
-      wrappedProps: props,
-      populatedProps,
-      wrappedComponent,
-    };
 
     return React.createElement(
       connect(mapStateToProps, mapDispatchToProps)(Container),
-      { ...wrapperProps, key: `container_${props.key}` },
+      {
+        key: `container_${props.key}`,
+        componentKey,
+        componentName,
+        componentInstance,
+        containerEventHandlers,
+        wrappedProps: props,
+        wrappedComponent,
+      },
       nestedComponents
     );
   }
 
   return React.createElement(
     Component,
-    { wrappedComponent, wrappedProps: props, key: `component_${props.key}` },
+    {
+      key: `component_${props.key}`,
+      wrappedProps: props,
+      wrappedComponent,
+    },
     nestedComponents
   );
 }

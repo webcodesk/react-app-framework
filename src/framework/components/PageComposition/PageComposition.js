@@ -1,12 +1,9 @@
-import queryString from 'query-string';
 import forOwn from 'lodash/forOwn';
 import uniqueId from 'lodash/uniqueId';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-import isUndefined from 'lodash/isUndefined';
 import isArray from 'lodash/isArray';
 import isPlainObject from 'lodash/isObject';
-import cloneDeep from 'lodash/cloneDeep';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ErrorBoundary from './ErrorBoundary';
@@ -14,33 +11,22 @@ import NotFoundComponent from '../NotFoundComponent';
 import createContainer from './Container';
 import WarningComponent from '../WarningComponent';
 
-let sendDebugMessage;
-let constants;
-if (process.env.NODE_ENV !== 'production') {
-  sendDebugMessage = require('../../commons/sendMessage').default;
-  constants = require('../../commons/constants');
-}
-
 class PageComposition extends Component {
 
   static propTypes = {
     userComponents: PropTypes.object,
     componentsTree: PropTypes.object,
     actionSequences: PropTypes.object,
-    targetProperties: PropTypes.object,
+    targets: PropTypes.object,
     routePath: PropTypes.string,
-    pageParams: PropTypes.object,
-    pageSearch: PropTypes.string,
   };
 
   static defaultProps = {
     userComponents: {},
     componentsTree: {},
     actionSequences: {},
-    targetProperties: {},
+    targets: {},
     routePath: '',
-    pageParams: {},
-    pageSearch: '',
   };
 
   constructor (props) {
@@ -99,12 +85,9 @@ class PageComposition extends Component {
     const {
       userComponents,
       actionSequences,
-      targetProperties,
-      routePath,
-      pageParams,
-      pageSearch,
+      targets,
     } = this.props;
-    const pageQuery = queryString.parse(pageSearch);
+
     if (!description) {
       return null;
     }
@@ -162,52 +145,19 @@ class PageComposition extends Component {
         containerHandlers = actionSequence.events;
         componentKey = actionSequence.componentKey;
       }
-      let populatedProps = {};
-      let containerProperties = [];
-      const propertiesObject = targetProperties[containerKey];
-      const parameterValue = pageParams ? pageParams['parameter'] : undefined;
-      const normalizedRoutePath = routePath.substr(1).replace('/:parameter?', '');
-      let propertyName = '';
-      if (propertiesObject) {
-        containerProperties = Object.keys(propertiesObject);
-        if (!isUndefined(parameterValue) || (pageQuery && !isEmpty(pageQuery))) {
-          forOwn(propertiesObject, (value, key) => {
-            if (value && value.populatePath === normalizedRoutePath) {
-              populatedProps[key] = parameterValue || pageQuery;
-              propertyName = key;
-            }
-          });
-        }
-      }
-      if (process.env.NODE_ENV !== 'production') {
-        if (window.__webcodeskIsListeningToFramework && window.__sendFrameworkMessage) {
-          if (!isEmpty(populatedProps)) {
-            sendDebugMessage({
-              key: componentKey,
-              eventType: constants.DEBUG_MSG_CREATE_CONTAINER_EVENT,
-              inputData: cloneDeep(populatedProps),
-              populatePath: normalizedRoutePath,
-              propertyName,
-              componentName: type,
-              componentInstance: instance,
-              timestamp: Date.now(),
-            });
-          }
-        }
-      }
+      const isTargetContainer = targets[containerKey];
       return createContainer(
         wrappedComponent,
         type,
         instance,
         componentKey,
         containerHandlers,
-        containerProperties,
+        isTargetContainer,
         {
           key: key || `${containerKey}_${uniqueId('c')}`,
           ...props,
           ...propsComponents
         },
-        populatedProps,
         nestedComponents
       );
     }

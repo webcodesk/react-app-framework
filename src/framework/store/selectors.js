@@ -1,25 +1,25 @@
 import { createSelector } from 'reselect';
 
-const select = (componentName, componentInstance, propertyName) => (state, props) => {
+const select = (componentName, componentInstance) => (state, props) => {
   const instanceState = state[`${componentName}_${componentInstance}`];
   if (instanceState) {
     if (props) {
-      if (typeof instanceState[propertyName] !== 'undefined') {
-        return instanceState[propertyName];
+      if (typeof instanceState !== 'undefined') {
+        return instanceState;
       }
-      return props.wrappedProps[propertyName];
+      return props.wrappedProps;
     } else {
-      return instanceState[propertyName]
+      return instanceState;
     }
   } else if (props) {
-    return props.wrappedProps[propertyName];
+    return props.wrappedProps;
   }
   return undefined;
 };
 
-export const createContainerSelector = (componentName, componentInstance, propertyName) => {
+export const createContainerSelector = (componentName, componentInstance) => {
   return createSelector(
-    select(componentName, componentInstance, propertyName),
+    select(componentName, componentInstance),
     a => a
   );
 };

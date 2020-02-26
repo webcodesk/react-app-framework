@@ -1,7 +1,6 @@
 import uniqueId from 'lodash/uniqueId';
 import forOwn from 'lodash/forOwn';
 import get from 'lodash/get';
-import merge from 'lodash/merge';
 import isArray from 'lodash/isArray';
 import isObject from 'lodash/isObject';
 import isEmpty from 'lodash/isEmpty';
@@ -11,39 +10,29 @@ import { COMPONENT_TYPE, USER_FUNCTION_TYPE } from './constants';
 
 let userFunctions = {};
 
-function getTargetPropertiesFromEvents (events, targetProperties) {
+function getTargetsFromEvents (events, targetsMap) {
   if (events && events.length > 0) {
     events.forEach(event => {
       const { targets } = event;
       if (targets && targets.length > 0) {
-        let key;
-        let propertiesObject;
         targets.forEach(target => {
           const { type, props, events } = target;
           if (type === COMPONENT_TYPE && props) {
-            const { componentName, componentInstance, propertyName, populatePath } = props;
-            if (propertyName) {
-              key = `${componentName}_${componentInstance}`;
-              propertiesObject = targetProperties[key] || {};
-              // tell the that this property should be bind to the http request query
-              propertiesObject[propertyName] = merge({}, propertiesObject[propertyName], {
-                populatePath
-              });
-              targetProperties[key] = propertiesObject;
-            }
+            const { componentName, componentInstance } = props;
+            targetsMap[`${componentName}_${componentInstance}`] = true;
           }
-          getTargetPropertiesFromEvents(events, targetProperties);
+          getTargetsFromEvents(events, targetsMap);
         });
       }
     });
   }
 }
 
-function deriveTargetProperties (actionSequences, targetProperties = {}) {
+function deriveTargets (actionSequences, targets = {}) {
   forOwn(actionSequences, (value, prop) => {
-    getTargetPropertiesFromEvents(value.events, targetProperties);
+    getTargetsFromEvents(value.events, targets);
   });
-  return targetProperties;
+  return targets;
 }
 
 function getEventSequence (event) {
@@ -83,19 +72,19 @@ function getEventSequence (event) {
   return eventSequence;
 }
 
-function getTargetComparatorObjectForEvents(events) {
+function getTargetComparatorObjectForEvents (events) {
   let result = {};
   if (events && events.length > 0) {
     let sourceTargetEventTargets;
-    for(let sei = 0; sei < events.length; sei++) {
+    for (let sei = 0; sei < events.length; sei++) {
       sourceTargetEventTargets = events[sei].targets;
       if (sourceTargetEventTargets && sourceTargetEventTargets.length > 0) {
         result[events[sei].name] = {};
         for (let seti = 0; seti < sourceTargetEventTargets.length; seti++) {
           const { type, props } = sourceTargetEventTargets[seti];
           if (type === COMPONENT_TYPE && props) {
-            const {componentName, componentInstance, propertyName} = props;
-            result[events[sei].name][`${componentName}_${componentInstance}_${propertyName}`] = true;
+            const { componentName, componentInstance } = props;
+            result[events[sei].name][`${componentName}_${componentInstance}`] = true;
           }
         }
       }
@@ -111,35 +100,13 @@ function eventTargetComparator (destTarget, sourceTarget) {
   if (sourceType === destType) {
     if (sourceProps && destProps) {
       if (sourceProps.functionName && destProps.functionName) {
-        // check only functions that do not use second argument to access the target component state
-        if (!sourceProps.isUsingTargetState && !destProps.isUsingTargetState) {
-          result = sourceProps.functionName === destProps.functionName
-            && sourceProps.transformScript === destProps.transformScript;
-        } else {
-          let sourceTargetComparatorObject = getTargetComparatorObjectForEvents(sourceEvents);
-          let destTargetComparatorObject = getTargetComparatorObjectForEvents(destEvents);
-          result = sourceProps.functionName === destProps.functionName
-            && sourceProps.transformScript === destProps.transformScript
-            && isEqual(destTargetComparatorObject, sourceTargetComparatorObject);
-        }
+        let sourceTargetComparatorObject = getTargetComparatorObjectForEvents(sourceEvents);
+        let destTargetComparatorObject = getTargetComparatorObjectForEvents(destEvents);
+        result = sourceProps.functionName === destProps.functionName
+          && isEqual(destTargetComparatorObject, sourceTargetComparatorObject);
       } else if (sourceProps.componentName && destProps.componentName) {
-        if (sourceProps.forwardPath && destProps.forwardPath) {
-          // if there is forwarding test all attributes
-          result = sourceProps.componentName === destProps.componentName
-            && sourceProps.componentInstance === destProps.componentInstance
-            && sourceProps.propertyName === destProps.propertyName
-            && sourceProps.forwardPath === destProps.forwardPath
-            && sourceProps.transformScript === destProps.transformScript;
-        } else {
-          // if there is no forwarding test only component attributes
-          result = sourceProps.componentName === destProps.componentName
-            && sourceProps.componentInstance === destProps.componentInstance
-            && sourceProps.propertyName === destProps.propertyName
-            && sourceProps.transformScript === destProps.transformScript;
-        }
-      } else if (sourceProps.forwardPath && destProps.forwardPath) {
-        // it is possible to set only forward path without component property target
-        result = sourceProps.forwardPath === destProps.forwardPath;
+        result = sourceProps.componentName === destProps.componentName
+          && sourceProps.componentInstance === destProps.componentInstance
       }
     }
   }
@@ -196,11 +163,7 @@ function getActionSequences (handlers, actionSequences = {}) {
           let handlerObject;
           if (event && event.name && event.targets && event.targets.length > 0) {
             if (type === COMPONENT_TYPE) {
-              if (props.forwardPath) {
-                key = `applicationPage_${props.forwardPath}`;
-              } else {
-                key = `${props.componentName}_${props.componentInstance}`;
-              }
+              key = `${props.componentName}_${props.componentInstance}`;
               handlerObject = actionSequences[key]
                 || { ...props, componentKey: uniqueId('seqNode'), events: [] };
               const eventSequence = getEventSequence(event);
@@ -245,8 +208,8 @@ function createActionSequencesRecursively (handlers, actionSequences = {}) {
 export function createActionSequences (handlers, functions) {
   userFunctions = { ...functions };
   const actionSequences = createActionSequencesRecursively(handlers);
-  const targetProperties = deriveTargetProperties(actionSequences);
-  return { actionSequences, targetProperties };
+  const targets = deriveTargets(actionSequences);
+  return {actionSequences, targets};
 }
 
 export function getUserFunctionByName (functionName) {
