@@ -1,4 +1,4 @@
-# React Application Framework for Webcodesk
+# React Application Framework for Create React App
 
 #### Installation
 
